@@ -15,7 +15,8 @@ import { cn } from '@/lib/utils'
  */
 
 interface GnbProps {
-  title?: string
+  /** 가운데 제목. 대화상자 제목처럼 감싸야 할 때는 요소를 넣는다 */
+  title?: ReactNode
   left?: ReactNode
   right?: ReactNode
   /** light: 흰 글자 (카메라 · 결과 화면의 어두운 배경), dark: 진한 글자 (흰 배경) */

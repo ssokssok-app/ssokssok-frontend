@@ -32,6 +32,7 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 | ----------------------------------------- | -------------------------- |
 | 사용자 · UX 판단, 화면 문구               | `docs/product.md`          |
 | 폴더 역할, 데이터 흐름, API 연동          | `docs/architecture.md`     |
+| API 계약 초안, 백엔드에 확인할 것         | `docs/api-contract.md`     |
 | 커밋 · 브랜치 · PR                        | `docs/git.md`              |
 | CI · 레포 설정 · 나중에 추가할 CI         | `docs/ci.md`               |
 | 훅 · 검사 스크립트 · 문서 체계            | `docs/harness.md`          |

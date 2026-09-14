@@ -1,4 +1,5 @@
 import { Button } from '@base-ui/react/button'
+import { useEffect, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -17,7 +18,8 @@ interface QuickMenuProps {
 
 /**
  * Figma QuickMenu + QuickMenu_Button. 문서 결과 화면의 구역 바로가기.
- * 항목이 화면보다 길면 가로로 스크롤한다. 스크롤 위치에 따른 선택 변경은 페이지가 맡는다.
+ * 항목이 화면보다 길면 가로로 스크롤하고, 선택된 항목이 가려지면 보이는 곳까지 가로로 옮긴다.
+ * 스크롤 위치에 따른 선택 변경은 페이지가 맡는다.
  */
 export function QuickMenu({
   items,
@@ -25,11 +27,31 @@ export function QuickMenu({
   onValueChange,
   className,
 }: QuickMenuProps) {
+  const navRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const nav = navRef.current
+    const active = nav?.querySelector<HTMLElement>('[aria-current="true"]')
+    if (!nav || !active) return
+    // 좌우 여백(px-5)만큼 띄워서 보이게 한다. 세로 스크롤은 건드리지 않도록 scrollIntoView 대신 가로만 옮긴다
+    const padding = parseFloat(getComputedStyle(nav).paddingLeft)
+    const start = active.offsetLeft - padding
+    const end =
+      active.offsetLeft + active.offsetWidth + padding - nav.clientWidth
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)')
+      .matches
+      ? 'auto'
+      : 'smooth'
+    if (start < nav.scrollLeft) nav.scrollTo({ left: start, behavior })
+    else if (end > nav.scrollLeft) nav.scrollTo({ left: end, behavior })
+  }, [value])
+
   return (
     <nav
+      ref={navRef}
       aria-label="바로가기"
       className={cn(
-        'flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]',
+        'relative flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]',
         className,
       )}
     >

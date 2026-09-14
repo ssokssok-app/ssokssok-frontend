@@ -10,20 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResultRouteImport } from './routes/result'
+import { Route as ReviewRouteImport } from './routes/review'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as DevComponentsRouteImport } from './routes/dev/components'
-import { Route as DocumentsIndexRouteImport } from './routes/documents/index'
-import { Route as DocumentsIdRouteImport } from './routes/documents/$id'
-import { Route as STokenRouteImport } from './routes/s/$token'
+import { Route as SamplesSampleIdRouteImport } from './routes/samples/$sampleId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ResultRoute = ResultRouteImport.update({
+  id: '/result',
+  path: '/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevComponentsRoute = DevComponentsRouteImport.update({
@@ -31,81 +41,71 @@ const DevComponentsRoute = DevComponentsRouteImport.update({
   path: '/dev/components',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DocumentsIndexRoute = DocumentsIndexRouteImport.update({
-  id: '/documents/',
-  path: '/documents/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentsIdRoute = DocumentsIdRouteImport.update({
-  id: '/documents/$id',
-  path: '/documents/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const STokenRoute = STokenRouteImport.update({
-  id: '/s/$token',
-  path: '/s/$token',
+const SamplesSampleIdRoute = SamplesSampleIdRouteImport.update({
+  id: '/samples/$sampleId',
+  path: '/samples/$sampleId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
+  '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
-  '/documents/$id': typeof DocumentsIdRoute
-  '/s/$token': typeof STokenRoute
-  '/documents/': typeof DocumentsIndexRoute
+  '/samples/$sampleId': typeof SamplesSampleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
+  '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
-  '/documents/$id': typeof DocumentsIdRoute
-  '/s/$token': typeof STokenRoute
-  '/documents': typeof DocumentsIndexRoute
+  '/samples/$sampleId': typeof SamplesSampleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
+  '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
+  '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
-  '/documents/$id': typeof DocumentsIdRoute
-  '/s/$token': typeof STokenRoute
-  '/documents/': typeof DocumentsIndexRoute
+  '/samples/$sampleId': typeof SamplesSampleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/login'
+    | '/result'
+    | '/review'
+    | '/settings'
     | '/dev/components'
-    | '/documents/$id'
-    | '/s/$token'
-    | '/documents/'
+    | '/samples/$sampleId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/login'
+    | '/result'
+    | '/review'
+    | '/settings'
     | '/dev/components'
-    | '/documents/$id'
-    | '/s/$token'
-    | '/documents'
+    | '/samples/$sampleId'
   id:
     | '__root__'
     | '/'
-    | '/login'
+    | '/result'
+    | '/review'
+    | '/settings'
     | '/dev/components'
-    | '/documents/$id'
-    | '/s/$token'
-    | '/documents/'
+    | '/samples/$sampleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LoginRoute: typeof LoginRoute
+  ResultRoute: typeof ResultRoute
+  ReviewRoute: typeof ReviewRoute
+  SettingsRoute: typeof SettingsRoute
   DevComponentsRoute: typeof DevComponentsRoute
-  DocumentsIdRoute: typeof DocumentsIdRoute
-  STokenRoute: typeof STokenRoute
-  DocumentsIndexRoute: typeof DocumentsIndexRoute
+  SamplesSampleIdRoute: typeof SamplesSampleIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -117,11 +117,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/result': {
+      id: '/result'
+      path: '/result'
+      fullPath: '/result'
+      preLoaderRoute: typeof ResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/components': {
@@ -131,25 +145,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/documents/': {
-      id: '/documents/'
-      path: '/documents'
-      fullPath: '/documents/'
-      preLoaderRoute: typeof DocumentsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/documents/$id': {
-      id: '/documents/$id'
-      path: '/documents/$id'
-      fullPath: '/documents/$id'
-      preLoaderRoute: typeof DocumentsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/s/$token': {
-      id: '/s/$token'
-      path: '/s/$token'
-      fullPath: '/s/$token'
-      preLoaderRoute: typeof STokenRouteImport
+    '/samples/$sampleId': {
+      id: '/samples/$sampleId'
+      path: '/samples/$sampleId'
+      fullPath: '/samples/$sampleId'
+      preLoaderRoute: typeof SamplesSampleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -157,11 +157,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LoginRoute: LoginRoute,
+  ResultRoute: ResultRoute,
+  ReviewRoute: ReviewRoute,
+  SettingsRoute: SettingsRoute,
   DevComponentsRoute: DevComponentsRoute,
-  DocumentsIdRoute: DocumentsIdRoute,
-  STokenRoute: STokenRoute,
-  DocumentsIndexRoute: DocumentsIndexRoute,
+  SamplesSampleIdRoute: SamplesSampleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

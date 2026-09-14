@@ -12,7 +12,7 @@
 | 종료 훅          | `.claude/hooks/stop-check.mjs`      | 변경이 있으면 `pnpm check` 실행, 실패하면 종료를 막음(최대 3번). 통과 후 문서가 언급하는 파일이 바뀌었는데 문서가 그대로면 알림 |
 | 문서 검사        | `scripts/check-docs.mjs`            | 문서에 적힌 `pnpm` 명령 · 경로 · 링크가 실제로 있는지                                                                           |
 | 큰글씨 검사      | `scripts/check-font-scale.mjs`      | 화면 코드의 임의 글자 크기 · Tailwind 기본 글자 단계 금지, 글자 토큰마다 큰글씨 값 확인, shadcn 임의 크기의 큰글씨 보정 확인    |
-| 토큰 등록 검사   | `scripts/check-tokens.mjs`          | `src/index.css` 에 직접 만든 토큰(글자 · 그라디언트 등)이 `src/lib/utils.ts` 의 `cn` 설정에 등록됐는지                          |
+| 토큰 등록 검사   | `scripts/check-tokens.mjs`          | `src/index.css` 에 직접 만든 토큰(글자 · 그라디언트 · 앱 폭 · 간격 등)이 `src/lib/utils.ts` 의 `cn` 설정에 등록됐는지           |
 | 디자인 규칙 검사 | `scripts/check-design.mjs`          | 화면 코드에 색 값(`bg-[#2c62ea]` 등)을 직접 쓰면 실패, `src/components/ui/` 에 허용 목록 밖의 shadcn 컴포넌트가 생기면 실패     |
 | CI 누락 검사     | `scripts/check-ci.mjs`              | 테스트 · E2E 설정이 생겼는데 CI 가 돌리지 않으면 실패 (`docs/ci.md` "나중에 추가할 것")                                         |
 | CI               | `.github/workflows/`                | PR 마다 `pnpm verify` 와 PR 제목 검사. 로컬 훅을 건너뛴 변경도 여기서 걸린다 (`docs/ci.md`)                                     |

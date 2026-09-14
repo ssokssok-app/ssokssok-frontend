@@ -60,6 +60,21 @@
   --shadow-knob: 0 0 2px 0 rgb(0 0 0 / 8%); /* Bigfont 스위치 손잡이 */
   --shadow-modal: 0 0 10px 0 rgb(0 0 0 / 10%); /* Modal */
   --shadow-popover: 0 1px 9.7px 0 rgb(0 0 0 / 20%); /* Listening 목소리 속도 패널 */
+  --shadow-sticky: 0 1px 3px 0 rgb(0 0 0 / 8%); /* 결과 화면 바로가기 메뉴가 위에 붙었을 때 (Figma 156:5663) */
+  --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
+}
+
+/* 간격: Figma 글자 스타일에 들어 있는 문단 간격 */
+@theme {
+  --spacing-body2: 0.5rem; /* Body2 문단 간격 8px → gap-body2 */
+}
+
+/*
+ * 앱 폭: Figma 에 데스크톱 디자인이 없어, 넓은 화면에서는 모바일 화면을 가운데 이 폭으로 세운다.
+ * 지그재그 웹과 같은 600px (docs/product.md "UX 원칙"). 루트 레이아웃과 화면 폭에 맞춰 붙는 요소(바텀시트 등)가 max-w-app 을 쓴다.
+ */
+@theme {
+  --container-app: 37.5rem; /* 600px */
 }
 
 /*
@@ -77,6 +92,12 @@
     #86a8ff 69.2%,
     #b7ccff 100%
   );
+  /*
+   * 결과 화면 위 고정 헤더 (Figma Frame 54). Figma 는 Gradient/Main 을 헤더 높이의 396% 로 늘려 깔아서
+   * 아래 Result_Main 과 이어져 보이게 했다. 웹은 헤더 높이가 안전 영역에 따라 달라서 길이(30rem ≈ 결과 머리 높이)로 늘린다.
+   * 뒤에 깔린 #2B71DA 는 이 그라디언트에 가려 보이지 않아 옮기지 않았다.
+   */
+  --gradient-header: linear-gradient(180deg, #3481f4 0, #174ea1 30rem);
   /* Figma 스타일에는 없고 Must 카드 머리에만 쓰인 값 */
   --gradient-must-header: linear-gradient(
     -10.29deg,
@@ -91,6 +112,10 @@
 
 @utility bg-gradient-main {
   background-image: var(--gradient-main);
+}
+
+@utility bg-gradient-header {
+  background-image: var(--gradient-header);
 }
 
 @utility bg-gradient-line {
@@ -146,7 +171,6 @@
   --text-caption-l-semibold--letter-spacing: -0.01em;
   --text-caption-l-semibold--font-weight: 600;
 
-  /* Body2/Regular · Body2/Medium 은 Body 와 값이 같아 따로 두지 않는다 */
   --text-body-regular: 1rem; /* 16px */
   --text-body-regular--line-height: 1.5;
   --text-body-regular--letter-spacing: -0.02em;
@@ -166,6 +190,20 @@
   --text-body-bold--line-height: 1.4;
   --text-body-bold--letter-spacing: -0.02em;
   --text-body-bold--font-weight: 700;
+
+  /*
+   * Body2: 글자는 Body 와 같고 문단 간격 8px 이 더해진 스타일 (쉬운 본문을 소제목 없는 줄글로 쓸 때).
+   * 문단은 요소가 따로라 글자 클래스에 간격을 담을 수 없어, 문단들을 감싼 요소에 gap-body2 를 준다.
+   */
+  --text-body2-regular: 1rem; /* 16px */
+  --text-body2-regular--line-height: 1.5;
+  --text-body2-regular--letter-spacing: -0.02em;
+  --text-body2-regular--font-weight: 400;
+
+  --text-body2-medium: 1rem; /* 16px */
+  --text-body2-medium--line-height: 1.5;
+  --text-body2-medium--letter-spacing: -0.02em;
+  --text-body2-medium--font-weight: 500;
 
   --text-subtitle-semibold: 1.125rem; /* 18px */
   --text-subtitle-semibold--line-height: 1.4;
@@ -221,6 +259,8 @@
     --text-body-medium: 1.25rem;
     --text-body-semibold: 1.25rem;
     --text-body-bold: 1.25rem;
+    --text-body2-regular: 1.25rem;
+    --text-body2-medium: 1.25rem;
     --text-subtitle-semibold: 1.375rem;
     --text-title-semibold: 1.5rem;
     --text-headline-s-semibold: 1.625rem;
@@ -374,7 +414,9 @@
   }
   body {
     /* text-* 클래스가 없는 본문도 Body/Regular 로 보이고 큰글씨 모드를 따라 커지도록 */
-    @apply bg-background text-body-regular text-foreground;
+    @apply text-body-regular text-foreground;
+    /* 넓은 화면에서 앱 폭(max-w-app) 기둥 바깥에 보이는 배경. 흰 화면과 구분되게 한 단계 어둡게 둔다 */
+    @apply bg-gray-80;
     /*
      * 한국어는 단어 중간에서 줄을 바꾸지 않는다 ("있 / 어요" 방지). 큰글씨 모드에서 줄바꿈이 잦아 특히 중요하다.
      * 공백 없는 긴 문자열(URL 등)은 넘치지 않게 필요할 때만 쪼갠다.
@@ -383,5 +425,18 @@
   }
   html {
     @apply font-sans;
+  }
+  /*
+   * 데스크톱에서 누를 수 있는 곳에 손가락 커서를 준다. Tailwind v4 는 버튼 커서를 기본 화살표로 되돌렸다.
+   * Base UI 스위치 · 라디오 · 탭은 <span> 으로 그려져서 역할(role)로도 잡는다. 비활성은 화살표로 둔다.
+   */
+  :is(
+    button,
+    [role='button'],
+    [role='switch'],
+    [role='radio'],
+    [role='tab']
+  ):not(:disabled, [aria-disabled='true'], [data-disabled]) {
+    cursor: pointer;
   }
 }
