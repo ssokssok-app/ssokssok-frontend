@@ -26,6 +26,7 @@ import {
 import { useToast } from '@/hooks/useToast'
 import type { ConversionStatus } from '@/types/conversion'
 
+import { getConversionErrorCopy } from './-result/conversion-error'
 import { parseParagraphSearch } from './-result/paragraph-search'
 import { ResultError } from './-result/result-error'
 import { ResultLoading } from './-result/result-loading'
@@ -53,16 +54,6 @@ export const Route = createFileRoute('/result')({
 const POLL_INTERVAL_MS = 2000
 const SLOW_POLL_INTERVAL_MS = 4000
 const SLOW_POLL_AFTER_MS = 60_000
-
-// 다시 골라야 해결되는 오류. 나머지는 같은 파일로 다시 시도할 수 있다 (docs/api-contract.md "백엔드에 보낼 제안" 5번)
-const reselectErrorCodes = new Set([
-  'UNSUPPORTED_FORMAT',
-  'FILE_TOO_LARGE',
-  'TOO_MANY_FILES',
-  'IMAGE_UNREADABLE',
-  'JOB_NOT_FOUND',
-  'JOB_EXPIRED',
-])
 
 function isFinished(status: ConversionStatus | undefined) {
   return (
@@ -144,19 +135,15 @@ function ResultPage() {
       : status?.status === 'failed' && status.error
         ? new ApiError(status.error)
         : status?.status === 'canceled'
-          ? new ApiError({
-              code: 'CANCELED',
-              message: '변환이 취소됐어요.',
-            })
+          ? new ApiError({ code: 'CANCELED', message: '변환이 취소됐어요.' })
           : statusQuery.error
 
   if (error) {
-    const needsReselect =
-      error instanceof ApiError && reselectErrorCodes.has(error.code)
+    const { title, description, needsReselect } = getConversionErrorCopy(error)
     return (
       <ResultError
-        title="문서를 읽지 못했어요"
-        description={error instanceof ApiError ? error.message : undefined}
+        title={title}
+        description={description}
         primaryAction={
           needsReselect
             ? { label: '홈으로 가기', onClick: goHome }

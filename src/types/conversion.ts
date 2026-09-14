@@ -13,9 +13,9 @@ export type ConversionJobStatus =
   'queued' | 'processing' | 'done' | 'failed' | 'canceled'
 
 export interface ApiErrorBody {
-  /** 프론트가 버튼을 나눌 때 쓴다. 예: IMAGE_UNREADABLE */
+  /** 프론트가 화면 문구 · 버튼을 정할 때 쓴다. 예: IMAGE_UNREADABLE */
   code: string
-  /** 서버가 만든, 사용자에게 그대로 보여 줄 문구 */
+  /** 로그 · 디버깅용. 화면에는 그대로 보여 주지 않는다 (src/routes/-result/conversion-error.ts) */
   message: string
 }
 

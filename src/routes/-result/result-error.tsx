@@ -7,7 +7,7 @@ interface ResultErrorAction {
 
 interface ResultErrorProps {
   title?: string
-  /** 서버가 준 문구가 있으면 그대로 보여 준다 */
+  /** 무엇이 안 됐는지 · 다음에 할 일. 서버 message 를 그대로 넣지 않는다 (conversion-error.ts) */
   description?: string
   primaryAction: ResultErrorAction
   secondaryAction?: ResultErrorAction
@@ -26,7 +26,9 @@ export function ResultError({
     <main className="flex min-h-dvh flex-col items-center justify-center gap-10 bg-gradient-background px-5 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] text-center">
       <div className="flex flex-col gap-2.5">
         <h1 className="text-headline-m-semibold text-gray-900">{title}</h1>
-        <p className="text-body-medium text-gray-700">{description}</p>
+        <p className="text-body-medium whitespace-pre-line text-gray-700">
+          {description}
+        </p>
       </div>
       <div className="flex w-full max-w-[353px] flex-col gap-2.5">
         <CtaButton onClick={primaryAction.onClick}>
