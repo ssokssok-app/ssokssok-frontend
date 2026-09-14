@@ -37,6 +37,7 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 | 훅 · 검사 스크립트 · 문서 체계            | `docs/harness.md`          |
 | 스타일 · 컴포넌트 (tsx 작업 시 자동 로드) | `.claude/rules/styling.md` |
 | 라우트 (routes 작업 시 자동 로드)         | `.claude/rules/routes.md`  |
+| 코드 리뷰 기준 (Codex · Claude 공통)      | `AGENTS.md`                |
 
 ## 반드시 지킬 것
 
