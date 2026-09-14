@@ -4,6 +4,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import checker from 'vite-plugin-checker'
+import svgr from 'vite-plugin-svgr'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +14,8 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
+    // `import CloseIcon from '@/assets/icons/24/close.svg?react'` 로 SVG 를 컴포넌트로 불러온다
+    svgr(),
     checker({
       typescript: true,
       oxlint: true,

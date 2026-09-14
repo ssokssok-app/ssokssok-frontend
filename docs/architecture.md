@@ -2,15 +2,16 @@
 
 ## 폴더
 
-| 경로              | 역할                                                                                |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                            |
-| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩              |
-| `src/components/` | 앱 컴포넌트. `src/components/ui/` 는 shadcn 원본 (규칙: `.claude/rules/styling.md`) |
-| `src/hooks/`      | 여러 화면에서 쓰는 훅                                                               |
-| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                             |
-| `src/types/`      | 여러 곳에서 쓰는 타입 (API 응답 타입 등)                                            |
-| `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                            |
+| 경로              | 역할                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                                                       |
+| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩                                         |
+| `src/components/` | Figma 공용 컴포넌트 (Base UI 기반, 규칙: `.claude/rules/styling.md`). `src/components/ui/` 는 shadcn 원본      |
+| `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG) |
+| `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                          |
+| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                                                        |
+| `src/types/`      | 여러 곳에서 쓰는 타입 (API 응답 타입 등)                                                                       |
+| `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                       |
 
 `src/` 바로 아래에 이 표에 없는 폴더를 만들면 표에 한 줄 추가한다. 추가하지 않으면 Stop 훅이 알려 준다.
 
@@ -21,6 +22,8 @@
 1. 라우터를 만든다. `context` 에 `queryClient` 를 넣고, 링크에 마우스를 올리면 미리 불러오게 한다.
 2. `initFontScale()` 로 저장된 큰글씨 설정을 첫 렌더 전에 적용한다.
 3. `QueryClientProvider` 와 `RouterProvider` 를 렌더한다.
+
+루트 레이아웃 `src/routes/__root.tsx` 는 모든 화면을 `ToastProvider` 로 감싼다. 화면 어디서든 `useToast()` (`src/hooks/useToast.ts`) 로 알림을 띄운다.
 
 ## 데이터 흐름
 
