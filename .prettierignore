@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+src/routeTree.gen.ts
+
+# shadcn 레지스트리 원본 그대로 유지한다.
+# 포맷이 달라지면 `shadcn add` 때마다 덮어쓰기 확인이 뜨고, TTY가 없으면 아무 파일도 안 만든 채 끝난다.
+src/components/ui

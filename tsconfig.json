@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path alias (vite.config.ts의 resolve.tsconfigPaths가 이 값을 사용) */
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  /*
+   * vite.config.ts 는 별도 프로젝트로 분리한다. 같은 프로그램에 넣으면 vite 타입의
+   * `/// <reference types="node" />` 때문에 src 에서도 process, Buffer 가 통과하고
+   * setTimeout 이 Node 타입(Timeout)으로 잡힌다.
+   */
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,58 @@
+# Logs
+# 루트 기준으로만 무시 (src 안에 logs 라는 기능 폴더가 생겨도 추적되도록)
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Env
+# Vite 규칙: .env / .env.[mode] 는 커밋하고, 로컬 전용 값은 .env.local / .env.[mode].local 에 둔다 (위 *.local 로 무시됨).
+# VITE_* 변수는 번들에 그대로 들어가므로 비밀값은 넣지 않는다.
+
+# Build / cache
+*.tsbuildinfo
+.pnpm-store
+# node_modules 를 못 찾을 때 Vite 가 설정 파일 옆에 남기는 임시 파일
+vite.config.*.timestamp-*
+
+# Test / coverage
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TanStack Router
+.tanstack
+
+# Claude Code (개인 설정, 브라우저 테스트 산출물)
+.claude/settings.local.json
+CLAUDE.local.md
+.playwright-mcp
+
+# Deploy
+.vercel
+.netlify
+
+# Certificates (로컬 HTTPS 등)
+*.pem
