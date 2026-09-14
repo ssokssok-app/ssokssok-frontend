@@ -1,7 +1,7 @@
 # 백엔드 호출 (src/api)
 
 FastAPI 백엔드를 부르는 함수와 TanStack Query `queryOptions` 를 도메인별 파일 하나씩 둔다. 규칙 원문은 `docs/architecture.md`, 전체 리뷰 기준은 루트 `AGENTS.md`.
-fetch 래퍼 · 오류 형식 · API 타입 생성 방식은 아직 정하지 않았다. 정해지면 `docs/architecture.md` 에 적고 이 기준도 고친다.
+계약은 `docs/api-contract.md` 다. 오류 응답은 `{ error: { code, message } }` 로 정해졌고, fetch 래퍼 · API 타입 생성 방식은 아직 정하지 않았다. 정해지면 `docs/architecture.md` 에 적고 이 기준도 고친다.
 
 ## Code Review Rules
 

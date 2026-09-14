@@ -1,8 +1,8 @@
 /**
  * 문서 변환 결과 (API 계약 초안).
  *
- * Figma 결과 화면이 필요로 하는 데이터를 프론트가 먼저 정한 모양이다. 백엔드와 확정되면 바뀔 수 있다.
- * 설명 · JSON 예시 · 백엔드에 확인할 것은 docs/api-contract.md 에 있다.
+ * Figma 결과 화면이 필요로 하는 데이터를 프론트가 먼저 정한 모양이고, 백엔드가 이 모양을 기준으로 만들기로 했다.
+ * 필드 이름 표기 · 원문 강조 단위가 정해지면 바뀔 수 있다. 설명과 남은 질문은 docs/api-contract.md 에 있다.
  */
 
 /** 문서 종류. 결과 화면 맨 위 일러스트와 기본 이름표를 정한다. 지원하지 않는 문서는 basic */
@@ -28,8 +28,8 @@ export interface DocumentResult {
 }
 
 export interface ResultParagraph {
-  /** 소제목. 문서에 따라 없을 수 있다 */
-  title?: string
+  /** 소제목. 소제목이 없는 문서는 null (백엔드 답변) */
+  title?: string | null
   body: string
   /** 이 문단을 만든 원문 부분. 찾지 못했으면 null (원문 보기를 띄우지 않는다) */
   source: SourceParagraph[] | null
