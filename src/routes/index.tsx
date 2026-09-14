@@ -12,6 +12,7 @@ import { HomeGnb } from '@/components/gnb'
 import { HomeButton, HomeSampleButton } from '@/components/home-button'
 import { Modal, ModalClose, ModalTextButton } from '@/components/modal'
 import { type LoginProvider, useAuth } from '@/hooks/useAuth'
+import { startConversionSession } from '@/hooks/useConversionSession'
 import {
   clearDocumentDraft,
   DraftError,
@@ -117,6 +118,8 @@ function HomePage() {
     if (!file) return
     try {
       startPdfDraft(file)
+      // 파일은 확인 화면 없이 바로 변환을 시작한다
+      startConversionSession([file])
       navigate({ to: '/result' })
     } catch (error) {
       showDraftError(error)

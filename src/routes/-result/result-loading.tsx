@@ -14,8 +14,15 @@ const steps = [
   '중요 정보 정리 중...',
 ]
 
-// 백엔드가 진행 상태를 줄 수 있는지 정해지기 전까지, 시간에 맞춰 단계를 넘기는 연출이다 (docs/api-contract.md "변환 요청 방식")
+// 진행 단계를 받지 않을 때(샘플) 시간에 맞춰 단계를 넘기는 간격
 const STEP_INTERVAL_MS = 800
+
+interface ResultLoadingProps {
+  /** 서버가 알려 준 진행 단계(0~3). 주지 않으면 시간에 맞춰 넘기는 연출을 한다 */
+  activeStep?: number
+  /** 서버가 알려 준 진행률(0~1). 주지 않으면 단계에 맞춰 막대를 채운다 */
+  progress?: number
+}
 
 /**
  * 문서 읽기 로딩 (Figma 2:360). 변환 결과를 기다리는 동안 보인다.
@@ -24,17 +31,26 @@ const STEP_INTERVAL_MS = 800
  * 사파리는 투명 배경 HEVC(.mov), 크롬 · 파이어폭스는 투명 배경 WebM 을 고른다 (크롬은 video/quicktime 을 재생하지 않아 건너뛴다).
  * 동작 줄이기 설정이면 첫 장면 그림만 보여 준다.
  */
-export function ResultLoading() {
-  const [activeStep, setActiveStep] = useState(0)
+export function ResultLoading({
+  activeStep: serverStep,
+  progress,
+}: ResultLoadingProps) {
+  const [timedStep, setTimedStep] = useState(0)
+  const activeStep = Math.min(serverStep ?? timedStep, steps.length - 1)
+  // Figma 첫 단계의 막대 길이(43/233)만큼은 처음부터 채워 둔다
+  const barRatio = Math.max(
+    progress ?? (activeStep + 0.75) / steps.length,
+    0.75 / steps.length,
+  )
 
   useEffect(() => {
-    if (activeStep >= steps.length - 1) return
+    if (serverStep !== undefined || timedStep >= steps.length - 1) return
     const timer = setTimeout(
-      () => setActiveStep(activeStep + 1),
+      () => setTimedStep(timedStep + 1),
       STEP_INTERVAL_MS,
     )
     return () => clearTimeout(timer)
-  }, [activeStep])
+  }, [serverStep, timedStep])
 
   return (
     <main
@@ -79,10 +95,9 @@ export function ResultLoading() {
         aria-valuenow={activeStep + 1}
         className="mt-7 h-[9px] w-[233px] overflow-hidden rounded-lg bg-gray-100"
       >
-        {/* Figma 첫 단계의 막대 길이(43/233)에 맞춰, 단계마다 3/4 칸씩 앞서 채운다 */}
         <div
           className="h-full rounded-lg bg-blue-500 transition-[width] duration-500"
-          style={{ width: `${((activeStep + 0.75) / steps.length) * 100}%` }}
+          style={{ width: `${barRatio * 100}%` }}
         />
       </div>
 

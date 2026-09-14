@@ -3,6 +3,7 @@ import { queryOptions } from '@tanstack/react-query'
 import type { DocumentResult } from '@/types/document-result'
 
 import { sampleResults } from './mocks/sample-results'
+import { wait } from './mocks/wait'
 
 /**
  * 샘플 문서 (로그인 없이 기능 체험).
@@ -24,20 +25,6 @@ export function isSampleId(value: string): value is SampleId {
 
 // 변환하는 동안 보이는 로딩 화면을 체험할 수 있도록, 목데이터도 실제 변환처럼 조금 기다렸다가 돌려준다
 const MOCK_DELAY_MS = 3200
-
-function wait(ms: number, signal: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, ms)
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer)
-        reject(signal.reason)
-      },
-      { once: true },
-    )
-  })
-}
 
 async function getSampleResult(
   sampleId: SampleId,

@@ -125,6 +125,13 @@ export function startPdfDraft(file: File) {
   setDraft({ kind: 'pdf', file })
 }
 
+/** 변환 요청에 보낼 파일. 사진은 순서대로 */
+export function getDraftFiles(draft: DocumentDraft) {
+  return draft.kind === 'images'
+    ? draft.pages.map((page) => page.file)
+    : [draft.file]
+}
+
 export function clearDocumentDraft() {
   setDraft(null)
 }

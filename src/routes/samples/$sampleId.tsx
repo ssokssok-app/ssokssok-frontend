@@ -9,15 +9,11 @@ import {
 import { isSampleId, sampleResultQueryOptions } from '@/api/samples'
 import { useToast } from '@/hooks/useToast'
 
+import { parseParagraphSearch } from '../-result/paragraph-search'
 import { ResultError } from '../-result/result-error'
 import { ResultLoading } from '../-result/result-loading'
 import { ResultView } from '../-result/result-view'
 import { SourceView } from '../-result/source-view'
-
-interface SampleSearch {
-  /** 원문 보기로 연 쉬운 문단 번호. 주소에 두어 휴대폰 뒤로 가기로 닫히게 한다 */
-  paragraph?: number
-}
 
 /*
  * 샘플 문서 결과. 로그인 없이 볼 수 있다.
@@ -31,14 +27,7 @@ export const Route = createFileRoute('/samples/$sampleId')({
     },
     stringify: ({ sampleId }) => ({ sampleId }),
   },
-  validateSearch: (search: Record<string, unknown>): SampleSearch => {
-    const { paragraph } = search
-    return typeof paragraph === 'number' &&
-      Number.isInteger(paragraph) &&
-      paragraph >= 0
-      ? { paragraph }
-      : {}
-  },
+  validateSearch: parseParagraphSearch,
   component: SampleResultPage,
 })
 
@@ -57,8 +46,11 @@ function SampleResultPage() {
   if (isError) {
     return (
       <ResultError
-        onRetry={() => refetch()}
-        onHome={() => navigate({ to: '/' })}
+        primaryAction={{ label: '다시 시도하기', onClick: () => refetch() }}
+        secondaryAction={{
+          label: '홈으로 가기',
+          onClick: () => navigate({ to: '/' }),
+        }}
       />
     )
   }

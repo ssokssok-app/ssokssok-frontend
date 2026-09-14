@@ -7,10 +7,12 @@ import ArrowBackIosIcon from '@/assets/icons/24/arrow-back-ios.svg?react'
 import CheckedSimpleIcon from '@/assets/icons/24/checked-simple.svg?react'
 import { CtaButton } from '@/components/cta-button'
 import { Gnb, GnbIconButton } from '@/components/gnb'
+import { startConversionSession } from '@/hooks/useConversionSession'
 import {
   addDraftImages,
   DraftError,
   getDocumentDraft,
+  getDraftFiles,
   MAX_PAGES,
   useDocumentDraft,
 } from '@/hooks/useDocumentDraft'
@@ -160,7 +162,13 @@ function ReviewPage() {
         </div>
 
         <div className="mt-[35px] px-5">
-          <CtaButton onClick={() => navigate({ to: '/result' })}>
+          <CtaButton
+            onClick={() => {
+              // 누른 순간 변환을 시작하고, 결과 화면이 진행 상태를 보여 준다
+              startConversionSession(getDraftFiles(draft))
+              navigate({ to: '/result' })
+            }}
+          >
             <CheckedSimpleIcon aria-hidden />다 찍었어요
           </CtaButton>
         </div>
