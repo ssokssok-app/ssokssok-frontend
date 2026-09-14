@@ -51,14 +51,14 @@ export function ModalSection() {
         }
       >
         <ModalClose>확인</ModalClose>
-        {/* Figma 문구 그대로. "다시 보지 않기" 오타로 보여 디자이너 확인 필요 */}
+        {/* Figma 는 "다시 안보지 않기" 지만 오타라 고쳐 쓴다 (docs/product.md) */}
         <ModalTextButton
           onClick={() => {
             setPrivacyOpen(false)
             showToast('다시 보지 않기를 눌렀어요')
           }}
         >
-          다시 안보지 않기
+          다시 보지 않기
         </ModalTextButton>
       </Modal>
 
