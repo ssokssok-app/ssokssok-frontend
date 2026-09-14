@@ -406,4 +406,17 @@
   html {
     @apply font-sans;
   }
+  /*
+   * 데스크톱에서 누를 수 있는 곳에 손가락 커서를 준다. Tailwind v4 는 버튼 커서를 기본 화살표로 되돌렸다.
+   * Base UI 스위치 · 라디오 · 탭은 <span> 으로 그려져서 역할(role)로도 잡는다. 비활성은 화살표로 둔다.
+   */
+  :is(
+    button,
+    [role='button'],
+    [role='switch'],
+    [role='radio'],
+    [role='tab']
+  ):not(:disabled, [aria-disabled='true'], [data-disabled]) {
+    cursor: pointer;
+  }
 }

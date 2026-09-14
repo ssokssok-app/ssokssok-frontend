@@ -23,6 +23,7 @@ paths:
 - 새 컴포넌트나 variant 를 만들면 개발 모드 카탈로그(`/dev/components`)에 추가하고, Figma 와 일반 · 큰글씨 두 모드로 비교한다. 섹션은 `src/routes/dev/-catalog/` 에 두고 `src/routes/dev/components.tsx` 에서 모은다.
 - 링크에 버튼 모양이 필요하면 cva 스타일 함수를 컴포넌트 파일과 다른 파일로 빼서 export 한다. 컴포넌트 파일에서 함수를 같이 export 하면 oxlint 가 경고한다 (Fast Refresh).
 - Figma 에 없는 상태(눌림 · 비활성)는 같은 팔레트에서 한 단계 진한 색(active) · 투명도 40%(disabled)로 맞춘다.
+- 누를 수 있는 요소는 `<button>` 이나 Base UI 부품(역할이 붙음)으로 만든다. 데스크톱 손가락 커서는 `src/index.css` 전역 규칙이 이 요소들에만 주므로, `cursor-pointer` 를 따로 붙이지 않는다.
 - Base UI 는 Radix 와 달리 `asChild` 가 없고 `render` prop 을 쓴다. API 가 헷갈리면 설치된 버전 문서 `node_modules/@base-ui/react/docs/` 를 본다.
 - 클래스 병합은 `cn` (`@/lib/utils`). `src/index.css` 에 직접 만든 토큰은 `cn` 설정에도 등록해야 병합 때 지워지지 않는다. 빠뜨리면 `pnpm check:tokens` 가 실패한다.
 
