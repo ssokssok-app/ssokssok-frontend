@@ -16,8 +16,9 @@
     "check:docs": "node scripts/check-docs.mjs",
     "check:font-scale": "node scripts/check-font-scale.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
+    "check:design": "node scripts/check-design.mjs",
     "check:ci": "node scripts/check-ci.mjs",
-    "check": "tsr generate && oxlint && pnpm typecheck && pnpm format:check && pnpm check:docs && pnpm check:font-scale && pnpm check:tokens && pnpm check:ci",
+    "check": "tsr generate && oxlint && pnpm typecheck && pnpm format:check && pnpm check:docs && pnpm check:font-scale && pnpm check:tokens && pnpm check:design && pnpm check:ci",
     "verify": "pnpm check && vite build"
   },
   "dependencies": {

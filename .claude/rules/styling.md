@@ -16,7 +16,7 @@ paths:
 
 ## 공용 컴포넌트
 
-- Figma 컴포넌트는 `@base-ui/react` 부품(Button, Dialog, Switch …)에 Figma 모양을 직접 입혀 `src/components/` 에 만든다. shadcn 컴포넌트는 새로 추가하지 않는다 (기본 스타일을 전부 덮어써야 해서 Figma 와 맞추기 어렵다).
+- Figma 컴포넌트는 `@base-ui/react` 부품(Button, Dialog, Switch …)에 Figma 모양을 직접 입혀 `src/components/` 에 만든다. shadcn 컴포넌트는 새로 추가하지 않는다 (기본 스타일을 전부 덮어써야 해서 Figma 와 맞추기 어렵다). `pnpm check:design` 이 막는다.
 - 파일 이름은 kebab-case, 컴포넌트 이름은 PascalCase 로 짓는다. 예: Figma CTA → 파일 cta-button.tsx, 컴포넌트 CtaButton.
 - Figma 의 고정 폭 · 높이(353px, 64px)를 그대로 쓰지 않는다. 폭은 부모를 따르고 높이는 여백으로 잡아, 큰글씨 모드에서 글자가 잘리지 않고 늘어나게 한다.
 - 컴포넌트는 모양과 동작만 맡는다. API 호출 · 화면 이동은 페이지에서 props 로 넘긴다.
@@ -35,7 +35,7 @@ paths:
 ## shadcn 원본
 
 - `src/components/ui/` 는 shadcn 레지스트리 원본이다. 직접 고치지 않는다 (다음 `shadcn add` 때 덮어쓰기 충돌).
-- 예외로 shadcn 컴포넌트를 추가해야 하면 먼저 사용자와 정한다. 추가는 `pnpm dlx shadcn@latest add <name>`, 그다음 `pnpm check:font-scale` 로 새 임의 크기에 큰글씨 보정이 필요한지 확인한다.
+- 예외로 shadcn 컴포넌트를 추가해야 하면 먼저 사용자와 정하고, `scripts/check-design.mjs` 의 허용 목록에 넣는다. 추가는 `pnpm dlx shadcn@latest add <name>`, 그다음 `pnpm check:font-scale` 로 새 임의 크기에 큰글씨 보정이 필요한지 확인한다.
 - 링크를 버튼처럼 보이게 할 때 `<Button render={<Link />}>` 를 쓰지 않는다 (Base UI 는 버튼 의미를 강제한다). `<Link className={buttonVariants({ variant: 'outline' })}>` 처럼 스타일만 입힌다.
 
 ## 색 · 테마
@@ -43,5 +43,5 @@ paths:
 - 화면 코드의 색은 Figma 색 스타일 이름을 그대로 쓴다. Figma `Gray/500` → `text-gray-500`. 예외는 `Common/0` · `Common/100` → `black` · `white`, `Status/Red` → `status-red`.
 - 그라디언트는 `bg-gradient-background` · `bg-gradient-main` · `bg-gradient-line` · `bg-gradient-must-header`, 그라디언트 테두리는 `border-gradient-line` (두께는 `border-[1.4px]` 처럼 따로), 모달 뒤 배경은 `bg-dimmed`.
 - Figma 스타일에 없고 컴포넌트에만 쓰인 값도 `src/index.css` 에 토큰으로 모은다: `bg-kakao`, 그림자 `shadow-knob` · `shadow-modal` · `shadow-popover`. 새 값이 필요하면 같은 곳에 추가하고 `cn` 에 등록한다.
-- 색 값(`bg-[#2c62ea]`)을 직접 쓰지 않는다. Tailwind 기본 색(`bg-red-500` 등)은 지워서 클래스가 생기지 않는다.
+- 색 값(`bg-[#2c62ea]`, `shadow-[…rgba(…)]`, `style={{ color: '#fff' }}`)을 직접 쓰지 않는다. `pnpm check:design` 이 막는다. Tailwind 기본 색(`bg-red-500` 등)은 지워서 클래스가 생기지 않는다.
 - shadcn 의미 토큰(`primary`, `muted-foreground` …)은 shadcn 컴포넌트가 Figma 색을 따르게 하는 연결이다. 연결 표는 `src/index.css` 의 `:root`. Figma 에 다크 디자인이 없어 `.dark` 는 shadcn 기본값 그대로다.
