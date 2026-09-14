@@ -26,6 +26,12 @@ paths:
 - Base UI 는 Radix 와 달리 `asChild` 가 없고 `render` prop 을 쓴다. API 가 헷갈리면 설치된 버전 문서 `node_modules/@base-ui/react/docs/` 를 본다.
 - 클래스 병합은 `cn` (`@/lib/utils`). `src/index.css` 에 직접 만든 토큰은 `cn` 설정에도 등록해야 병합 때 지워지지 않는다. 빠뜨리면 `pnpm check:tokens` 가 실패한다.
 
+## 화면 폭 (데스크톱)
+
+- 모든 화면은 루트 레이아웃의 앱 폭 기둥(`max-w-app`, 600px) 안에 그려진다. 페이지는 폭 제한(`max-w-md` 등)을 따로 두지 않고 기둥을 꽉 채운다.
+- `fixed` 로 화면에 붙는 요소(아래 고정 버튼, 바텀시트 등)는 화면 전체가 아니라 기둥에 맞춘다: `fixed inset-x-0 mx-auto max-w-app`. `100vw` · `w-screen` 은 쓰지 않는다. 어두운 배경(backdrop)만 화면 전체를 덮는다.
+- 넓은 화면에서도 확인한다 (예: 1440×900). 기둥 밖으로 넘치거나 기둥보다 넓게 붙는 요소가 없어야 한다.
+
 ## 아이콘
 
 - Figma 아이콘은 `src/assets/icons/{20,24,32}/` 에 있다. `import CloseIcon from '@/assets/icons/24/close.svg?react'` 로 불러온다.

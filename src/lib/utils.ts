@@ -33,12 +33,14 @@ export const cn = createCn({
           bg: [
             'gradient-background',
             'gradient-main',
+            'gradient-header',
             'gradient-line',
             'gradient-must-header',
           ],
         },
       ],
-      shadow: [{ shadow: ['knob', 'modal', 'popover'] }],
+      shadow: [{ shadow: ['knob', 'modal', 'popover', 'sticky', 'card'] }],
+      'max-w': [{ 'max-w': ['app'] }],
     },
   },
 })

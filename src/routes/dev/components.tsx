@@ -19,6 +19,7 @@ import {
 } from './-catalog/display-sections'
 import { IconSection } from './-catalog/icon-section'
 import {
+  BottomSheetSection,
   GnbSection,
   ListeningSection,
   ModalSection,
@@ -62,6 +63,7 @@ function ComponentCatalogPage() {
         <DocumentListSection />
         <FaqSection />
         <ModalSection />
+        <BottomSheetSection />
         <ListeningSection />
         <GnbSection />
         <ResultHeroSection />

@@ -15,7 +15,8 @@ const providers = {
     className: 'bg-kakao text-black/85',
   },
   google: {
-    label: '구글 로그인',
+    // Figma 컴포넌트 기본 문구는 "구글 로그인" 이지만, 실제 쓰인 화면(홈 - 로그인 유도 시트)은 카카오와 짝을 맞춘 이 문구다
+    label: '구글로 계속하기',
     Logo: GoogleLogo,
     className: 'bg-gray-90 text-black/54',
   },

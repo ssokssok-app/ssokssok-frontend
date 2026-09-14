@@ -60,6 +60,16 @@
   --shadow-knob: 0 0 2px 0 rgb(0 0 0 / 8%); /* Bigfont 스위치 손잡이 */
   --shadow-modal: 0 0 10px 0 rgb(0 0 0 / 10%); /* Modal */
   --shadow-popover: 0 1px 9.7px 0 rgb(0 0 0 / 20%); /* Listening 목소리 속도 패널 */
+  --shadow-sticky: 0 1px 3px 0 rgb(0 0 0 / 8%); /* 결과 화면 바로가기 메뉴가 위에 붙었을 때 (Figma 156:5663) */
+  --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
+}
+
+/*
+ * 앱 폭: Figma 에 데스크톱 디자인이 없어, 넓은 화면에서는 모바일 화면을 가운데 이 폭으로 세운다.
+ * 지그재그 웹과 같은 600px (docs/product.md "UX 원칙"). 루트 레이아웃과 화면 폭에 맞춰 붙는 요소(바텀시트 등)가 max-w-app 을 쓴다.
+ */
+@theme {
+  --container-app: 37.5rem; /* 600px */
 }
 
 /*
@@ -77,6 +87,12 @@
     #86a8ff 69.2%,
     #b7ccff 100%
   );
+  /*
+   * 결과 화면 위 고정 헤더 (Figma Frame 54). Figma 는 Gradient/Main 을 헤더 높이의 396% 로 늘려 깔아서
+   * 아래 Result_Main 과 이어져 보이게 했다. 웹은 헤더 높이가 안전 영역에 따라 달라서 길이(30rem ≈ 결과 머리 높이)로 늘린다.
+   * 뒤에 깔린 #2B71DA 는 이 그라디언트에 가려 보이지 않아 옮기지 않았다.
+   */
+  --gradient-header: linear-gradient(180deg, #3481f4 0, #174ea1 30rem);
   /* Figma 스타일에는 없고 Must 카드 머리에만 쓰인 값 */
   --gradient-must-header: linear-gradient(
     -10.29deg,
@@ -91,6 +107,10 @@
 
 @utility bg-gradient-main {
   background-image: var(--gradient-main);
+}
+
+@utility bg-gradient-header {
+  background-image: var(--gradient-header);
 }
 
 @utility bg-gradient-line {
@@ -374,7 +394,9 @@
   }
   body {
     /* text-* 클래스가 없는 본문도 Body/Regular 로 보이고 큰글씨 모드를 따라 커지도록 */
-    @apply bg-background text-body-regular text-foreground;
+    @apply text-body-regular text-foreground;
+    /* 넓은 화면에서 앱 폭(max-w-app) 기둥 바깥에 보이는 배경. 흰 화면과 구분되게 한 단계 어둡게 둔다 */
+    @apply bg-gray-80;
     /*
      * 한국어는 단어 중간에서 줄을 바꾸지 않는다 ("있 / 어요" 방지). 큰글씨 모드에서 줄바꿈이 잦아 특히 중요하다.
      * 공백 없는 긴 문자열(URL 등)은 넘치지 않게 필요할 때만 쪼갠다.

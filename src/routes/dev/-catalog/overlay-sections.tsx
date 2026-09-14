@@ -6,7 +6,13 @@ import FlashOnIcon from '@/assets/icons/24/flash-on.svg?react'
 import HomeIcon from '@/assets/icons/24/home.svg?react'
 import privacyShieldImage from '@/assets/images/privacy-shield.png'
 import warningImage from '@/assets/images/warning.png'
+import {
+  BottomSheet,
+  BottomSheetDescription,
+  BottomSheetTitle,
+} from '@/components/bottom-sheet'
 import { CtaButton } from '@/components/cta-button'
+import { DocumentListItem } from '@/components/document-list-item'
 import { Gnb, GnbIconButton, HomeGnb } from '@/components/gnb'
 import { ListenButton } from '@/components/listen-button'
 import {
@@ -76,6 +82,68 @@ export function ModalSection() {
           showToast('나가기를 눌렀어요')
         }}
       />
+    </CatalogSection>
+  )
+}
+
+export function BottomSheetSection() {
+  const [openSheet, setOpenSheet] = useState<'center' | 'list' | null>(null)
+  const showToast = useToast()
+
+  function close(open: boolean) {
+    if (!open) setOpenSheet(null)
+  }
+
+  return (
+    <CatalogSection title="BottomSheet" figmaNodeId="홈 시트 70:1309 · 66:940">
+      <CatalogItem label="Figma 컴포넌트는 없음. 쓸어내리거나 바깥을 누르면 닫힘">
+        <div className="flex gap-2">
+          <CtaButton size="md" onClick={() => setOpenSheet('center')}>
+            가운데 제목
+          </CtaButton>
+          <CtaButton
+            size="md"
+            variant="dark"
+            onClick={() => setOpenSheet('list')}
+          >
+            제목 + 목록
+          </CtaButton>
+        </div>
+      </CatalogItem>
+
+      <BottomSheet
+        open={openSheet === 'center'}
+        onOpenChange={close}
+        className="gap-[46px] pt-[45px] pb-[26px]"
+      >
+        <BottomSheetTitle className="text-center text-headline-m-semibold">
+          {'로그인하고 더 많은 문서를\n쉽게 읽어보세요'}
+        </BottomSheetTitle>
+        <CtaButton onClick={() => setOpenSheet(null)}>닫기</CtaButton>
+      </BottomSheet>
+
+      <BottomSheet
+        open={openSheet === 'list'}
+        onOpenChange={close}
+        className="pt-[22px] pb-[50px]"
+      >
+        <div className="flex flex-col gap-0.5">
+          <BottomSheetTitle>샘플 체험해보기</BottomSheetTitle>
+          <BottomSheetDescription>
+            사용해보고 싶은 문서를 선택해주세요
+          </BottomSheetDescription>
+        </div>
+        <div className="mt-[22px] flex flex-col gap-2">
+          <DocumentListItem onClick={() => showToast('근로 계약서를 눌렀어요')}>
+            근로 계약서
+          </DocumentListItem>
+          <DocumentListItem
+            onClick={() => showToast('임대차 계약서를 눌렀어요')}
+          >
+            임대차 계약서
+          </DocumentListItem>
+        </div>
+      </BottomSheet>
     </CatalogSection>
   )
 }
