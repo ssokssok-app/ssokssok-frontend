@@ -13,11 +13,12 @@ import { cn } from '@/lib/utils'
  * - 넓은 화면에서는 앱 폭(max-w-app)만큼만 가운데에 뜬다
  * - 큰글씨 모드 · 가로 화면에서 화면보다 길어지면 판 안에서 스크롤된다
  * - 배경 어둡기: Figma 샘플 목록 시트만 58% 이고 나머지는 Dimmed/Normal(70%)이라 70% 로 맞췄다
+ * - 동작 줄이기 설정이면 올라오고 내려가는 움직임 없이 바로 나타나고 사라진다. 손가락으로 끄는 동안 따라오는 것은 그대로다
  */
 const backdropClassName =
   'fixed inset-0 z-50 min-h-dvh bg-dimmed opacity-[calc(1-var(--drawer-swipe-progress))] transition-opacity duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] supports-[-webkit-touch-callout:none]:absolute'
 const popupClassName =
-  '-mb-12 flex max-h-[calc(100dvh-1.5rem+3rem)] w-full max-w-app flex-col overflow-y-auto overscroll-contain rounded-t-[20px] bg-white px-5 pt-3 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+3rem)] outline-none touch-auto [transform:translateY(var(--drawer-swipe-movement-y))] transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-starting-style:[transform:translateY(calc(100%-3rem+2px))] data-ending-style:[transform:translateY(calc(100%-3rem+2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]'
+  '-mb-12 flex max-h-[calc(100dvh-1.5rem+3rem)] w-full max-w-app flex-col overflow-y-auto overscroll-contain rounded-t-[20px] bg-white px-5 pt-3 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+3rem)] outline-none touch-auto [transform:translateY(var(--drawer-swipe-movement-y))] transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-starting-style:[transform:translateY(calc(100%-3rem+2px))] data-ending-style:[transform:translateY(calc(100%-3rem+2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] motion-reduce:transition-none'
 
 interface BottomSheetProps {
   open: boolean

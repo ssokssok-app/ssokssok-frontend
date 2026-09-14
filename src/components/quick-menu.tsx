@@ -38,10 +38,12 @@ export function QuickMenu({
     const start = active.offsetLeft - padding
     const end =
       active.offsetLeft + active.offsetWidth + padding - nav.clientWidth
-    if (start < nav.scrollLeft)
-      nav.scrollTo({ left: start, behavior: 'smooth' })
-    else if (end > nav.scrollLeft)
-      nav.scrollTo({ left: end, behavior: 'smooth' })
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)')
+      .matches
+      ? 'auto'
+      : 'smooth'
+    if (start < nav.scrollLeft) nav.scrollTo({ left: start, behavior })
+    else if (end > nav.scrollLeft) nav.scrollTo({ left: end, behavior })
   }, [value])
 
   return (
