@@ -106,17 +106,20 @@ state.verifiedFingerprint = gitSnapshot()?.fingerprint ?? null
 // ── 2. 문서 최신화 알림 ───────────────────────────────────
 function listDocs() {
   const docs = existsSync(join(projectDir, 'CLAUDE.md')) ? ['CLAUDE.md'] : []
-  const walk = (dir) => {
+  const walk = (dir, isDoc = (name) => name.endsWith('.md')) => {
     if (!existsSync(join(projectDir, dir))) return
     for (const entry of readdirSync(join(projectDir, dir), {
       withFileTypes: true,
     })) {
       const path = `${dir}/${entry.name}`
-      if (entry.isDirectory()) walk(path)
-      else if (entry.name.endsWith('.md')) docs.push(path)
+      if (entry.isDirectory()) walk(path, isDoc)
+      else if (isDoc(entry.name)) docs.push(path)
     }
   }
-  ;['docs', '.claude/rules', '.claude/skills'].forEach(walk)
+  ;['docs', '.claude/rules', '.claude/skills'].forEach((dir) => walk(dir))
+  // Codex 등이 읽는 리뷰 기준 (루트와 src 하위 폴더)
+  if (existsSync(join(projectDir, 'AGENTS.md'))) docs.push('AGENTS.md')
+  walk('src', (name) => name === 'AGENTS.md')
   return docs.map((path) => ({
     path,
     lines: readFileSync(join(projectDir, path), 'utf8').split('\n'),

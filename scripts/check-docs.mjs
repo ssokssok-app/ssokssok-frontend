@@ -2,7 +2,7 @@
 /**
  * 문서 최신성 검사 (`pnpm check` 에 포함).
  *
- * 에이전트용 문서(CLAUDE.md, docs/, .claude/rules, .claude/skills)에 적힌
+ * 에이전트용 문서(CLAUDE.md, 모든 AGENTS.md, docs/, .claude/rules, .claude/skills)에 적힌
  * - `pnpm <script>` 명령어가 package.json 에 실제로 있는지
  * - 인라인 코드로 적은 파일·폴더 경로와 상대 링크가 실제로 있는지
  * 확인한다. 코드가 바뀌었는데 문서가 그대로면 여기서 실패한다.
@@ -56,6 +56,8 @@ const scripts =
 const docFiles = allFiles.filter(
   (file) =>
     file === 'CLAUDE.md' ||
+    // Codex 등이 읽는 리뷰 기준. 루트와 하위 폴더에 있다
+    file.split('/').at(-1) === 'AGENTS.md' ||
     (file.endsWith('.md') &&
       (file.startsWith('docs/') ||
         file.startsWith('.claude/rules/') ||
