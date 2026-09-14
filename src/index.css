@@ -64,6 +64,11 @@
   --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
 }
 
+/* 간격: Figma 글자 스타일에 들어 있는 문단 간격 */
+@theme {
+  --spacing-body2: 0.5rem; /* Body2 문단 간격 8px → gap-body2 */
+}
+
 /*
  * 앱 폭: Figma 에 데스크톱 디자인이 없어, 넓은 화면에서는 모바일 화면을 가운데 이 폭으로 세운다.
  * 지그재그 웹과 같은 600px (docs/product.md "UX 원칙"). 루트 레이아웃과 화면 폭에 맞춰 붙는 요소(바텀시트 등)가 max-w-app 을 쓴다.
@@ -166,7 +171,6 @@
   --text-caption-l-semibold--letter-spacing: -0.01em;
   --text-caption-l-semibold--font-weight: 600;
 
-  /* Body2/Regular · Body2/Medium 은 Body 와 값이 같아 따로 두지 않는다 */
   --text-body-regular: 1rem; /* 16px */
   --text-body-regular--line-height: 1.5;
   --text-body-regular--letter-spacing: -0.02em;
@@ -186,6 +190,20 @@
   --text-body-bold--line-height: 1.4;
   --text-body-bold--letter-spacing: -0.02em;
   --text-body-bold--font-weight: 700;
+
+  /*
+   * Body2: 글자는 Body 와 같고 문단 간격 8px 이 더해진 스타일 (쉬운 본문을 소제목 없는 줄글로 쓸 때).
+   * 문단은 요소가 따로라 글자 클래스에 간격을 담을 수 없어, 문단들을 감싼 요소에 gap-body2 를 준다.
+   */
+  --text-body2-regular: 1rem; /* 16px */
+  --text-body2-regular--line-height: 1.5;
+  --text-body2-regular--letter-spacing: -0.02em;
+  --text-body2-regular--font-weight: 400;
+
+  --text-body2-medium: 1rem; /* 16px */
+  --text-body2-medium--line-height: 1.5;
+  --text-body2-medium--letter-spacing: -0.02em;
+  --text-body2-medium--font-weight: 500;
 
   --text-subtitle-semibold: 1.125rem; /* 18px */
   --text-subtitle-semibold--line-height: 1.4;
@@ -241,6 +259,8 @@
     --text-body-medium: 1.25rem;
     --text-body-semibold: 1.25rem;
     --text-body-bold: 1.25rem;
+    --text-body2-regular: 1.25rem;
+    --text-body2-medium: 1.25rem;
     --text-subtitle-semibold: 1.375rem;
     --text-title-semibold: 1.5rem;
     --text-headline-s-semibold: 1.625rem;

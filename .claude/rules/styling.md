@@ -9,6 +9,7 @@ paths:
 ## 글자 · 큰글씨 모드
 
 - 글자는 Figma 글자 스타일과 1:1 인 토큰만 쓴다. Figma `Body/Semibold` → `text-body-semibold`. 크기 · 줄높이 · 자간 · 굵기가 한 클래스에 들어 있으니 `font-semibold` · `leading-*` 를 덧붙이지 않는다.
+- Figma `Body2/Regular` · `Body2/Medium` 은 `text-body2-regular` · `text-body2-medium` 이다. 글자는 Body 와 같고 문단 간격 8px 이 더해진 스타일이라, 문단들을 감싼 요소에 `gap-body2` 를 함께 준다 (예: 소제목 없는 쉬운 본문, 원문 보기). Body 와 값이 같아 보여도 Figma 가 Body2 를 쓴 곳에는 Body2 를 쓴다.
 - 쓰지 않는 것: 임의 크기(`text-[13px]`, 큰글씨 모드에서 안 커짐), Tailwind 기본 단계(`text-sm` 등, shadcn 컴포넌트용). `pnpm check:font-scale` 이 막는다.
 - 글자 토큰을 추가하면 `src/index.css` 의 `html[data-font-scale='large']` 에 +0.25rem 값도 넣는다. 빠지면 같은 검사가 실패한다.
 - 원리와 값은 `src/index.css` 주석, 모드 상태는 `src/hooks/useFontScale.ts` 의 `useFontScale()`.

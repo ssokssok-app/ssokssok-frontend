@@ -64,18 +64,18 @@ export function SourceView({ paragraph, onClose }: SourceViewProps) {
                   <h2 className="text-subtitle-semibold text-gray-900">
                     원문의 이 부분에서 가져왔어요
                   </h2>
-                  <div className="relative flex flex-col gap-2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
+                  <div className="relative flex flex-col gap-body2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
                     {source.map((segments, paragraphIndex) => (
                       <p
                         // 원문 문단 순서는 바뀌지 않는다
                         key={paragraphIndex}
-                        className="text-body-regular text-gray-900"
+                        className="text-body2-regular text-gray-900"
                       >
                         {segments.map((segment, segmentIndex) =>
                           segment.highlighted ? (
                             <mark
                               key={segmentIndex}
-                              className="bg-blue-500/10 box-decoration-clone text-body-medium text-blue-500"
+                              className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500"
                             >
                               {segment.text}
                             </mark>

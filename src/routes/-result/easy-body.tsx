@@ -32,7 +32,7 @@ export function EasyBody({ id, paragraphs, onOpenSource }: EasyBodyProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [listeningOpen, setListeningOpen] = useState(false)
   const [speed, setSpeed] = useState<ListeningSpeed>('normal')
-  // Figma: 소제목 있는 문서는 문단 사이 14px, 없는 문서는 8px
+  // Figma: 소제목 있는 문서는 Body 문단 사이 14px, 소제목 없는 줄글은 Body2 문단 간격(8px)
   const hasTitles = paragraphs.some((paragraph) => paragraph.title)
 
   function openSource(index: number) {
@@ -78,7 +78,7 @@ export function EasyBody({ id, paragraphs, onOpenSource }: EasyBodyProps) {
         </p>
       </div>
 
-      <div className={cn('flex flex-col', hasTitles ? 'gap-3.5' : 'gap-2')}>
+      <div className={cn('flex flex-col', hasTitles ? 'gap-3.5' : 'gap-body2')}>
         {paragraphs.map((paragraph, index) => (
           <ParagraphItem
             // 문단은 순서가 바뀌지 않고 같은 문장이 두 번 나올 수 있어 순서를 키로 쓴다
@@ -117,7 +117,7 @@ function ParagraphItem({
   onOpenSource,
 }: ParagraphItemProps) {
   const sourceButtonId = useId()
-  // 선택: Blue/600 · Medium (Figma 73:2677), 읽는 중: Blue/500 (Figma 73:2088)
+  // 선택: Blue/600 · Body2/Medium (Figma 73:2675), 읽는 중: Blue/500 (Figma 73:2088)
   const textClassName = cn(
     selected && 'text-blue-600',
     !selected && reading && 'text-blue-500',
@@ -133,8 +133,8 @@ function ParagraphItem({
   ) : (
     <p
       className={cn(
-        'text-body-regular whitespace-pre-line text-gray-900',
-        selected && 'text-body-medium',
+        'text-body2-regular whitespace-pre-line text-gray-900',
+        selected && 'text-body2-medium',
         textClassName,
       )}
     >
