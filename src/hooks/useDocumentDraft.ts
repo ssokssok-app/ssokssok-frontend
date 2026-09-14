@@ -31,12 +31,34 @@ export type DocumentDraft =
   | { kind: 'images'; source: ImageSource; pages: DraftPage[] }
   | { kind: 'pdf'; file: File }
 
-/** 사진 · 파일을 받지 못한 이유. 화면이 알림 문구로 바꾼다 */
-export class DraftError extends Error {
-  constructor(message: string) {
-    super(message)
+/** 사용자에게 알림 모달로 보여 줄 제목 · 다음에 할 일 */
+export interface DraftNotice {
+  title: string
+  description: string
+}
+
+/** 사진 · 파일을 받지 못한 이유. 화면이 notice 를 알림 모달로 보여 준다 */
+class DraftError extends Error {
+  readonly notice: DraftNotice
+
+  constructor(notice: DraftNotice) {
+    super(notice.title)
     this.name = 'DraftError'
+    this.notice = notice
   }
+}
+
+/** 사진 · 파일을 넣다가 난 오류를 알림 모달 문구로 바꾼다 */
+export function toDraftNotice(error: unknown): DraftNotice {
+  return error instanceof DraftError
+    ? error.notice
+    : { title: '문서를 불러오지 못했어요', description: '다시 골라주세요.' }
+}
+
+/** 10장이 넘게 골라 일부만 넣었을 때 */
+export const PAGE_LIMIT_NOTICE: DraftNotice = {
+  title: `사진은 ${MAX_PAGES}장까지 올릴 수 있어요`,
+  description: `${MAX_PAGES}장이 넘는 사진은 빼고 넣었어요.`,
 }
 
 let currentDraft: DocumentDraft | null = null
@@ -72,17 +94,26 @@ export function getDocumentDraft() {
 
 async function toPages(files: File[]): Promise<DraftPage[]> {
   if (!files.every((file) => file.type.startsWith('image/'))) {
-    throw new DraftError('사진만 고를 수 있어요')
+    throw new DraftError({
+      title: '사진만 고를 수 있어요',
+      description: '사진 파일을 다시 골라주세요.',
+    })
   }
   const compressed = await Promise.all(
     files.map((file) =>
       compressImage(file).catch(() => {
-        throw new DraftError('열 수 없는 사진이 있어요. 다른 사진을 골라주세요')
+        throw new DraftError({
+          title: '열 수 없는 사진이 있어요',
+          description: '다른 사진을 골라주세요.',
+        })
       }),
     ),
   )
   if (compressed.some((file) => file.size > MAX_IMAGE_BYTES)) {
-    throw new DraftError('사진이 너무 커요. 다른 사진을 골라주세요')
+    throw new DraftError({
+      title: '사진이 너무 커요',
+      description: '다른 사진을 골라주세요.',
+    })
   }
   return compressed.map((file) => ({
     id: `page-${nextPageId++}`,
@@ -117,10 +148,16 @@ export async function addDraftImages(files: File[]) {
 
 export function startPdfDraft(file: File) {
   if (file.type !== 'application/pdf') {
-    throw new DraftError('PDF 파일만 불러올 수 있어요')
+    throw new DraftError({
+      title: 'PDF 파일만 불러올 수 있어요',
+      description: 'PDF 파일을 다시 골라주세요.',
+    })
   }
   if (file.size > MAX_PDF_BYTES) {
-    throw new DraftError('파일이 너무 커요. 20MB 보다 작은 파일을 골라주세요')
+    throw new DraftError({
+      title: '파일이 너무 커요',
+      description: '20MB 보다 작은 파일을 골라주세요.',
+    })
   }
   setDraft({ kind: 'pdf', file })
 }

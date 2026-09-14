@@ -5,18 +5,21 @@ import { type ChangeEvent, useRef, useState } from 'react'
 import AddIcon from '@/assets/icons/24/add.svg?react'
 import ArrowBackIosIcon from '@/assets/icons/24/arrow-back-ios.svg?react'
 import CheckedSimpleIcon from '@/assets/icons/24/checked-simple.svg?react'
+import warningImage from '@/assets/images/warning.png'
 import { CtaButton } from '@/components/cta-button'
 import { Gnb, GnbIconButton } from '@/components/gnb'
+import { Modal, ModalClose } from '@/components/modal'
 import { startConversionSession } from '@/hooks/useConversionSession'
 import {
   addDraftImages,
-  DraftError,
+  type DraftNotice,
   getDocumentDraft,
   getDraftFiles,
   MAX_PAGES,
+  PAGE_LIMIT_NOTICE,
+  toDraftNotice,
   useDocumentDraft,
 } from '@/hooks/useDocumentDraft'
-import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/utils'
 
 /*
@@ -33,9 +36,11 @@ export const Route = createFileRoute('/review')({
 function ReviewPage() {
   const draft = useDocumentDraft()
   const navigate = Route.useNavigate()
-  const showToast = useToast()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  // 읽어야 하는 알림이라 Toast 대신 모달로 띄운다. 닫히는 동안에도 문구가 보이도록 내용과 열림을 따로 둔다
+  const [notice, setNotice] = useState<DraftNotice | null>(null)
+  const [noticeOpen, setNoticeOpen] = useState(false)
   const addInputRef = useRef<HTMLInputElement>(null)
 
   // 홈으로 나가는 중에 초안이 비면 아무것도 그리지 않는다
@@ -52,9 +57,17 @@ function ReviewPage() {
   const selectedPage = pages[selectedIndex]
   const full = pages.length >= MAX_PAGES
 
+  function showNotice(next: DraftNotice) {
+    setNotice(next)
+    setNoticeOpen(true)
+  }
+
   function handleAddClick() {
     if (full) {
-      showToast(`사진은 ${MAX_PAGES}장까지 올릴 수 있어요`)
+      showNotice({
+        title: PAGE_LIMIT_NOTICE.title,
+        description: `이미 ${MAX_PAGES}장을 모두 넣었어요.`,
+      })
       return
     }
     addInputRef.current?.click()
@@ -69,13 +82,9 @@ function ReviewPage() {
     try {
       const { truncated } = await addDraftImages(files)
       setSelectedId(null)
-      if (truncated) showToast(`사진은 ${MAX_PAGES}장까지 올릴 수 있어요`)
+      if (truncated) showNotice(PAGE_LIMIT_NOTICE)
     } catch (error) {
-      showToast(
-        error instanceof DraftError
-          ? error.message
-          : '사진을 불러오지 못했어요. 다시 시도해주세요',
-      )
+      showNotice(toDraftNotice(error))
     } finally {
       setAdding(false)
     }
@@ -184,6 +193,16 @@ function ReviewPage() {
         hidden
         onChange={handleAddChange}
       />
+      {/* Figma 에 없는 알림이라 개인정보 안내와 같은 Modal 에 경고 일러스트를 쓴다 (docs/product.md "확인 필요") */}
+      <Modal
+        open={noticeOpen}
+        onOpenChange={setNoticeOpen}
+        illustration={warningImage}
+        title={notice?.title ?? ''}
+        description={notice?.description ?? ''}
+      >
+        <ModalClose>확인</ModalClose>
+      </Modal>
     </div>
   )
 }

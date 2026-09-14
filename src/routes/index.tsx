@@ -7,6 +7,7 @@ import DocumentFilledIcon from '@/assets/icons/32/document-filled.svg?react'
 import ImageFilledIcon from '@/assets/icons/32/image-filled.svg?react'
 import homeDocumentsImage from '@/assets/images/home-documents.jpg'
 import privacyShieldImage from '@/assets/images/privacy-shield.png'
+import warningImage from '@/assets/images/warning.png'
 import { Divider } from '@/components/divider'
 import { HomeGnb } from '@/components/gnb'
 import { HomeButton, HomeSampleButton } from '@/components/home-button'
@@ -15,13 +16,14 @@ import { type LoginProvider, useAuth } from '@/hooks/useAuth'
 import { startConversionSession } from '@/hooks/useConversionSession'
 import {
   clearDocumentDraft,
-  DraftError,
+  type DraftNotice,
   type ImageSource,
+  PAGE_LIMIT_NOTICE,
   startImageDraft,
   startPdfDraft,
+  toDraftNotice,
 } from '@/hooks/useDocumentDraft'
 import { usePrivacyNotice } from '@/hooks/usePrivacyNotice'
-import { useToast } from '@/hooks/useToast'
 
 import { LoginSheet } from './-auth/login-sheet'
 import { DocumentTypesSheet } from './-home/document-types-sheet'
@@ -37,14 +39,22 @@ type InputMethod = 'camera' | 'gallery' | 'file'
 /** 문서를 넣기 전에 차례로 띄우는 안내: 개인정보 안내 모달 → 로그인 유도 시트(비로그인일 때) → 지원 문서 시트 */
 type GuideStep = 'privacy' | 'login' | 'documentTypes'
 
+/** 사진 · 파일 알림. 읽어야 하는 내용이라 저절로 사라지는 Toast 대신 모달로 띄운다 */
+interface HomeNotice extends DraftNotice {
+  /** 닫은 뒤 촬영한 문서 확인 화면으로 간다 (사진을 일부만 넣은 경우) */
+  goToReview?: boolean
+}
+
 function HomePage() {
   const navigate = useNavigate()
-  const showToast = useToast()
   const { isLoggedIn, login } = useAuth()
   const privacyNotice = usePrivacyNotice()
   const [inputMethod, setInputMethod] = useState<InputMethod>('camera')
   const [guideStep, setGuideStep] = useState<GuideStep | null>(null)
   const [sampleSheetOpen, setSampleSheetOpen] = useState(false)
+  // 닫히는 동안에도 문구가 보이도록 알림 내용과 열림을 따로 둔다
+  const [notice, setNotice] = useState<HomeNotice | null>(null)
+  const [noticeOpen, setNoticeOpen] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -90,14 +100,6 @@ function HomePage() {
     return files
   }
 
-  function showDraftError(error: unknown) {
-    showToast(
-      error instanceof DraftError
-        ? error.message
-        : '사진을 불러오지 못했어요. 다시 시도해주세요',
-    )
-  }
-
   async function handleImagesChange(
     source: ImageSource,
     event: ChangeEvent<HTMLInputElement>,
@@ -106,10 +108,10 @@ function HomePage() {
     if (files.length === 0) return
     try {
       const { truncated } = await startImageDraft(source, files)
-      if (truncated) showToast('사진은 10장까지 올릴 수 있어요')
-      navigate({ to: '/review' })
+      if (truncated) showNotice({ ...PAGE_LIMIT_NOTICE, goToReview: true })
+      else navigate({ to: '/review' })
     } catch (error) {
-      showDraftError(error)
+      showNotice(toDraftNotice(error))
     }
   }
 
@@ -122,8 +124,18 @@ function HomePage() {
       startConversionSession([file])
       navigate({ to: '/result' })
     } catch (error) {
-      showDraftError(error)
+      showNotice(toDraftNotice(error))
     }
+  }
+
+  function showNotice(next: HomeNotice) {
+    setNotice(next)
+    setNoticeOpen(true)
+  }
+
+  function closeNotice() {
+    setNoticeOpen(false)
+    if (notice?.goToReview) navigate({ to: '/review' })
   }
 
   function handleSampleSelect(sampleId: SampleId) {
@@ -256,6 +268,16 @@ function HomePage() {
         onOpenChange={setSampleSheetOpen}
         onSelect={handleSampleSelect}
       />
+      {/* Figma 에 없는 알림이라 개인정보 안내와 같은 Modal 에 경고 일러스트를 쓴다 (docs/product.md "확인 필요") */}
+      <Modal
+        open={noticeOpen}
+        onOpenChange={(open) => !open && closeNotice()}
+        illustration={warningImage}
+        title={notice?.title ?? ''}
+        description={notice?.description ?? ''}
+      >
+        <ModalClose>확인</ModalClose>
+      </Modal>
     </div>
   )
 }
