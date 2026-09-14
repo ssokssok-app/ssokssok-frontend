@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "check:docs": "node scripts/check-docs.mjs",
     "check:font-scale": "node scripts/check-font-scale.mjs",
-    "check": "tsr generate && oxlint && pnpm typecheck && pnpm format:check && pnpm check:docs && pnpm check:font-scale",
+    "check:ci": "node scripts/check-ci.mjs",
+    "check": "tsr generate && oxlint && pnpm typecheck && pnpm format:check && pnpm check:docs && pnpm check:font-scale && pnpm check:ci",
     "verify": "pnpm check && vite build"
   },
   "dependencies": {

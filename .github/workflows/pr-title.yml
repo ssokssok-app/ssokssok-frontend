@@ -1,0 +1,30 @@
+# PR 제목이 커밋 규칙(docs/git.md)을 따르는지 검사한다. squash merge 라서 PR 제목이 곧 main 의 커밋 메시지다.
+# - job 이름(pr-title)은 main 규칙의 필수 체크 이름이다. 바꾸면 GitHub 규칙도 같이 바꾼다.
+# - type 목록은 액션 기본값(Conventional Commits 의 11개)을 쓴다. docs/git.md 의 표와 같다.
+name: PR 제목
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: pr-title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          subjectPattern: '^.*[^.]$'
+          subjectPatternError: |
+            PR 제목 "{title}" 의 요약이 마침표로 끝납니다. 마침표를 빼 주세요.
+            형식: type(scope): 한국어 요약 (예: feat(documents): 문서 목록 화면 추가) — docs/git.md 참고
