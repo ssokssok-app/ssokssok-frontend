@@ -5,16 +5,15 @@
 
 ## 스택
 
-Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 기반) · TanStack Query · Tailwind CSS v4 · shadcn (**Base UI 기반, Radix 아님**) · pnpm
+Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 기반) · TanStack Query · Tailwind CSS v4 · Base UI (**Radix 아님**, 공용 컴포넌트의 바탕) · pnpm
 백엔드는 FastAPI (별도 레포). dev 서버가 `/api` 를 `localhost:8000` 으로 프록시한다.
 
 ## 명령어
 
-- `pnpm dev`: 개발 서버
+- `pnpm dev`: 개발 서버. `/dev/components` 에서 공용 컴포넌트 카탈로그를 본다 (개발 모드 전용)
 - `pnpm check`: 라우트 생성 + lint + 타입 + 포맷 검사 + 하네스 검사 (빌드 제외, 빠름)
 - `pnpm verify`: `pnpm check` + 프로덕션 빌드. **작업을 끝내기 전에 통과해야 한다**
 - `pnpm format`: 포맷 자동 수정
-- `pnpm dlx shadcn@latest add <name>`: UI 컴포넌트 추가
 
 전체 목록의 기준은 `package.json` 의 scripts 다.
 
@@ -42,8 +41,8 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 ## 반드시 지킬 것
 
 - `src/routeTree.gen.ts` 는 생성물이다. 직접 고치지 않는다.
-- `src/components/ui/` 는 shadcn 원본이다. 직접 고치지 않고 감싸는 컴포넌트를 만든다.
-- 글자 크기는 `text-sm` 같은 스케일 클래스만 쓴다. 임의 크기는 큰글씨 모드에서 커지지 않는다.
+- 공용 컴포넌트는 Figma 를 따라 Base UI 로 `src/components/` 에 만든다. `src/components/ui/` 는 shadcn 원본이라 고치지 않는다.
+- 글자 크기 · 색은 Figma 토큰(`text-body-regular`, `bg-blue-500`)만 쓴다. 임의 크기는 큰글씨 모드에서 커지지 않는다.
 - `VITE_*` 환경 변수에 비밀값을 넣지 않는다 (번들에 그대로 노출된다).
 - 문서 · 코드 주석 · 커밋 메시지는 한국어로, 식별자는 영어로 쓴다.
 - 커밋 · push · PR 은 사용자가 요청할 때만 한다.
