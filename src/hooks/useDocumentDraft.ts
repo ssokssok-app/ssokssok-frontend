@@ -43,13 +43,18 @@ let currentDraft: DocumentDraft | null = null
 let nextPageId = 1
 const listeners = new Set<() => void>()
 
-function revokePreviews(draft: DocumentDraft | null) {
-  if (draft?.kind !== 'images') return
-  for (const page of draft.pages) URL.revokeObjectURL(page.previewUrl)
+function previewUrls(draft: DocumentDraft | null) {
+  return draft?.kind === 'images'
+    ? draft.pages.map((page) => page.previewUrl)
+    : []
 }
 
 function setDraft(next: DocumentDraft | null) {
-  if (currentDraft !== next) revokePreviews(currentDraft)
+  // 사진을 추가할 때처럼 새 초안에도 남는 사진의 미리보기 주소는 해제하지 않는다
+  const kept = new Set(previewUrls(next))
+  for (const url of previewUrls(currentDraft)) {
+    if (!kept.has(url)) URL.revokeObjectURL(url)
+  }
   currentDraft = next
   listeners.forEach((listener) => listener())
 }
