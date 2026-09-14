@@ -57,7 +57,10 @@ export function MustCard({ kind, children, className }: MustCardProps) {
           )}
         />
       </div>
-      <div className="mx-5 h-px bg-gray-100" />
+      {/*
+       * 머리와 몸통 사이에 선을 두지 않는다. Figma 는 "해야할 일" 카드에만 안쪽으로 들여 그린 선이 있어
+       * 가장자리에서 끊겨 보이고, "꼭 확인하세요" 카드는 선 없이 배경만으로 나뉜다. 선 없는 쪽으로 맞췄다 (docs/product.md)
+       */}
       <div className="px-5 py-[26px]">{children}</div>
     </section>
   )
