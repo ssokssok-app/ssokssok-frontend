@@ -11,9 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultRouteImport } from './routes/result'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as CaptureIndexRouteImport } from './routes/capture/index'
-import { Route as CaptureReviewRouteImport } from './routes/capture/review'
 import { Route as DevComponentsRouteImport } from './routes/dev/components'
 import { Route as SamplesSampleIdRouteImport } from './routes/samples/$sampleId'
 
@@ -27,19 +26,14 @@ const ResultRoute = ResultRouteImport.update({
   path: '/result',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaptureIndexRoute = CaptureIndexRouteImport.update({
-  id: '/capture/',
-  path: '/capture/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaptureReviewRoute = CaptureReviewRouteImport.update({
-  id: '/capture/review',
-  path: '/capture/review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevComponentsRoute = DevComponentsRouteImport.update({
@@ -56,69 +50,62 @@ const SamplesSampleIdRoute = SamplesSampleIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
-  '/capture/review': typeof CaptureReviewRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
-  '/capture/': typeof CaptureIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
-  '/capture/review': typeof CaptureReviewRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
-  '/capture': typeof CaptureIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/review': typeof ReviewRoute
   '/settings': typeof SettingsRoute
-  '/capture/review': typeof CaptureReviewRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
-  '/capture/': typeof CaptureIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/result'
+    | '/review'
     | '/settings'
-    | '/capture/review'
     | '/dev/components'
     | '/samples/$sampleId'
-    | '/capture/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/result'
+    | '/review'
     | '/settings'
-    | '/capture/review'
     | '/dev/components'
     | '/samples/$sampleId'
-    | '/capture'
   id:
     | '__root__'
     | '/'
     | '/result'
+    | '/review'
     | '/settings'
-    | '/capture/review'
     | '/dev/components'
     | '/samples/$sampleId'
-    | '/capture/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResultRoute: typeof ResultRoute
+  ReviewRoute: typeof ReviewRoute
   SettingsRoute: typeof SettingsRoute
-  CaptureReviewRoute: typeof CaptureReviewRoute
   DevComponentsRoute: typeof DevComponentsRoute
   SamplesSampleIdRoute: typeof SamplesSampleIdRoute
-  CaptureIndexRoute: typeof CaptureIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,25 +124,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/capture/': {
-      id: '/capture/'
-      path: '/capture'
-      fullPath: '/capture/'
-      preLoaderRoute: typeof CaptureIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/capture/review': {
-      id: '/capture/review'
-      path: '/capture/review'
-      fullPath: '/capture/review'
-      preLoaderRoute: typeof CaptureReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/components': {
@@ -178,11 +158,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResultRoute: ResultRoute,
+  ReviewRoute: ReviewRoute,
   SettingsRoute: SettingsRoute,
-  CaptureReviewRoute: CaptureReviewRoute,
   DevComponentsRoute: DevComponentsRoute,
   SamplesSampleIdRoute: SamplesSampleIdRoute,
-  CaptureIndexRoute: CaptureIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

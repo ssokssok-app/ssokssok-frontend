@@ -7,7 +7,7 @@ paths:
 
 - `src/routeTree.gen.ts` 는 생성물이다. 직접 고치지 않는다. dev 서버나 `pnpm routes:generate` 가 다시 만든다.
 - 파일 이름 → URL
-  - `index.tsx`: 그 폴더 경로 자체 (`capture/index.tsx` → `/capture/`)
+  - `index.tsx`: 그 폴더 경로 자체 (`samples/index.tsx` 가 있다면 → `/samples/`)
   - `$sampleId.tsx`: 경로 파라미터 → `Route.useParams()`
   - `__root.tsx`: 루트 레이아웃
   - `_` 로 시작: URL 에 나타나지 않는 레이아웃 라우트

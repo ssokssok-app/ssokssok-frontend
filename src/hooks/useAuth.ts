@@ -8,11 +8,19 @@ import { useSyncExternalStore } from 'react'
  * - 백엔드 소셜 로그인이 준비되면 이 파일 안만 바꾸고, 화면은 useAuth() 를 그대로 쓴다.
  */
 
-let loggedIn = false
+export type LoginProvider = 'kakao' | 'google'
+
+export interface Account {
+  provider: LoginProvider
+  /** 로그인한 계정 이메일. 백엔드 연결 전에는 알 수 없어 null 이다 */
+  email: string | null
+}
+
+let currentAccount: Account | null = null
 const listeners = new Set<() => void>()
 
-function setLoggedIn(next: boolean) {
-  loggedIn = next
+function setAccount(next: Account | null) {
+  currentAccount = next
   listeners.forEach((listener) => listener())
 }
 
@@ -24,19 +32,19 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot() {
-  return loggedIn
+  return currentAccount
 }
 
-function login() {
-  setLoggedIn(true)
+function login(provider: LoginProvider) {
+  setAccount({ provider, email: null })
 }
 
 function logout() {
-  setLoggedIn(false)
+  setAccount(null)
 }
 
 export function useAuth() {
-  const isLoggedIn = useSyncExternalStore(subscribe, getSnapshot)
+  const account = useSyncExternalStore(subscribe, getSnapshot)
 
-  return { isLoggedIn, login, logout }
+  return { account, isLoggedIn: account !== null, login, logout }
 }

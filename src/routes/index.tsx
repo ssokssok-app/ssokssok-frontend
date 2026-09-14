@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { type ChangeEvent, useRef, useState } from 'react'
+import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 
 import type { SampleId } from '@/api/samples'
 import CameraFilledIcon from '@/assets/icons/32/camera-filled.svg?react'
@@ -11,12 +11,19 @@ import { Divider } from '@/components/divider'
 import { HomeGnb } from '@/components/gnb'
 import { HomeButton, HomeSampleButton } from '@/components/home-button'
 import { Modal, ModalClose, ModalTextButton } from '@/components/modal'
-import { useAuth } from '@/hooks/useAuth'
+import { type LoginProvider, useAuth } from '@/hooks/useAuth'
+import {
+  clearDocumentDraft,
+  DraftError,
+  type ImageSource,
+  startImageDraft,
+  startPdfDraft,
+} from '@/hooks/useDocumentDraft'
 import { usePrivacyNotice } from '@/hooks/usePrivacyNotice'
 import { useToast } from '@/hooks/useToast'
 
+import { LoginSheet } from './-auth/login-sheet'
 import { DocumentTypesSheet } from './-home/document-types-sheet'
-import { LoginSheet } from './-home/login-sheet'
 import { SampleSheet } from './-home/sample-sheet'
 
 export const Route = createFileRoute('/')({
@@ -37,8 +44,14 @@ function HomePage() {
   const [inputMethod, setInputMethod] = useState<InputMethod>('camera')
   const [guideStep, setGuideStep] = useState<GuideStep | null>(null)
   const [sampleSheetOpen, setSampleSheetOpen] = useState(false)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 홈으로 돌아오면 고르던 사진 · 파일을 메모리에서 비운다 (개인정보)
+  useEffect(() => {
+    clearDocumentDraft()
+  }, [])
 
   function startInput(method: InputMethod) {
     setInputMethod(method)
@@ -56,15 +69,15 @@ function HomePage() {
     setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
   }
 
-  function handleLogin() {
-    login()
+  function handleLogin(provider: LoginProvider) {
+    login(provider)
     setGuideStep('documentTypes')
   }
 
   function handleDocumentTypesConfirm() {
     setGuideStep(null)
-    // 파일 선택 창은 사용자가 누른 순간에만 열 수 있어서, 이 클릭 처리 안에서 바로 연다
-    if (inputMethod === 'camera') navigate({ to: '/capture' })
+    // 카메라 · 파일 선택 창은 사용자가 누른 순간에만 열 수 있어서, 이 클릭 처리 안에서 바로 연다
+    if (inputMethod === 'camera') cameraInputRef.current?.click()
     else if (inputMethod === 'gallery') galleryInputRef.current?.click()
     else fileInputRef.current?.click()
   }
@@ -76,24 +89,38 @@ function HomePage() {
     return files
   }
 
-  function handleGalleryChange(event: ChangeEvent<HTMLInputElement>) {
+  function showDraftError(error: unknown) {
+    showToast(
+      error instanceof DraftError
+        ? error.message
+        : '사진을 불러오지 못했어요. 다시 시도해주세요',
+    )
+  }
+
+  async function handleImagesChange(
+    source: ImageSource,
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
     const files = readSelectedFiles(event)
     if (files.length === 0) return
-    if (!files.every((file) => file.type.startsWith('image/'))) {
-      showToast('사진만 고를 수 있어요')
-      return
+    try {
+      const { truncated } = await startImageDraft(source, files)
+      if (truncated) showToast('사진은 10장까지 올릴 수 있어요')
+      navigate({ to: '/review' })
+    } catch (error) {
+      showDraftError(error)
     }
-    navigate({ to: '/capture/review' })
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const [file] = readSelectedFiles(event)
     if (!file) return
-    if (file.type !== 'application/pdf') {
-      showToast('PDF 파일만 불러올 수 있어요')
-      return
+    try {
+      startPdfDraft(file)
+      navigate({ to: '/result' })
+    } catch (error) {
+      showDraftError(error)
     }
-    navigate({ to: '/result' })
   }
 
   function handleSampleSelect(sampleId: SampleId) {
@@ -166,13 +193,22 @@ function HomePage() {
         </div>
       </main>
 
+      {/* 휴대폰 기본 카메라를 연다 (웹 카메라 화면 대신, docs/product.md "문서 입력") */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(event) => handleImagesChange('camera', event)}
+      />
       <input
         ref={galleryInputRef}
         type="file"
         accept="image/*"
         multiple
         hidden
-        onChange={handleGalleryChange}
+        onChange={(event) => handleImagesChange('gallery', event)}
       />
       <input
         ref={fileInputRef}
