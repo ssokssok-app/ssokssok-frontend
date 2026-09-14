@@ -16,7 +16,14 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.git', '.tanstack'])
-const PATH_ROOTS = ['src/', 'docs/', 'scripts/', 'public/', '.claude/']
+const PATH_ROOTS = [
+  'src/',
+  'docs/',
+  'scripts/',
+  'public/',
+  '.claude/',
+  '.github/',
+]
 const FILE_EXT = /\.(json|ts|tsx|mjs|js|md|css|html|ya?ml)$/
 const PNPM_BUILTINS = new Set([
   'add',
