@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DevComponentsRouteImport } from './routes/dev/components'
 import { Route as DocumentsIndexRouteImport } from './routes/documents/index'
 import { Route as DocumentsIdRouteImport } from './routes/documents/$id'
 import { Route as STokenRouteImport } from './routes/s/$token'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevComponentsRoute = DevComponentsRouteImport.update({
+  id: '/dev/components',
+  path: '/dev/components',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocumentsIndexRoute = DocumentsIndexRouteImport.update({
@@ -44,6 +50,7 @@ const STokenRoute = STokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dev/components': typeof DevComponentsRoute
   '/documents/$id': typeof DocumentsIdRoute
   '/s/$token': typeof STokenRoute
   '/documents/': typeof DocumentsIndexRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dev/components': typeof DevComponentsRoute
   '/documents/$id': typeof DocumentsIdRoute
   '/s/$token': typeof STokenRoute
   '/documents': typeof DocumentsIndexRoute
@@ -59,22 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dev/components': typeof DevComponentsRoute
   '/documents/$id': typeof DocumentsIdRoute
   '/s/$token': typeof STokenRoute
   '/documents/': typeof DocumentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/documents/$id' | '/s/$token' | '/documents/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dev/components'
+    | '/documents/$id'
+    | '/s/$token'
+    | '/documents/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/documents/$id' | '/s/$token' | '/documents'
+  to:
+    | '/'
+    | '/login'
+    | '/dev/components'
+    | '/documents/$id'
+    | '/s/$token'
+    | '/documents'
   id:
-    '__root__' | '/' | '/login' | '/documents/$id' | '/s/$token' | '/documents/'
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/dev/components'
+    | '/documents/$id'
+    | '/s/$token'
+    | '/documents/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  DevComponentsRoute: typeof DevComponentsRoute
   DocumentsIdRoute: typeof DocumentsIdRoute
   STokenRoute: typeof STokenRoute
   DocumentsIndexRoute: typeof DocumentsIndexRoute
@@ -94,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/components': {
+      id: '/dev/components'
+      path: '/dev/components'
+      fullPath: '/dev/components'
+      preLoaderRoute: typeof DevComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/documents/': {
@@ -123,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  DevComponentsRoute: DevComponentsRoute,
   DocumentsIdRoute: DocumentsIdRoute,
   STokenRoute: STokenRoute,
   DocumentsIndexRoute: DocumentsIndexRoute,

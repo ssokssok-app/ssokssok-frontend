@@ -2,11 +2,12 @@
 
 ## 지금 도는 검사
 
-| 검사       | 설정 위치                                   | 언제                       | 하는 일                                                                |
-| ---------- | ------------------------------------------- | -------------------------- | ---------------------------------------------------------------------- |
-| `verify`   | `.github/workflows/ci.yml`                  | PR, `main` push            | `pnpm verify` 실행, 생성 파일(`routeTree.gen.ts` 등)을 커밋했는지 확인 |
-| `pr-title` | `.github/workflows/pr-title.yml`            | PR 열기 · 제목 수정 · push | PR 제목이 `docs/git.md` 커밋 형식인지 확인                             |
-| CodeQL     | GitHub 설정 (Code security → default setup) | PR, `main` push, 주기적    | JS/TS · 워크플로 보안 취약점 스캔                                      |
+| 검사            | 설정 위치                                    | 언제                                                     | 하는 일                                                                                                                                            |
+| --------------- | -------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify`        | `.github/workflows/ci.yml`                   | PR, `main` push                                          | `pnpm verify` 실행, 생성 파일(`routeTree.gen.ts` 등)을 커밋했는지 확인                                                                             |
+| `pr-title`      | `.github/workflows/pr-title.yml`             | PR 열기 · 제목 수정 · push                               | PR 제목이 `docs/git.md` 커밋 형식인지 확인                                                                                                         |
+| CodeQL          | GitHub 설정 (Code security → default setup)  | PR, `main` push, 주기적                                  | JS/TS · 워크플로 보안 취약점 스캔                                                                                                                  |
+| Codex 코드 리뷰 | ChatGPT Codex 설정 (Code review) + GitHub 앱 | PR 에 `@codex review` 코멘트, 자동 리뷰를 켰으면 PR 마다 | `AGENTS.md` 의 `## Code Review Rules` 기준으로 리뷰 코멘트. 병합 필수 조건은 아니다. 한 번만 초점을 줄 때는 `@codex review for 개인정보` 처럼 쓴다 |
 
 ## 레포 설정 (파일 없이 GitHub 에서 관리)
 
@@ -37,4 +38,4 @@
 | 2   | 주요 화면이 2~3개 구현되면 | **Playwright E2E + axe 접근성 검사** + CI 에 `test:e2e` 스크립트 단계 추가 | 일반 · 큰글씨 두 모드 모두 검사. 이 서비스에서 가장 중요한 CI |
 | 3   | 배포처가 정해지면          | **PR 미리보기 배포**                                                       | PR 마다 URL 이 생겨 Figma 와 비교하며 리뷰                    |
 | 4   | 배포 이후                  | **Lighthouse CI**, 번들 크기 검사                                          | 저사양 기기 · 느린 네트워크 사용자 고려                       |
-| 5   | 필요해지면                 | Claude PR 리뷰 액션, 주기적 문서 점검 에이전트                             | API 키와 비용이 든다                                          |
+| 5   | 필요해지면                 | 주기적 문서 점검 에이전트                                                  | API 키와 비용이 든다. PR 리뷰는 Codex 로 하고 있다 (위 표)    |
