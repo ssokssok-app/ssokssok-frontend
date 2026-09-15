@@ -105,9 +105,12 @@ function ReviewPage() {
       />
 
       <main className="flex flex-1 flex-col">
-        {/* Figma 글자색 #696969 는 팔레트에 없어 가장 가까운 Gray/600 을 쓴다 (docs/product.md) */}
+        {/*
+         * Figma 글자색 #696969 는 팔레트에 없어 가장 가까운 Gray/600 을 쓴다 (docs/product.md).
+         * 문구는 Figma("문서를 모두 찍었다면")에 "같은" 을 더했다. 한 번에 한 문서만 올려야 해서다 (docs/product.md "문서 입력")
+         */}
         <p className="mt-1.5 px-5 text-center text-subtitle-semibold whitespace-pre-line text-gray-600">
-          {'문서를 모두 찍었다면\n하단 파란색 버튼을 눌러주세요'}
+          {'같은 문서를 모두 찍었다면\n하단 파란색 버튼을 눌러주세요'}
         </p>
 
         {/*
