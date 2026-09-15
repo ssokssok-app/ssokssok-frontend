@@ -12,7 +12,7 @@ import { Divider } from '@/components/divider'
 import { HomeGnb } from '@/components/gnb'
 import { HomeButton, HomeSampleButton } from '@/components/home-button'
 import { Modal, ModalClose, ModalTextButton } from '@/components/modal'
-import { type LoginProvider, useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 import { startConversionSession } from '@/hooks/useConversionSession'
 import {
   clearDocumentDraft,
@@ -24,17 +24,21 @@ import {
   toDraftNotice,
 } from '@/hooks/useDocumentDraft'
 import { usePrivacyNotice } from '@/hooks/usePrivacyNotice'
+import type { LoginProvider } from '@/types/auth'
 
 import { LoginSheet } from './-auth/login-sheet'
+import {
+  LOGIN_UNAVAILABLE_NOTICE,
+  startSocialLogin,
+} from './-auth/social-login'
 import { DocumentTypesSheet } from './-home/document-types-sheet'
+import { type InputMethod, parseHomeSearch } from './-home/home-search'
 import { SampleSheet } from './-home/sample-sheet'
 
 export const Route = createFileRoute('/')({
+  validateSearch: parseHomeSearch,
   component: HomePage,
 })
-
-/** 문서를 넣는 방법. 홈의 큰 버튼 세 개와 짝이다 */
-type InputMethod = 'camera' | 'gallery' | 'file'
 
 /** 문서를 넣기 전에 차례로 띄우는 안내: 개인정보 안내 모달 → 로그인 유도 시트(비로그인일 때) → 지원 문서 시트 */
 type GuideStep = 'privacy' | 'login' | 'documentTypes'
@@ -47,10 +51,16 @@ interface HomeNotice extends DraftNotice {
 
 function HomePage() {
   const navigate = useNavigate()
-  const { isLoggedIn, login } = useAuth()
+  const { resume } = Route.useSearch()
+  const { isLoggedIn } = useAuth()
   const privacyNotice = usePrivacyNotice()
-  const [inputMethod, setInputMethod] = useState<InputMethod>('camera')
-  const [guideStep, setGuideStep] = useState<GuideStep | null>(null)
+  // 로그인하러 다녀왔으면 고르던 입력 방법으로 지원 문서 안내부터 이어 간다
+  const [inputMethod, setInputMethod] = useState<InputMethod>(
+    resume ?? 'camera',
+  )
+  const [guideStep, setGuideStep] = useState<GuideStep | null>(
+    resume && isLoggedIn ? 'documentTypes' : null,
+  )
   const [sampleSheetOpen, setSampleSheetOpen] = useState(false)
   // 닫히는 동안에도 문구가 보이도록 알림 내용과 열림을 따로 둔다
   const [notice, setNotice] = useState<HomeNotice | null>(null)
@@ -64,6 +74,12 @@ function HomePage() {
     clearDocumentDraft()
   }, [])
 
+  // 이어 가기 표시는 한 번만 쓴다. 남겨 두면 다른 화면에서 뒤로 돌아올 때 안내가 다시 뜬다
+  useEffect(() => {
+    if (resume) navigate({ to: '/', search: {}, replace: true })
+  }, [resume, navigate])
+
+  // 로그인 되살리기는 루트 라우트가 첫 화면 전에 기다려서, 여기서는 로그인 여부를 바로 본다
   function startInput(method: InputMethod) {
     setInputMethod(method)
     if (!privacyNotice.isDismissed) setGuideStep('privacy')
@@ -80,9 +96,12 @@ function HomePage() {
     setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
   }
 
+  // 로그인 화면으로 이동한다. 돌아오면 콜백이 ?resume= 을 붙여 지원 문서 안내부터 이어 간다
   function handleLogin(provider: LoginProvider) {
-    login(provider)
-    setGuideStep('documentTypes')
+    if (!startSocialLogin(provider, { to: '/', resume: inputMethod })) {
+      setGuideStep(null)
+      showNotice(LOGIN_UNAVAILABLE_NOTICE)
+    }
   }
 
   function handleDocumentTypesConfirm() {

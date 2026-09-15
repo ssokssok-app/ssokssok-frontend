@@ -6,7 +6,7 @@
 ## 스택
 
 Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 기반) · TanStack Query · Tailwind CSS v4 · Base UI (**Radix 아님**, 공용 컴포넌트의 바탕) · pnpm
-백엔드는 FastAPI (별도 레포). dev 서버가 `/api` 를 `localhost:8000` 으로 프록시한다.
+백엔드는 FastAPI (별도 레포, Fly.io 배포). dev 서버와 Vercel 이 `/api` 를 배포된 백엔드로 넘긴다.
 
 ## 명령어
 

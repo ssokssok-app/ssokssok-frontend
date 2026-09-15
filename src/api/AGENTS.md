@@ -1,7 +1,7 @@
 # 백엔드 호출 (src/api)
 
 FastAPI 백엔드를 부르는 함수와 TanStack Query `queryOptions` 를 도메인별 파일 하나씩 둔다. 규칙 원문은 `docs/architecture.md`, 전체 리뷰 기준은 루트 `AGENTS.md`.
-계약은 `docs/api-contract.md` 다. 오류 응답은 `{ error: { code, message } }` 로 정해졌고, fetch 래퍼 · API 타입 생성 방식은 아직 정하지 않았다. 정해지면 `docs/architecture.md` 에 적고 이 기준도 고친다.
+계약은 `docs/api-contract.md` 다. 오류 응답은 `{ error: { code, message } }` 이고, 요청은 `client.ts` 의 `apiRequest` 로 보낸다 (`docs/architecture.md` "백엔드 연동"). API 타입 생성 방식은 아직 정하지 않았다.
 
 ## Code Review Rules
 
@@ -11,7 +11,8 @@ AI 가 만든 결과는 문서마다 빠지는 항목이 있을 수 있다 (예:
 
 - 응답을 `as` · `any` 로 단언만 하고 형식을 확인하지 않은 채 쓰는 경우. 선택 항목이 없을 때 화면이 깨지지 않게 처리한다
 - 응답 값에 `!` (non-null 단언)을 붙여 없을 수도 있는 값을 있다고 가정하는 경우
-- 백엔드 주소를 절대 주소나 환경 변수로 적는 경우. 개발 서버 프록시를 거치도록 항상 `/api/...` 상대 경로로 부른다
+- 백엔드 주소를 절대 주소나 환경 변수로 적는 경우. 개발 서버 프록시 · Vercel 을 거치도록 항상 `/api/...` 상대 경로로 부른다
+- `fetch` 를 직접 불러 토큰 붙이기 · 만료 갱신 · 오류 변환을 건너뛰는 경우. `apiRequest` 를 쓰고, 로그인이 필요한 요청에는 `auth: true` 를 준다 (예외: `client.ts` 안의 갱신 요청)
 
 ### 요청 (P1)
 

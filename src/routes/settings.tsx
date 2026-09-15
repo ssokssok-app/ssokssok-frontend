@@ -1,4 +1,5 @@
 import { Button } from '@base-ui/react/button'
+import { useQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
   useCanGoBack,
@@ -6,25 +7,28 @@ import {
 } from '@tanstack/react-router'
 import { type ReactNode, useState } from 'react'
 
+import { deleteAccount, logout } from '@/api/auth'
+import { meQueryOptions } from '@/api/users'
 import ArrowBackIosIcon from '@/assets/icons/24/arrow-back-ios.svg?react'
 import profilePlaceholderImage from '@/assets/images/profile-placeholder.svg'
+import warningImage from '@/assets/images/warning.png'
 import { CtaButton } from '@/components/cta-button'
 import { Divider } from '@/components/divider'
 import { Gnb, GnbIconButton } from '@/components/gnb'
-import { type Account, useAuth } from '@/hooks/useAuth'
+import { ConfirmModal, Modal, ModalClose } from '@/components/modal'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/utils'
 
 import { LoginSheet } from './-auth/login-sheet'
+import {
+  LOGIN_UNAVAILABLE_NOTICE,
+  startSocialLogin,
+} from './-auth/social-login'
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
 })
-
-const providerNames = {
-  kakao: '카카오',
-  google: '구글',
-}
 
 /**
  * 설정 (Figma 비로그인 156:2468 · 로그인 151:2298).
@@ -35,8 +39,20 @@ function SettingsPage() {
   const navigate = Route.useNavigate()
   const canGoBack = useCanGoBack()
   const showToast = useToast()
-  const { account, login, logout } = useAuth()
+  const { isLoggedIn } = useAuth()
   const [loginSheetOpen, setLoginSheetOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  // 실패 알림. 읽어야 하는 오류라 Toast 대신 모달로 띄우고, 닫히는 동안에도 문구가 보이도록 내용과 열림을 따로 둔다
+  const [notice, setNotice] = useState<{
+    title: string
+    description: string
+  } | null>(null)
+  const [noticeOpen, setNoticeOpen] = useState(false)
+
+  function showNotice(next: { title: string; description: string }) {
+    setNotice(next)
+    setNoticeOpen(true)
+  }
 
   function goBack() {
     // 주소로 바로 들어왔으면 돌아갈 곳이 없어 홈으로 간다
@@ -44,9 +60,38 @@ function SettingsPage() {
     else navigate({ to: '/' })
   }
 
-  // 연결할 곳(문의 채널 · 약관 페이지 · 탈퇴 API)이 정해지지 않은 메뉴 (docs/product.md "확인 필요")
+  // 연결할 곳(문의 채널 · 약관 페이지)이 정해지지 않은 메뉴 (docs/product.md "확인 필요")
   function showNotReady() {
     showToast('아직 준비 중이에요')
+  }
+
+  // 로그아웃은 확인 없이 바로 한다 (Figma 에 확인 창이 없다). 실패하면 쿠키가 남아 다시 로그인되므로 알린다.
+  // 사용자 정보 캐시는 로그인이 바뀌면 src/main.tsx 가 지운다
+  async function handleLogout() {
+    try {
+      await logout()
+    } catch {
+      showNotice({
+        title: '로그아웃하지 못했어요',
+        description: '인터넷 연결을 확인하고\n다시 시도해주세요.',
+      })
+    }
+  }
+
+  async function handleDeleteAccount() {
+    // 창을 먼저 닫아 탈퇴 요청이 두 번 나가지 않게 한다
+    setDeleteConfirmOpen(false)
+    try {
+      await deleteAccount()
+    } catch {
+      showNotice({
+        title: '탈퇴하지 못했어요',
+        description: '잠시 뒤에 다시 시도해주세요.',
+      })
+      return
+    }
+    navigate({ to: '/', replace: true })
+    showToast('탈퇴했어요')
   }
 
   return (
@@ -65,10 +110,13 @@ function SettingsPage() {
 
       {/* Figma: 로그인하면 구역 사이 26px, 비로그인은 28px */}
       <main
-        className={cn('flex flex-col pt-6', account ? 'gap-[26px]' : 'gap-7')}
+        className={cn(
+          'flex flex-col pt-6',
+          isLoggedIn ? 'gap-[26px]' : 'gap-7',
+        )}
       >
-        {account ? (
-          <AccountSection account={account} onLogout={logout} />
+        {isLoggedIn ? (
+          <AccountSection onLogout={handleLogout} />
         ) : (
           <section className="flex flex-col gap-5 px-5">
             <p className="text-subtitle-semibold text-gray-900">
@@ -88,29 +136,52 @@ function SettingsPage() {
           <MenuButton onClick={showNotReady}>1:1 문의</MenuButton>
           <MenuButton onClick={showNotReady}>개인정보처리방침</MenuButton>
           <MenuButton onClick={showNotReady}>서비스이용약관</MenuButton>
-          {account && <MenuButton onClick={showNotReady}>탈퇴하기</MenuButton>}
+          {isLoggedIn && (
+            <MenuButton onClick={() => setDeleteConfirmOpen(true)}>
+              탈퇴하기
+            </MenuButton>
+          )}
         </nav>
       </main>
+
+      {/* Figma 에 없는 확인 창이라 결과 나가기 확인과 같은 모양을 쓴다 (docs/product.md "확인 필요") */}
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        illustration={warningImage}
+        title="정말 탈퇴할까요?"
+        description={'탈퇴하면 계정 정보가 사라지고\n되돌릴 수 없어요.'}
+        confirmLabel="탈퇴하기"
+        onConfirm={handleDeleteAccount}
+      />
+      <Modal
+        open={noticeOpen}
+        onOpenChange={setNoticeOpen}
+        illustration={warningImage}
+        title={notice?.title ?? ''}
+        description={notice?.description ?? ''}
+      >
+        <ModalClose>확인</ModalClose>
+      </Modal>
 
       <LoginSheet
         open={loginSheetOpen}
         onOpenChange={setLoginSheetOpen}
         onLogin={(provider) => {
-          login(provider)
-          setLoginSheetOpen(false)
+          // 로그인 화면으로 이동하고, 마치면 콜백이 이 화면으로 돌려보낸다
+          if (!startSocialLogin(provider, { to: '/settings' })) {
+            setLoginSheetOpen(false)
+            showNotice(LOGIN_UNAVAILABLE_NOTICE)
+          }
         }}
       />
     </div>
   )
 }
 
-function AccountSection({
-  account,
-  onLogout,
-}: {
-  account: Account
-  onLogout: () => void
-}) {
+function AccountSection({ onLogout }: { onLogout: () => void }) {
+  const { data: me, isError } = useQuery(meQueryOptions())
+
   return (
     <section
       aria-label="계정"
@@ -124,9 +195,11 @@ function AccountSection({
         />
         <div className="flex min-w-0 flex-col">
           <p className="text-body-semibold text-gray-900">현재 로그인된 계정</p>
-          {/* 백엔드 연결 전에는 이메일을 몰라 로그인한 서비스 이름을 보여 준다 */}
+          {/* 이메일 대신 닉네임을 보여 준다. 카카오는 이메일이 없고, 주 사용자에게 이름이 알아보기 쉽다 (2026-09-15 사용자와 정함) */}
+          {/* 불러오는 동안에도 줄을 비워 두어, 닉네임이 들어올 때 화면이 밀리지 않게 한다 */}
           <p className="text-body-regular text-gray-600">
-            {account.email ?? `${providerNames[account.provider]} 계정`}
+            {me?.nickname ??
+              (isError ? '계정 정보를 불러오지 못했어요' : '\u00a0')}
           </p>
         </div>
       </div>

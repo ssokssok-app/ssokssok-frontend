@@ -1,6 +1,6 @@
 import { BottomSheet, BottomSheetTitle } from '@/components/bottom-sheet'
 import { LoginButton } from '@/components/login-button'
-import type { LoginProvider } from '@/hooks/useAuth'
+import type { LoginProvider } from '@/types/auth'
 
 interface LoginSheetProps {
   open: boolean
