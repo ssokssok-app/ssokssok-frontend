@@ -62,6 +62,9 @@
   --shadow-popover: 0 1px 9.7px 0 rgb(0 0 0 / 20%); /* Listening 목소리 속도 패널 */
   --shadow-sticky: 0 1px 3px 0 rgb(0 0 0 / 8%); /* 결과 화면 바로가기 메뉴가 위에 붙었을 때 (Figma 156:5663) */
   --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
+
+  /* 말풍선처럼 네모가 아닌 모양은 꼬리까지 그림자가 지도록 filter drop-shadow 로 준다 (Figma 흐림 값의 절반) */
+  --drop-shadow-bubble: 0 2px 5.05px rgb(91 137 255 / 18%); /* 홈 남은 이용 횟수 말풍선 (Figma 230:4997) */
 }
 
 /* 간격: Figma 글자 스타일에 들어 있는 문단 간격 */
@@ -155,7 +158,7 @@
  * - 5xl 이상은 이미 충분히 커서 Tailwind 기본값 그대로 두고 확대하지 않는다.
  */
 @theme {
-  /* Figma 글자 스타일 (Pretendard, 자간 -2% · Caption/L 만 -1%) */
+  /* Figma 글자 스타일 (Pretendard, 자간 -2% · Caption/L/Regular · Caption/L/Semibold 만 -1%) */
   --text-caption-s-semibold: 0.625rem; /* 10px */
   --text-caption-s-semibold--line-height: normal; /* Figma AUTO */
   --text-caption-s-semibold--letter-spacing: -0.02em;
@@ -165,6 +168,11 @@
   --text-caption-l-regular--line-height: 1.5;
   --text-caption-l-regular--letter-spacing: -0.01em;
   --text-caption-l-regular--font-weight: 400;
+
+  --text-caption-l-medium: 0.875rem; /* 14px */
+  --text-caption-l-medium--line-height: 1.5;
+  --text-caption-l-medium--letter-spacing: -0.02em;
+  --text-caption-l-medium--font-weight: 500;
 
   --text-caption-l-semibold: 0.875rem; /* 14px */
   --text-caption-l-semibold--line-height: 1.5;
@@ -254,6 +262,7 @@
   html[data-font-scale='large'] {
     --text-caption-s-semibold: 0.875rem;
     --text-caption-l-regular: 1.125rem;
+    --text-caption-l-medium: 1.125rem;
     --text-caption-l-semibold: 1.125rem;
     --text-body-regular: 1.25rem;
     --text-body-medium: 1.25rem;

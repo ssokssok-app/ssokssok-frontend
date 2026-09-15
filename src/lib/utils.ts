@@ -15,6 +15,7 @@ export const cn = createCn({
           text: [
             'caption-s-semibold',
             'caption-l-regular',
+            'caption-l-medium',
             'caption-l-semibold',
             'body-regular',
             'body-medium',
@@ -42,6 +43,7 @@ export const cn = createCn({
         },
       ],
       shadow: [{ shadow: ['knob', 'modal', 'popover', 'sticky', 'card'] }],
+      'drop-shadow': [{ 'drop-shadow': ['bubble'] }],
       'max-w': [{ 'max-w': ['app'] }],
       gap: [{ gap: ['body2'] }],
     },

@@ -56,6 +56,7 @@ function SettingsPage() {
 - 여러 라우트가 같이 쓰는 화면 부품(결과 화면 등)은 `src/routes/-result/` 처럼 routes 바로 아래 `-` 폴더에 둔다.
 - 화면 안의 겹친 화면(원문 보기 등)을 휴대폰 뒤로 가기로 닫아야 하면 검색 파라미터(`?paragraph=`)로 연다. 같은 라우트라 아래 화면과 스크롤 위치가 그대로 남는다. 이동할 때 `resetScroll: false` 를 준다.
 - 서버 응답은 받은 모양 그대로 쓰고, 화면용 가공(원문 발췌 등)은 화면 폴더의 순수 함수로 둔다 (`src/routes/-result/source-excerpt.ts`). 응답 타입과 화면이 어긋나면 타입을 고치지 않고 가공 함수를 고친다
+- 오늘 남은 이용 횟수는 홈이 `src/api/users.ts` 의 `usageQueryOptions` 로 받는다. 사용자별 데이터라 `usersQueryKey` 아래에 두고, 서버가 변환을 요청할 때 횟수를 세므로 `startConversionSession` 이 요청할 때 지워서 홈에 돌아오면 새로 받는다.
 - 변환하려고 고른 사진 · PDF 는 파일이라 주소에 담을 수 없어 `src/hooks/useDocumentDraft.ts` 가 메모리에 둔다 (홈 → 확인 → 결과). 사진은 넣을 때 `src/lib/compress-image.ts` 로 줄인다. 홈으로 돌아오면 비우고, 미리보기 주소는 비울 때 해제한다.
 - 문서 변환은 사용자가 누른 순간 `src/hooks/useConversionSession.ts` 가 파일을 올려 작업 ID 를 받는다 (화면이 그려질 때 요청하면 개발 모드에서 두 번 나간다). 결과 화면(`src/routes/result.tsx`)은 작업 ID 로 `src/api/conversion.ts` 의 상태 조회를 TanStack Query `refetchInterval` 로 반복하고, 라우트 `onLeave` 에서 변환을 취소한다. 나가기 확인은 `useBlocker` 로 홈 · 닫기 · 뒤로 가기를 한곳에서 막는다.
 - 서버와 무관한 UI 상태는 컴포넌트 state 에 둔다.

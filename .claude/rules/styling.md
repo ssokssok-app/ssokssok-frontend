@@ -50,6 +50,6 @@ paths:
 
 - 화면 코드의 색은 Figma 색 스타일 이름을 그대로 쓴다. Figma `Gray/500` → `text-gray-500`. 예외는 `Common/0` · `Common/100` → `black` · `white`, `Status/Red` → `status-red`.
 - 그라디언트는 `bg-gradient-background` · `bg-gradient-main` · `bg-gradient-line` · `bg-gradient-must-header`, 그라디언트 테두리는 `border-gradient-line` (두께는 `border-[1.4px]` 처럼 따로), 모달 뒤 배경은 `bg-dimmed`.
-- Figma 스타일에 없고 컴포넌트에만 쓰인 값도 `src/index.css` 에 토큰으로 모은다: `bg-kakao`, 그림자 `shadow-knob` · `shadow-modal` · `shadow-popover`. 새 값이 필요하면 같은 곳에 추가하고 `cn` 에 등록한다.
+- Figma 스타일에 없고 컴포넌트에만 쓰인 값도 `src/index.css` 에 토큰으로 모은다: `bg-kakao`, 그림자 `shadow-knob` · `shadow-modal` · `shadow-popover`. 말풍선처럼 네모가 아닌 모양의 그림자는 `drop-shadow-bubble` 처럼 `--drop-shadow-*` 로 둔다. 새 값이 필요하면 같은 곳에 추가하고 `cn` 에 등록한다.
 - 색 값(`bg-[#2c62ea]`, `shadow-[…rgba(…)]`, `style={{ color: '#fff' }}`)을 직접 쓰지 않는다. `pnpm check:design` 이 막는다. Tailwind 기본 색(`bg-red-500` 등)은 지워서 클래스가 생기지 않는다.
 - shadcn 의미 토큰(`primary`, `muted-foreground` …)은 shadcn 컴포넌트가 Figma 색을 따르게 하는 연결이다. 연결 표는 `src/index.css` 의 `:root`. Figma 에 다크 디자인이 없어 `.dark` 는 shadcn 기본값 그대로다.

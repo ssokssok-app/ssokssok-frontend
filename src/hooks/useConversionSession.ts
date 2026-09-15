@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 import { cancelConversion, startConversion } from '@/api/conversion'
+import { usageQueryOptions } from '@/api/users'
+import { queryClient } from '@/lib/query-client'
 
 /**
  * 진행 중인 문서 변환 한 건 (파일 올리기 → 작업 ID).
@@ -39,6 +41,8 @@ export function getConversionSession() {
 /** 파일을 올리고 변환을 시작한다. 이미 진행 중인 변환이 있으면 취소하고 새로 시작한다 */
 export function startConversionSession(files: File[]) {
   endConversionSession()
+  // 서버는 변환을 요청하는 순간 이용 횟수를 센다. 저장해 둔 횟수를 지워, 홈에 돌아갔을 때 줄기 전 횟수가 보이지 않고 새로 받게 한다
+  queryClient.removeQueries({ queryKey: usageQueryOptions().queryKey })
   const controller = new AbortController()
   uploadController = controller
   const session: ConversionSession = {
