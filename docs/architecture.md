@@ -5,12 +5,12 @@
 | 경로              | 역할                                                                                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                                                                                                                  |
-| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 백엔드 전 목데이터는 `mocks/`                                                                     |
+| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 응답 모양 확인 함수는 같은 폴더에 둔다 (`documents.ts`)                                           |
 | `src/components/` | Figma 공용 컴포넌트 (Base UI 기반, 규칙: `.claude/rules/styling.md`). `src/components/ui/` 는 shadcn 원본                                                                 |
 | `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG · SVG, 투명 영역이 없으면 JPG), `videos/` 움직이는 일러스트 |
 | `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                                                                                     |
-| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                                                                                                                   |
-| `src/types/`      | 여러 곳에서 쓰는 타입. API 계약 초안 타입(`document-result.ts`, `auth.ts`, `docs/api-contract.md`)                                                                        |
+| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`, `wait.ts`)                                                                                                        |
+| `src/types/`      | 여러 곳에서 쓰는 타입. 백엔드 응답 타입(`document-result.ts` · `conversion.ts` · `auth.ts`)은 Swagger 와 1:1 로 맞춘다 (`docs/api-contract.md`)                           |
 | `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                                                                                  |
 
 `src/` 바로 아래에 이 표에 없는 폴더를 만들면 표에 한 줄 추가한다. 추가하지 않으면 Stop 훅이 알려 준다.
@@ -55,6 +55,7 @@ function SettingsPage() {
 - 예외: 기다리는 동안 전용 로딩 화면(문서 읽기 로딩)을 보여 줘야 하는 결과 화면은 loader 로 미리 받지 않고, 화면에서 `useQuery` 로 받으며 대기 · 오류 상태를 직접 그린다 (`src/routes/samples/$sampleId.tsx`).
 - 여러 라우트가 같이 쓰는 화면 부품(결과 화면 등)은 `src/routes/-result/` 처럼 routes 바로 아래 `-` 폴더에 둔다.
 - 화면 안의 겹친 화면(원문 보기 등)을 휴대폰 뒤로 가기로 닫아야 하면 검색 파라미터(`?paragraph=`)로 연다. 같은 라우트라 아래 화면과 스크롤 위치가 그대로 남는다. 이동할 때 `resetScroll: false` 를 준다.
+- 서버 응답은 받은 모양 그대로 쓰고, 화면용 가공(원문 발췌 등)은 화면 폴더의 순수 함수로 둔다 (`src/routes/-result/source-excerpt.ts`). 응답 타입과 화면이 어긋나면 타입을 고치지 않고 가공 함수를 고친다
 - 변환하려고 고른 사진 · PDF 는 파일이라 주소에 담을 수 없어 `src/hooks/useDocumentDraft.ts` 가 메모리에 둔다 (홈 → 확인 → 결과). 사진은 넣을 때 `src/lib/compress-image.ts` 로 줄인다. 홈으로 돌아오면 비우고, 미리보기 주소는 비울 때 해제한다.
 - 문서 변환은 사용자가 누른 순간 `src/hooks/useConversionSession.ts` 가 파일을 올려 작업 ID 를 받는다 (화면이 그려질 때 요청하면 개발 모드에서 두 번 나간다). 결과 화면(`src/routes/result.tsx`)은 작업 ID 로 `src/api/conversion.ts` 의 상태 조회를 TanStack Query `refetchInterval` 로 반복하고, 라우트 `onLeave` 에서 변환을 취소한다. 나가기 확인은 `useBlocker` 로 홈 · 닫기 · 뒤로 가기를 한곳에서 막는다.
 - 서버와 무관한 UI 상태는 컴포넌트 state 에 둔다.
@@ -70,7 +71,7 @@ function SettingsPage() {
 - 소셜 로그인 공개 키: `VITE_KAKAO_REST_API_KEY`(카카오 REST API 키) · `VITE_GOOGLE_CLIENT_ID`(구글 클라이언트 ID). 로컬은 git 에 올리지 않는 `.env.local`, 배포는 Vercel 환경 변수에 둔다. 로그인 페이지로 가는 주소에 어차피 드러나는 값이라 공개돼도 되고, 두 시크릿은 백엔드에만 있다. 콘솔 설정은 `docs/api-contract.md` "로그인"
 - API 계약은 `docs/api-contract.md` 에 있다. Swagger 는 `https://ssokssok-backend.fly.dev/docs`
 - 정해진 것 (2026-09-14 백엔드 답변): 오류 응답은 `{ error: { code, message } }`, 인증은 JWT(액세스 + 리프레시 토큰), 변환은 작업 ID + 폴링
-- **요청 함수:** 백엔드 요청은 `src/api/client.ts` 의 `apiRequest` 로 보낸다. 실패하면 `ApiError`(`src/api/errors.ts`)를 던진다. 로그인이 필요한 요청은 `auth: true` 로 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다
+- **요청 함수:** 백엔드 요청은 `src/api/client.ts` 의 `apiRequest` 로 보낸다. JSON 본문은 `json`, 파일 올리기는 `form`(FormData) 으로 준다. 실패하면 `ApiError`(`src/api/errors.ts`)를 던진다. 로그인이 필요한 요청은 `auth: true` 로 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다
 - **웹 토큰 (2026-09-15 결정):** 액세스 토큰은 `src/api/client.ts` 메모리에만 두고, 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키라 프론트 코드가 다루지 않는다 (응답 본문의 `refreshToken` 은 앱용이라 읽지 않는다). 토큰은 localStorage · sessionStorage · URL 에 두지 않는다. 이유와 백엔드 쪽 조건은 `docs/api-contract.md` "웹 토큰 저장"
   - 앱을 켤 때 갱신 요청으로 로그인을 되살린다. 쿠키는 읽을 수 없어 "로그인한 적 있음" 표시(참/거짓)만 localStorage 에 두고, 표시가 없으면 갱신 요청을 보내지 않는다 (비로그인 사용자의 헛된 요청을 줄인다)
   - 되살리기는 루트 라우트가 첫 화면 전에 한 번 기다린다. 화면마다 따로 기다리면 빠뜨리는 곳이 생겨(예: 개인정보 안내 확인 직후) 이미 로그인한 사람에게 로그인 시트가 뜰 수 있어서다. 화면은 `useAuth()` 의 로그인 여부를 바로 쓴다
@@ -83,5 +84,5 @@ function SettingsPage() {
   2. 콜백 라우트 `src/routes/auth/$provider/callback.tsx` 의 loader 가 앱 시작 때의 로그인 되살리기를 기다린 뒤(늦게 끝난 갱신이 새 로그인을 덮어쓰지 않게), 저장한 값을 꺼내 지우고 `state` 를 비교하고, `src/api/auth.ts` 의 `loginWithCode` 로 코드를 넘긴다. 코드는 한 번만 쓸 수 있어 개발 모드에서 두 번 실행되는 effect 대신 loader 에서 처리한다
   3. 돌아갈 화면으로 replace 이동한다(코드가 방문 기록에 남지 않게). 홈이면 `?resume=` 을 붙여 지원 문서 안내부터 이어 가고, 홈이 한 번 쓰고 주소에서 지운다
 - **로그아웃 · 탈퇴:** `src/api/auth.ts` 의 `logout` 은 백엔드가 쿠키를 지워야 끝나므로, 실패하면 로그인 상태를 두고 오류를 던진다. `deleteAccount` 는 탈퇴 응답이 쿠키를 지우지 않아 로그아웃을 한 번 더 부른다
-- **변환 목데이터:** `src/api/conversion.ts` 는 백엔드 설계안 · 제안(작업 ID, 단계, 결과 · 오류 모양)대로 시간에 맞춰 흉내 내고, 결과는 `src/api/mocks/conversion-result.ts` 다. 파일 이름에 `unreadable` 이 들어가면 읽을 수 없는 사진 오류를 흉내 낸다 (오류 화면 확인용)
-- **샘플 목데이터:** `src/api/samples.ts` 가 샘플 목록과 결과 `queryOptions` 를 가지고, 결과 내용은 `src/api/mocks/sample-results.ts` 에 있다. 로딩 화면을 체험하도록 3.2초 뒤에 돌려준다. 백엔드가 준비되면 호출 함수 안만 바꾸고 목데이터는 지운다
+- **변환 요청 (2026-09-15 연결):** `src/api/conversion.ts` 가 파일을 multipart 로 올려 작업 ID 를 받고(POST), 상태를 조회하고(GET), 취소한다(DELETE). 응답 모양은 `src/api/documents.ts` 의 `parseDocumentResult` 와 상태 파서가 확인하고, 다르면 `INVALID_RESPONSE` 오류다. 개발 중에도 실제 OCR · AI 를 부른다
+- **샘플 (2026-09-15 연결):** `src/api/samples.ts` 가 목록(Figma 문구, 프론트 고정)과 결과 `queryOptions` 를 가진다. 결과는 `GET /api/documents/samples/{id}` 로 받아 `parseDocumentResult` 로 확인한다. 변환 과정을 체험하도록 로딩 화면을 최소 2초 보여 준다 (`src/lib/wait.ts`)

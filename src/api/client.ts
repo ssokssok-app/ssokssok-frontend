@@ -140,6 +140,8 @@ interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'DELETE'
   /** JSON 으로 보낼 본문 */
   json?: unknown
+  /** multipart/form-data 로 보낼 본문 (파일 올리기). Content-Type 은 브라우저가 경계 문자열과 함께 붙인다 */
+  form?: FormData
   signal?: AbortSignal
   /** 로그인이 필요한 요청. 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다 */
   auth?: boolean
@@ -151,7 +153,7 @@ interface ApiRequestOptions {
  */
 export async function apiRequest(
   path: `/api/${string}`,
-  { method = 'GET', json, signal, auth = false }: ApiRequestOptions = {},
+  { method = 'GET', json, form, signal, auth = false }: ApiRequestOptions = {},
 ): Promise<unknown> {
   if (auth) await restoring
 
@@ -163,7 +165,7 @@ export async function apiRequest(
     return fetch(path, {
       method,
       headers,
-      body: json === undefined ? undefined : JSON.stringify(json),
+      body: json === undefined ? form : JSON.stringify(json),
       signal,
     })
   }

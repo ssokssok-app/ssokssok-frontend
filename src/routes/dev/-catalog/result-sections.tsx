@@ -1,7 +1,8 @@
 import { EasyParagraph } from '@/components/easy-paragraph'
 import { InfoItem, InfoList } from '@/components/info-list'
 import { MustCard, MustCardEmpty, TodoList } from '@/components/must-card'
-import { type ResultDocumentType, ResultHero } from '@/components/result-hero'
+import { ResultHero } from '@/components/result-hero'
+import type { DocumentKind } from '@/types/document-result'
 
 import { CatalogItem, CatalogSection } from './catalog-section'
 
@@ -54,17 +55,17 @@ export function MustCardSection() {
 }
 
 const heroExamples: {
-  type: ResultDocumentType
+  type: DocumentKind
   title: string
   description: string
 }[] = [
   {
-    type: 'house-contract',
+    type: 'lease_contract',
     title: '원룸 임대차 계약서예요',
     description: '보증금과 월세, 계약 기간을 꼭 확인해주세요',
   },
   {
-    type: 'work-contract',
+    type: 'labor_contract',
     title: '근로계약서예요',
     description: '근무 조건과 급여 내용을 꼭 확인해주세요',
   },
@@ -80,7 +81,7 @@ const heroExamples: {
     description: '위반 내용과 납부 기한을 꼭 확인해주세요',
   },
   {
-    type: 'basic',
+    type: 'other',
     title: '일반 범용 안내문',
     description: '설명란설명란설명란설명란설명란',
   },
