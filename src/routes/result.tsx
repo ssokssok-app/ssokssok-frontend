@@ -20,12 +20,15 @@ import {
 } from '@/hooks/useConversionSession'
 import {
   clearDocumentDraft,
+  type DocumentDraft,
   getDocumentDraft,
   getDraftFiles,
+  useDocumentDraft,
 } from '@/hooks/useDocumentDraft'
 import { useToast } from '@/hooks/useToast'
 import type { ConversionStatus } from '@/types/conversion'
 
+import type { InputMethod } from './-home/home-search'
 import { getConversionErrorCopy } from './-result/conversion-error'
 import { parseParagraphSearch } from './-result/paragraph-search'
 import { ResultError } from './-result/result-error'
@@ -55,6 +58,21 @@ const POLL_INTERVAL_MS = 2000
 const SLOW_POLL_INTERVAL_MS = 4000
 const SLOW_POLL_AFTER_MS = 60_000
 
+/**
+ * 다시 고르러 갈 입력 방법과 버튼 이름. 처음 고른 방법 그대로 간다 (Figma 는 촬영 기준 "다시 찍으러 가기").
+ * 고른 사진 · 파일이 없으면(새로고침 등) null 이라 홈으로만 보낸다
+ */
+function getRetake(
+  draft: DocumentDraft | null,
+): { method: InputMethod; label: string } | null {
+  if (!draft) return null
+  if (draft.kind === 'pdf')
+    return { method: 'file', label: '파일 다시 고르러 가기' }
+  return draft.source === 'camera'
+    ? { method: 'camera', label: '다시 찍으러 가기' }
+    : { method: 'gallery', label: '사진 다시 고르러 가기' }
+}
+
 function isFinished(status: ConversionStatus | undefined) {
   return (
     status?.status === 'done' ||
@@ -83,6 +101,7 @@ function ResultPage() {
   const router = useRouter()
   const canGoBack = useCanGoBack()
   const showToast = useToast()
+  const draft = useDocumentDraft()
 
   const jobId = session?.status === 'started' ? session.jobId : ''
   const statusQuery = useQuery({
@@ -142,19 +161,26 @@ function ResultPage() {
           : statusQuery.error
 
   if (error) {
-    const { title, description, needsReselect } = getConversionErrorCopy(error)
+    const { title, description, next } = getConversionErrorCopy(error)
+    const retake = next === 'retake' ? getRetake(draft) : null
+    const homeAction = { label: '홈으로 가기', onClick: goHome }
     return (
       <ResultError
         title={title}
         description={description}
         primaryAction={
-          needsReselect
-            ? { label: '홈으로 가기', onClick: goHome }
-            : { label: '다시 시도하기', onClick: retry }
+          retake
+            ? {
+                label: retake.label,
+                // 홈에서 같은 방법으로 지원 문서 안내부터 이어 간다. 카메라 · 파일 창은 그 안내의 버튼을 누를 때 열린다
+                onClick: () =>
+                  navigate({ to: '/', search: { resume: retake.method } }),
+              }
+            : next === 'retry'
+              ? { label: '다시 시도하기', onClick: retry }
+              : homeAction
         }
-        secondaryAction={
-          needsReselect ? undefined : { label: '홈으로 가기', onClick: goHome }
-        }
+        secondaryAction={next === 'retry' ? homeAction : undefined}
       />
     )
   }
