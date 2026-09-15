@@ -190,6 +190,7 @@ function ResultPage() {
       <ResultLoading
         activeStep={toLoadingStep(status)}
         progress={status?.progress ?? 0}
+        startedAt={session.startedAt}
       />
     )
   }
