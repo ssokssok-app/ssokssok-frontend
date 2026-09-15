@@ -122,6 +122,9 @@
 | GET    | `/documents/samples`      | 샘플 목록                          |
 | GET    | `/documents/samples/{id}` | 3번과 같은 결과 모양 + 원문 텍스트 |
 
+- 2026-09-15 프론트 연결 (`src/api/samples.ts`): 결과만 `GET /documents/samples/{id}` 로 받는다. 목록 API 는 부르지 않는다 (Figma 문구 · 순서를 프론트가 가지고, id 는 제안 11번대로 맞췄다)
+- 샘플 내용은 백엔드가 실제 문서 4종을 변환해 DB 에 저장해 두고 그대로 준다 (2026-09-15 백엔드 답변). 채워지기 전까지는 자리표시("샘플 본문입니다.", 문단 1개)가 화면에 그대로 보인다
+
 ### 7. 듣기 · 저장하기
 
 | 메서드 | 경로                                   | 설명                             |
@@ -194,7 +197,8 @@
    - 교체 직후 몇 초(예: 10초)는 바로 전 토큰도 받는다. 탭 여러 개가 동시에 갱신하면 옛 토큰이 한 번 더 올 수 있어서, 도난으로 오해해 로그아웃시키지 않게 한다
 9. **내 정보** (2026-09-15 백엔드 반영): `/users/me` 가 `{ id, nickname, provider, email }` 을 준다. 설정 화면은 이메일 대신 닉네임을 보여 준다. 카카오는 이메일 동의항목을 보류해서(위 "콘솔 설정") `email` 이 `null` 이다
 10. **듣기 · 저장 세부**: `speed` 는 `slow | normal | fast` 로 보내고 서버가 클로바 값으로 바꾼다. `voice` 는 기본 목소리 하나로 시작해 생략할 수 있게 한다. 음성은 `audio/mpeg`, PDF 는 `application/pdf` 에 `Content-Disposition: attachment` (파일 이름 포함)
-11. **샘플 id**: 프론트 목데이터와 같은 `work-contract` · `house-contract` · `pension-notice` · `fine` 을 쓰면 연결할 때 바꿀 곳이 없다
+11. **샘플 id** (2026-09-15 반영): 프론트 목데이터와 같은 `work-contract` · `house-contract` · `pension-notice` · `fine` 을 쓰면 연결할 때 바꿀 곳이 없다
+12. **샘플 내용** (2026-09-15 백엔드 답변: 실제 문서 4종을 변환해 DB 에 저장): 채워지면 알려 주면 프론트가 배포 서버에서 화면을 확인한다. 이름표(`category`) 문구는 `docs/product.md` "확인 필요"
 
 ## 결과 데이터
 

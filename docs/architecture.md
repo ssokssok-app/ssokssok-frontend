@@ -5,11 +5,11 @@
 | 경로              | 역할                                                                                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                                                                                                                  |
-| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 백엔드 전 목데이터는 `mocks/`                                                                     |
+| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 응답 모양 확인 함수는 같은 폴더에 둔다 (`documents.ts`)                                           |
 | `src/components/` | Figma 공용 컴포넌트 (Base UI 기반, 규칙: `.claude/rules/styling.md`). `src/components/ui/` 는 shadcn 원본                                                                 |
 | `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG · SVG, 투명 영역이 없으면 JPG), `videos/` 움직이는 일러스트 |
 | `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                                                                                     |
-| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                                                                                                                   |
+| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`, `wait.ts`)                                                                                                        |
 | `src/types/`      | 여러 곳에서 쓰는 타입. 백엔드 응답 타입(`document-result.ts` · `conversion.ts` · `auth.ts`)은 Swagger 와 1:1 로 맞춘다 (`docs/api-contract.md`)                           |
 | `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                                                                                  |
 
@@ -85,4 +85,4 @@ function SettingsPage() {
   3. 돌아갈 화면으로 replace 이동한다(코드가 방문 기록에 남지 않게). 홈이면 `?resume=` 을 붙여 지원 문서 안내부터 이어 가고, 홈이 한 번 쓰고 주소에서 지운다
 - **로그아웃 · 탈퇴:** `src/api/auth.ts` 의 `logout` 은 백엔드가 쿠키를 지워야 끝나므로, 실패하면 로그인 상태를 두고 오류를 던진다. `deleteAccount` 는 탈퇴 응답이 쿠키를 지우지 않아 로그아웃을 한 번 더 부른다
 - **변환 요청 (2026-09-15 연결):** `src/api/conversion.ts` 가 파일을 multipart 로 올려 작업 ID 를 받고(POST), 상태를 조회하고(GET), 취소한다(DELETE). 응답 모양은 `src/api/documents.ts` 의 `parseDocumentResult` 와 상태 파서가 확인하고, 다르면 `INVALID_RESPONSE` 오류다. 개발 중에도 실제 OCR · AI 를 부른다
-- **샘플 목데이터:** `src/api/samples.ts` 가 샘플 목록과 결과 `queryOptions` 를 가지고, 결과 내용은 `src/api/mocks/sample-results.ts` 에 있다. 로딩 화면을 체험하도록 3.2초 뒤에 돌려준다. 백엔드가 준비되면 호출 함수 안만 바꾸고 목데이터는 지운다
+- **샘플 (2026-09-15 연결):** `src/api/samples.ts` 가 목록(Figma 문구, 프론트 고정)과 결과 `queryOptions` 를 가진다. 결과는 `GET /api/documents/samples/{id}` 로 받아 `parseDocumentResult` 로 확인한다. 변환 과정을 체험하도록 로딩 화면을 최소 2초 보여 준다 (`src/lib/wait.ts`)
