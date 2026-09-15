@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
  *
  * - 판을 화면 아래로 3rem 더 늘려(bleed) 위로 당겨도 아래 틈이 보이지 않게 한다 (Base UI Drawer 예제 구조)
  * - 아래 여백은 홈 바(safe area)와 20px 중 큰 값이다. Figma 는 홈 바 34px 를 포함해 그렸으니 페이지는 그 위 여백만 더한다
- * - 넓은 화면에서는 앱 폭(max-w-app)만큼만 가운데에 뜬다
+ * - 넓은 화면에서는 앱 기둥 자리(app-column-inset)에만 뜬다. 어두운 배경은 화면 전체를 덮는다
  * - 큰글씨 모드 · 가로 화면에서 화면보다 길어지면 판 안에서 스크롤된다
  * - 배경 어둡기: Figma 샘플 목록 시트만 58% 이고 나머지는 Dimmed/Normal(70%)이라 70% 로 맞췄다
  * - 동작 줄이기 설정이면 올라오고 내려가는 움직임 없이 바로 나타나고 사라진다. 손가락으로 끄는 동안 따라오는 것은 그대로다
@@ -39,7 +39,7 @@ export function BottomSheet({
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
         <Drawer.Backdrop className={backdropClassName} />
-        <Drawer.Viewport className="fixed inset-0 z-50 flex items-end justify-center">
+        <Drawer.Viewport className="fixed inset-y-0 z-50 flex app-column-inset items-end justify-center">
           <Drawer.Popup className={popupClassName}>
             <div
               aria-hidden

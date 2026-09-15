@@ -35,6 +35,7 @@ export const cn = createCn({
         {
           bg: [
             'gradient-background',
+            'gradient-desktop',
             'gradient-main',
             'gradient-header',
             'gradient-line',
@@ -48,6 +49,7 @@ export const cn = createCn({
       'drop-shadow': [{ 'drop-shadow': ['bubble'] }],
       'max-w': [{ 'max-w': ['app'] }],
       gap: [{ gap: ['body2'] }],
+      app: [{ app: ['column-inset'] }],
     },
   },
 })

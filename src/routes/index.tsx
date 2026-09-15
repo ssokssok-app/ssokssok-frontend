@@ -8,6 +8,7 @@ import CameraFilledIcon from '@/assets/icons/32/camera-filled.svg?react'
 import DocumentFilledIcon from '@/assets/icons/32/document-filled.svg?react'
 import ImageFilledIcon from '@/assets/icons/32/image-filled.svg?react'
 import homeDocumentsImage from '@/assets/images/home-documents.jpg'
+import homeDocumentsImage2x from '@/assets/images/home-documents-2x.jpg'
 import privacyShieldImage from '@/assets/images/privacy-shield.png'
 import warningImage from '@/assets/images/warning.png'
 import { Divider } from '@/components/divider'
@@ -185,12 +186,18 @@ function HomePage() {
     <div className="relative flex min-h-dvh flex-col overflow-x-clip bg-gradient-background pt-[env(safe-area-inset-top)] pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
       {/*
        * Figma 에서 제목 · 버튼 뒤에 깔린 일러스트. 흰 바탕을 곱하기로 지워 배경 그라디언트에 섞는다.
-       * 원본 가장자리가 순백이 아니라(253~254) 네모 경계가 비치므로, 가장자리 5% 를 투명하게 흐린다
+       * 원본 가장자리가 순백이 아니라(253~254) 네모 경계가 비치므로, 가장자리 5% 를 투명하게 흐린다.
+       *
+       * 크기는 Figma 330×275 가 가장 작은 크기이고, 화면이 높으면 제목과 버튼 사이 빈 곳을 채우도록 커진다 (최대 기둥 폭의 84%, 600px 기둥에서 504px).
+       * 첫 버튼은 항상 화면 아래에서 377px 위에 있어서, 이미지 아래가 버튼보다 42px 위(852px 휴대폰의 Figma 위치)에 오도록 화면 높이로 폭을 정한다.
+       * 커져도 흐리지 않게 Figma 원본(1374px)에서 만든 2배 이미지를 함께 두고 브라우저가 고른다
        */}
       <img
         src={homeDocumentsImage}
+        srcSet={`${homeDocumentsImage} 660w, ${homeDocumentsImage2x} 1320w`}
+        sizes="(min-width: 600px) 504px, 330px"
         alt=""
-        className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+158px)] -right-5 h-[275px] w-[330px] opacity-78 mix-blend-multiply mask-x-from-95% mask-y-from-95%"
+        className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+158px)] -right-5 aspect-[6/5] w-[max(330px,min(84%,calc((100dvh-577px)*1.2)))] opacity-78 mix-blend-multiply mask-x-from-95% mask-y-from-95%"
       />
 
       <HomeGnb

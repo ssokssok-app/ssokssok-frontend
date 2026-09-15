@@ -41,7 +41,7 @@ export function SourceView({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Popup className="fixed inset-0 z-40 mx-auto flex max-w-app flex-col overflow-y-auto overscroll-contain bg-gray-80 outline-none">
+        <Dialog.Popup className="fixed inset-y-0 z-40 flex app-column-inset flex-col overflow-y-auto overscroll-contain bg-gray-80 outline-none">
           <ResultHeader
             title={<Dialog.Title render={<span />}>원문 보기</Dialog.Title>}
             left={

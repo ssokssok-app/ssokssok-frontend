@@ -25,7 +25,7 @@
 4. `QueryClientProvider` 와 `RouterProvider` 를 렌더한다.
 
 루트 라우트 `src/routes/__root.tsx` 는 `beforeLoad` 에서 로그인 되살리기가 끝날 때까지 기다린 뒤 화면을 그린다. 보통 0.1~0.3초라 바로 뜨고, 1초가 넘을 때만 "잠시만 기다려주세요" 대기 화면을 보여 준다 (보이면 0.5초는 유지). 루트 레이아웃은 모든 화면을 `ToastProvider` 로 감싼다. 화면 어디서든 `useToast()` (`src/hooks/useToast.ts`) 로 알림을 띄운다.
-그 안에서 모든 화면을 앱 폭(`max-w-app`, 600px) 흰 기둥에 넣어 가운데 세운다. 기둥 바깥 배경은 `body` 가 칠한다 (`docs/product.md` "UX 원칙").
+그 안에서 모든 화면을 앱 폭(`max-w-app`, 600px) 흰 기둥에 넣어 가운데 세운다. 기둥 바깥 배경은 `body` 가 칠한다. 데스크톱 폭(`desktop:`, 1360px 이상)에서는 기둥을 `--app-column-left` 만큼 왼쪽에 두고 오른쪽에 소개(`src/routes/-root/desktop-intro.tsx`)를 붙인다. 폭 기준과 계산은 `src/index.css` "데스크톱 화면", 제품 기준은 `docs/product.md` "UX 원칙".
 
 ## 데이터 흐름
 
