@@ -16,8 +16,8 @@ import { compressImage } from '@/lib/compress-image'
 export const MAX_PAGES = 10
 /** 줄인 뒤 사진 한 장의 최대 크기 */
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
-/** PDF 최대 크기. 백엔드와 합의 전이라 제안한 값(20MB)을 쓴다 (docs/api-contract.md "백엔드에 보낼 제안" 6번) */
-const MAX_PDF_BYTES = 20 * 1024 * 1024
+/** 한 번에 올리는 파일 전체(사진 여러 장 또는 PDF 한 개)의 최대 크기. 서버 한도다 (docs/api-contract.md "2. 업로드") */
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024
 
 export type ImageSource = 'camera' | 'gallery'
 
@@ -61,6 +61,12 @@ export const PAGE_LIMIT_NOTICE: DraftNotice = {
   description: `${MAX_PAGES}장이 넘는 사진은 빼고 넣었어요.`,
 }
 
+/** 장당 크기는 맞지만 합계가 서버 한도를 넘을 때. 느린 네트워크에서 다 올린 뒤에야 실패하지 않게 넣기 전에 막는다 */
+const TOTAL_LIMIT_NOTICE: DraftNotice = {
+  title: '사진 용량이 너무 커요',
+  description: '사진을 몇 장 빼고 다시 골라주세요.',
+}
+
 let currentDraft: DocumentDraft | null = null
 let nextPageId = 1
 const listeners = new Set<() => void>()
@@ -92,7 +98,8 @@ export function getDocumentDraft() {
   return currentDraft
 }
 
-async function toPages(files: File[]): Promise<DraftPage[]> {
+/** 사진인지 확인하고 줄인다. 미리보기는 아직 만들지 않아서, 뒤에서 거절해도 해제할 것이 없다 */
+async function compressFiles(files: File[]): Promise<File[]> {
   if (!files.every((file) => file.type.startsWith('image/'))) {
     throw new DraftError({
       title: '사진만 고를 수 있어요',
@@ -115,7 +122,15 @@ async function toPages(files: File[]): Promise<DraftPage[]> {
       description: '다른 사진을 골라주세요.',
     })
   }
-  return compressed.map((file) => ({
+  return compressed
+}
+
+function totalBytes(files: File[]) {
+  return files.reduce((sum, file) => sum + file.size, 0)
+}
+
+function toPages(files: File[]): DraftPage[] {
+  return files.map((file) => ({
     id: `page-${nextPageId++}`,
     file,
     previewUrl: URL.createObjectURL(file),
@@ -125,8 +140,11 @@ async function toPages(files: File[]): Promise<DraftPage[]> {
 /** 새 사진 문서를 시작한다. 10장이 넘으면 앞에서부터 10장만 쓰고, 잘렸는지 알려 준다 */
 export async function startImageDraft(source: ImageSource, files: File[]) {
   const accepted = files.slice(0, MAX_PAGES)
-  const pages = await toPages(accepted)
-  setDraft({ kind: 'images', source, pages })
+  const compressed = await compressFiles(accepted)
+  if (totalBytes(compressed) > MAX_TOTAL_BYTES) {
+    throw new DraftError(TOTAL_LIMIT_NOTICE)
+  }
+  setDraft({ kind: 'images', source, pages: toPages(compressed) })
   return { truncated: accepted.length < files.length }
 }
 
@@ -136,13 +154,13 @@ export async function addDraftImages(files: File[]) {
   if (draft?.kind !== 'images') return { truncated: false }
   const remaining = MAX_PAGES - draft.pages.length
   const accepted = files.slice(0, Math.max(0, remaining))
-  const pages = await toPages(accepted)
+  const compressed = await compressFiles(accepted)
   // 줄이는 동안 문서가 바뀌었으면(홈으로 나감 등) 버린다
-  if (currentDraft !== draft) {
-    for (const page of pages) URL.revokeObjectURL(page.previewUrl)
-    return { truncated: false }
+  if (currentDraft !== draft) return { truncated: false }
+  if (totalBytes([...getDraftFiles(draft), ...compressed]) > MAX_TOTAL_BYTES) {
+    throw new DraftError(TOTAL_LIMIT_NOTICE)
   }
-  setDraft({ ...draft, pages: [...draft.pages, ...pages] })
+  setDraft({ ...draft, pages: [...draft.pages, ...toPages(compressed)] })
   return { truncated: accepted.length < files.length }
 }
 
@@ -153,7 +171,7 @@ export function startPdfDraft(file: File) {
       description: 'PDF 파일을 다시 골라주세요.',
     })
   }
-  if (file.size > MAX_PDF_BYTES) {
+  if (file.size > MAX_TOTAL_BYTES) {
     throw new DraftError({
       title: '파일이 너무 커요',
       description: '20MB 보다 작은 파일을 골라주세요.',
