@@ -11,7 +11,8 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 ## 명령어
 
 - `pnpm dev`: 개발 서버. `/dev/components` 에서 공용 컴포넌트 카탈로그를 본다 (개발 모드 전용)
-- `pnpm check`: 라우트 생성 + lint + 타입 + 포맷 검사 + 하네스 검사 (빌드 제외, 빠름)
+- `pnpm check`: 라우트 생성 + lint + 타입 + 로직 테스트 + 포맷 검사 + 하네스 검사 (빌드 제외, 빠름)
+- `pnpm test`: 로직 테스트(Vitest)만. 고치면서 돌려 보려면 `pnpm test:watch`. 쓰는 규칙은 `docs/architecture.md` "테스트"
 - `pnpm verify`: `pnpm check` + 프로덕션 빌드. **작업을 끝내기 전에 통과해야 한다**
 - `pnpm format`: 포맷 자동 수정
 

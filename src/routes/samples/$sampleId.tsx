@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
-  notFound,
   useCanGoBack,
   useRouter,
 } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
-import { isSampleId, sampleResultQueryOptions } from '@/api/samples'
+import { sampleResultQueryOptions } from '@/api/samples'
 import { useToast } from '@/hooks/useToast'
 
 import { parseParagraphSearch } from '../-result/paragraph-search'
@@ -14,19 +14,17 @@ import { ResultError } from '../-result/result-error'
 import { ResultLoading } from '../-result/result-loading'
 import { ResultView } from '../-result/result-view'
 import { SourceView } from '../-result/source-view'
+import { sampleParams } from './-sample-params'
+
+// 샘플은 변환 과정을 체험하는 게 목적이라, 결과를 이미 받았어도 들어올 때마다 로딩 화면을 이만큼은 보여 준다 (docs/product.md "결과 화면")
+const MIN_LOADING_MS = 2000
 
 /*
  * 샘플 문서 결과. 로그인 없이 볼 수 있다.
  * 변환 과정(로딩 화면)을 체험하게 하려고 loader 로 미리 받지 않고, 화면에서 받으면서 로딩 화면을 보여 준다.
  */
 export const Route = createFileRoute('/samples/$sampleId')({
-  params: {
-    parse: ({ sampleId }) => {
-      if (!isSampleId(sampleId)) throw notFound()
-      return { sampleId }
-    },
-    stringify: ({ sampleId }) => ({ sampleId }),
-  },
+  params: sampleParams,
   validateSearch: parseParagraphSearch,
   component: SampleResultPage,
 })
@@ -41,8 +39,15 @@ function SampleResultPage() {
   const { data, isPending, isError, refetch } = useQuery(
     sampleResultQueryOptions(sampleId),
   )
+  const [minLoadingDone, setMinLoadingDone] = useState(false)
 
-  if (isPending) return <ResultLoading />
+  // 원문 보기처럼 주소만 바뀔 때는 다시 그리지 않아서, 화면에 들어올 때 한 번만 센다
+  useEffect(() => {
+    const timer = setTimeout(() => setMinLoadingDone(true), MIN_LOADING_MS)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isPending || !minLoadingDone) return <ResultLoading />
   if (isError) {
     return (
       <ResultError

@@ -164,6 +164,14 @@ export async function addDraftImages(files: File[]) {
   return { truncated: accepted.length < files.length }
 }
 
+/** 지금 사진 문서에서 사진 한 장을 뺀다. 마지막 한 장이면 문서를 비운다 */
+export function removeDraftPage(pageId: string) {
+  const draft = currentDraft
+  if (draft?.kind !== 'images') return
+  const pages = draft.pages.filter((page) => page.id !== pageId)
+  setDraft(pages.length > 0 ? { ...draft, pages } : null)
+}
+
 export function startPdfDraft(file: File) {
   if (file.type !== 'application/pdf') {
     throw new DraftError({

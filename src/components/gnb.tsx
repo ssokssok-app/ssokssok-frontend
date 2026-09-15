@@ -92,10 +92,11 @@ export function HomeGnb({
         className,
       )}
     >
+      {/* Figma Logo(230:4744). GNB 에서 보이는 크기가 약 54.5×31.5px 이라 비율(482:280)을 지켜 맞춘다 */}
       <SsokssokLogo
         role="img"
         aria-label="쏙쏙"
-        className="h-[25px] w-12 shrink-0 text-blue-500"
+        className="h-8 w-[55px] shrink-0 text-blue-500"
       />
       <div className={cn('flex items-center', isLarge ? 'gap-3.5' : 'gap-2.5')}>
         <BigFontSwitch />

@@ -62,6 +62,10 @@
   --shadow-popover: 0 1px 9.7px 0 rgb(0 0 0 / 20%); /* Listening 목소리 속도 패널 */
   --shadow-sticky: 0 1px 3px 0 rgb(0 0 0 / 8%); /* 결과 화면 바로가기 메뉴가 위에 붙었을 때 (Figma 156:5663) */
   --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
+  --shadow-float: 0 0 7.7px 0 rgb(0 0 0 / 10%); /* 촬영한 문서 확인 사진 삭제 버튼 (Figma 225:2942) */
+
+  /* 말풍선처럼 네모가 아닌 모양은 꼬리까지 그림자가 지도록 filter drop-shadow 로 준다 (Figma 흐림 값의 절반) */
+  --drop-shadow-bubble: 0 2px 5.05px rgb(91 137 255 / 18%); /* 홈 남은 이용 횟수 말풍선 (Figma 230:4997) */
 }
 
 /* 간격: Figma 글자 스타일에 들어 있는 문단 간격 */
@@ -78,11 +82,51 @@
 }
 
 /*
+ * 데스크톱 화면 (Figma Slide 16:9 - 1, 156:5490): 앱 기둥 오른쪽에 로고 · 소개 문구 · QR 을 둔다.
+ * 기둥(600) + 간격(61) + 소개(578) 에 양옆 여백이 남는 85rem(1360px) 부터 바꾼다. 1366 노트북부터 해당한다.
+ * 남는 가로 공간은 Figma 처럼 왼쪽 473 : 오른쪽 276 으로 나눠 기둥을 조금 왼쪽에 둔다.
+ * fixed 로 뜨는 요소(바텀시트 · 모달 · 원문 보기 · 알림)도 같은 값(app-column-inset)으로 기둥에 맞춘다.
+ */
+@theme {
+  --breakpoint-desktop: 85rem; /* 1360px → desktop: */
+}
+
+:root {
+  --desktop-gap: 61px;
+  --desktop-intro-width: 578px;
+  /* 100% 는 쓰는 곳의 기준 폭(페이지 폭 · fixed 요소는 화면 폭)이라, 기둥과 fixed 요소가 같은 위치로 계산된다 */
+  --app-column-left: calc(
+    (
+        100% - var(--container-app) - var(--desktop-gap) -
+          var(--desktop-intro-width)
+      ) *
+      473 / 749
+  );
+}
+
+/* fixed 요소를 앱 기둥과 같은 가로 위치 · 폭에 둔다. 좁은 화면은 가운데, 데스크톱은 기둥 자리 */
+@utility app-column-inset {
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  max-width: var(--container-app);
+
+  @variant desktop {
+    left: var(--app-column-left);
+    right: auto;
+    margin-inline: 0;
+    width: var(--container-app);
+  }
+}
+
+/*
  * 그라디언트: Tailwind 테마에 그라디언트 항목이 없어 변수 + 유틸리티로 둔다.
  * 테두리 등 배경이 아닌 곳에는 var(--gradient-*) 를 직접 쓴다.
  */
 :root {
   --gradient-background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 100%);
+  /* 넓은 화면에서 앱 기둥 바깥 배경. Figma 스타일에는 없고 데스크톱 화면(Slide 16:9 - 1, 156:5490)에만 쓰인 값 */
+  --gradient-desktop: linear-gradient(180deg, #f9fcff 0%, #cddbff 100%);
   --gradient-main: linear-gradient(180deg, #3481f4 0%, #174ea1 100%);
   /* Figma 는 거의 왼쪽 위 → 오른쪽 아래 모서리 방향이다. to bottom right 는 요소 비율에 맞춰 모서리를 따라간다 */
   --gradient-line: linear-gradient(
@@ -108,6 +152,10 @@
 
 @utility bg-gradient-background {
   background-image: var(--gradient-background);
+}
+
+@utility bg-gradient-desktop {
+  background-image: var(--gradient-desktop);
 }
 
 @utility bg-gradient-main {
@@ -155,7 +203,7 @@
  * - 5xl 이상은 이미 충분히 커서 Tailwind 기본값 그대로 두고 확대하지 않는다.
  */
 @theme {
-  /* Figma 글자 스타일 (Pretendard, 자간 -2% · Caption/L 만 -1%) */
+  /* Figma 글자 스타일 (Pretendard, 자간 -2% · Caption/L/Regular · Caption/L/Semibold 만 -1%) */
   --text-caption-s-semibold: 0.625rem; /* 10px */
   --text-caption-s-semibold--line-height: normal; /* Figma AUTO */
   --text-caption-s-semibold--letter-spacing: -0.02em;
@@ -165,6 +213,11 @@
   --text-caption-l-regular--line-height: 1.5;
   --text-caption-l-regular--letter-spacing: -0.01em;
   --text-caption-l-regular--font-weight: 400;
+
+  --text-caption-l-medium: 0.875rem; /* 14px */
+  --text-caption-l-medium--line-height: 1.5;
+  --text-caption-l-medium--letter-spacing: -0.02em;
+  --text-caption-l-medium--font-weight: 500;
 
   --text-caption-l-semibold: 0.875rem; /* 14px */
   --text-caption-l-semibold--line-height: 1.5;
@@ -254,6 +307,7 @@
   html[data-font-scale='large'] {
     --text-caption-s-semibold: 0.875rem;
     --text-caption-l-regular: 1.125rem;
+    --text-caption-l-medium: 1.125rem;
     --text-caption-l-semibold: 1.125rem;
     --text-body-regular: 1.25rem;
     --text-body-medium: 1.25rem;
@@ -415,8 +469,8 @@
   body {
     /* text-* 클래스가 없는 본문도 Body/Regular 로 보이고 큰글씨 모드를 따라 커지도록 */
     @apply text-body-regular text-foreground;
-    /* 넓은 화면에서 앱 폭(max-w-app) 기둥 바깥에 보이는 배경. 흰 화면과 구분되게 한 단계 어둡게 둔다 */
-    @apply bg-gray-80;
+    /* 넓은 화면에서 앱 기둥 바깥에 보이는 배경 (Figma 데스크톱 화면). 긴 화면을 스크롤해도 그라디언트가 화면에 붙어 있게 한다 */
+    @apply bg-gradient-desktop bg-fixed;
     /*
      * 한국어는 단어 중간에서 줄을 바꾸지 않는다 ("있 / 어요" 방지). 큰글씨 모드에서 줄바꿈이 잦아 특히 중요하다.
      * 공백 없는 긴 문자열(URL 등)은 넘치지 않게 필요할 때만 쪼갠다.

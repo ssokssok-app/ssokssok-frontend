@@ -31,8 +31,9 @@ paths:
 ## 화면 폭 (데스크톱)
 
 - 모든 화면은 루트 레이아웃의 앱 폭 기둥(`max-w-app`, 600px) 안에 그려진다. 페이지는 폭 제한(`max-w-md` 등)을 따로 두지 않고 기둥을 꽉 채운다.
-- `fixed` 로 화면에 붙는 요소(아래 고정 버튼, 바텀시트 등)는 화면 전체가 아니라 기둥에 맞춘다: `fixed inset-x-0 mx-auto max-w-app`. `100vw` · `w-screen` 은 쓰지 않는다. 어두운 배경(backdrop)만 화면 전체를 덮는다.
-- 넓은 화면에서도 확인한다 (예: 1440×900). 기둥 밖으로 넘치거나 기둥보다 넓게 붙는 요소가 없어야 한다.
+- 데스크톱 폭(`desktop:`, 1360px 이상)에서는 기둥이 가운데가 아니라 조금 왼쪽에 서고 오른쪽에 소개가 붙는다 (`src/index.css` "데스크톱 화면"). 그래서 `mx-auto` 만으로는 기둥에 맞지 않는다.
+- `fixed` 로 화면에 붙는 요소(아래 고정 버튼, 바텀시트 등)는 화면 전체가 아니라 기둥에 맞춘다: `fixed inset-y-0 app-column-inset` 처럼 가로 위치 · 폭은 `app-column-inset` 으로 준다. `100vw` · `w-screen` 은 쓰지 않는다. 어두운 배경(backdrop)만 화면 전체를 덮는다.
+- 넓은 화면에서도 확인한다: 가운데 기둥(예: 1024×768)과 데스크톱 화면(예: 1440×900, 1920×1080). 기둥 밖으로 넘치거나 기둥과 어긋나게 뜨는 요소가 없어야 한다.
 
 ## 아이콘
 
@@ -49,7 +50,7 @@ paths:
 ## 색 · 테마
 
 - 화면 코드의 색은 Figma 색 스타일 이름을 그대로 쓴다. Figma `Gray/500` → `text-gray-500`. 예외는 `Common/0` · `Common/100` → `black` · `white`, `Status/Red` → `status-red`.
-- 그라디언트는 `bg-gradient-background` · `bg-gradient-main` · `bg-gradient-line` · `bg-gradient-must-header`, 그라디언트 테두리는 `border-gradient-line` (두께는 `border-[1.4px]` 처럼 따로), 모달 뒤 배경은 `bg-dimmed`.
-- Figma 스타일에 없고 컴포넌트에만 쓰인 값도 `src/index.css` 에 토큰으로 모은다: `bg-kakao`, 그림자 `shadow-knob` · `shadow-modal` · `shadow-popover`. 새 값이 필요하면 같은 곳에 추가하고 `cn` 에 등록한다.
+- 그라디언트는 `bg-gradient-background` · `bg-gradient-desktop`(넓은 화면 기둥 바깥) · `bg-gradient-main` · `bg-gradient-line` · `bg-gradient-must-header`, 그라디언트 테두리는 `border-gradient-line` (두께는 `border-[1.4px]` 처럼 따로), 모달 뒤 배경은 `bg-dimmed`.
+- Figma 스타일에 없고 컴포넌트에만 쓰인 값도 `src/index.css` 에 토큰으로 모은다: `bg-kakao`, 그림자 `shadow-knob` · `shadow-modal` · `shadow-popover`. 말풍선처럼 네모가 아닌 모양의 그림자는 `drop-shadow-bubble` 처럼 `--drop-shadow-*` 로 둔다. 새 값이 필요하면 같은 곳에 추가하고 `cn` 에 등록한다.
 - 색 값(`bg-[#2c62ea]`, `shadow-[…rgba(…)]`, `style={{ color: '#fff' }}`)을 직접 쓰지 않는다. `pnpm check:design` 이 막는다. Tailwind 기본 색(`bg-red-500` 등)은 지워서 클래스가 생기지 않는다.
 - shadcn 의미 토큰(`primary`, `muted-foreground` …)은 shadcn 컴포넌트가 Figma 색을 따르게 하는 연결이다. 연결 표는 `src/index.css` 의 `:root`. Figma 에 다크 디자인이 없어 `.dark` 는 shadcn 기본값 그대로다.

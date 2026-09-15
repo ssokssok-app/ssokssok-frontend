@@ -5,21 +5,21 @@
 
 ## 구성
 
-| 장치             | 파일                                | 하는 일                                                                                                                            |
-| ---------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 훅 등록          | `.claude/settings.json`             | 아래 두 훅을 연결                                                                                                                  |
-| 수정 직후 훅     | `.claude/hooks/post-edit.mjs`       | Edit/Write 직후 Prettier 포맷, oxlint 오류를 바로 돌려줌, 바뀐 파일 기록                                                           |
-| 종료 훅          | `.claude/hooks/stop-check.mjs`      | 변경이 있으면 `pnpm check` 실행, 실패하면 종료를 막음(최대 3번). 통과 후 문서가 언급하는 파일이 바뀌었는데 문서가 그대로면 알림    |
-| 문서 검사        | `scripts/check-docs.mjs`            | 문서에 적힌 `pnpm` 명령 · 경로 · 링크가 실제로 있는지                                                                              |
-| 큰글씨 검사      | `scripts/check-font-scale.mjs`      | 화면 코드의 임의 글자 크기 · Tailwind 기본 글자 단계 금지, 글자 토큰마다 큰글씨 값 확인, shadcn 임의 크기의 큰글씨 보정 확인       |
-| 토큰 등록 검사   | `scripts/check-tokens.mjs`          | `src/index.css` 에 직접 만든 토큰(글자 · 그라디언트 · 앱 폭 · 간격 등)이 `src/lib/utils.ts` 의 `cn` 설정에 등록됐는지              |
-| 디자인 규칙 검사 | `scripts/check-design.mjs`          | 화면 코드에 색 값(`bg-[#2c62ea]` 등)을 직접 쓰면 실패, `src/components/ui/` 에 허용 목록 밖의 shadcn 컴포넌트가 생기면 실패        |
-| CI 누락 검사     | `scripts/check-ci.mjs`              | 테스트 · E2E 설정이 생겼는데 CI 가 돌리지 않으면 실패 (`docs/ci.md` "나중에 추가할 것"), `.nvmrc` 와 `engines.node` 가 다르면 실패 |
-| CI               | `.github/workflows/`                | PR 마다 `pnpm verify` 와 PR 제목 검사. 로컬 훅을 건너뛴 변경도 여기서 걸린다 (`docs/ci.md`)                                        |
-| 경로별 규칙      | `.claude/rules/`                    | `paths` 에 맞는 파일을 읽을 때만 로드                                                                                              |
-| 문서 점검 스킬   | `.claude/skills/sync-docs/SKILL.md` | `/sync-docs` 로 문서 전체 점검                                                                                                     |
+| 장치             | 파일                                | 하는 일                                                                                                                                                                                                                          |
+| ---------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 훅 등록          | `.claude/settings.json`             | 아래 두 훅을 연결                                                                                                                                                                                                                |
+| 수정 직후 훅     | `.claude/hooks/post-edit.mjs`       | Edit/Write 직후 Prettier 포맷, oxlint 오류를 바로 돌려줌, 바뀐 파일 기록                                                                                                                                                         |
+| 종료 훅          | `.claude/hooks/stop-check.mjs`      | 변경이 있으면 `pnpm check` 실행, 실패하면 종료를 막음(최대 3번). 통과 후 문서가 언급하는 파일이 바뀌었는데 문서가 그대로면 알림                                                                                                  |
+| 문서 검사        | `scripts/check-docs.mjs`            | 문서에 적힌 `pnpm` 명령 · 경로 · 링크가 실제로 있는지                                                                                                                                                                            |
+| 큰글씨 검사      | `scripts/check-font-scale.mjs`      | 화면 코드의 임의 글자 크기 · Tailwind 기본 글자 단계 금지, 글자 토큰마다 큰글씨 값 확인, shadcn 임의 크기의 큰글씨 보정 확인                                                                                                     |
+| 토큰 등록 검사   | `scripts/check-tokens.mjs`          | `src/index.css` 에 직접 만든 토큰(글자 · 그림자 · 그라디언트 · 앱 폭 · 간격 등)이 `src/lib/utils.ts` 의 `cn` 설정에 등록됐는지                                                                                                   |
+| 디자인 규칙 검사 | `scripts/check-design.mjs`          | 화면 코드에 색 값(`bg-[#2c62ea]` 등)을 직접 쓰면 실패, `src/components/ui/` 에 허용 목록 밖의 shadcn 컴포넌트가 생기면 실패                                                                                                      |
+| CI 누락 검사     | `scripts/check-ci.mjs`              | 테스트 파일이 있는데 CI 가 `pnpm test` 를 돌리지 않으면(직접 또는 `pnpm verify` → check 를 거쳐) 실패, E2E 설정이 생겼는데 CI 가 돌리지 않으면 실패 (`docs/ci.md` "나중에 추가할 것"), `.nvmrc` 와 `engines.node` 가 다르면 실패 |
+| CI               | `.github/workflows/`                | PR 마다 `pnpm verify` 와 PR 제목 검사. 로컬 훅을 건너뛴 변경도 여기서 걸린다 (`docs/ci.md`)                                                                                                                                      |
+| 경로별 규칙      | `.claude/rules/`                    | `paths` 에 맞는 파일을 읽을 때만 로드                                                                                                                                                                                            |
+| 문서 점검 스킬   | `.claude/skills/sync-docs/SKILL.md` | `/sync-docs` 로 문서 전체 점검                                                                                                                                                                                                   |
 
-`pnpm check` 는 라우트 생성 → oxlint → 타입 검사(앱 + `vite.config.ts`) → Prettier 검사 → 문서 검사 → 큰글씨 검사 → 토큰 등록 검사 → 디자인 규칙 검사 → CI 누락 검사 순서로 돈다.
+`pnpm check` 는 라우트 생성 → oxlint → 타입 검사(앱 + `vite.config.ts` · `vitest.config.ts`) → 로직 테스트(Vitest) → Prettier 검사 → 문서 검사 → 큰글씨 검사 → 토큰 등록 검사 → 디자인 규칙 검사 → CI 누락 검사 순서로 돈다.
 `pnpm verify` 는 `pnpm check` 뒤에 프로덕션 빌드를 한다.
 
 ## 문서 체계

@@ -15,6 +15,7 @@ export const cn = createCn({
           text: [
             'caption-s-semibold',
             'caption-l-regular',
+            'caption-l-medium',
             'caption-l-semibold',
             'body-regular',
             'body-medium',
@@ -34,6 +35,7 @@ export const cn = createCn({
         {
           bg: [
             'gradient-background',
+            'gradient-desktop',
             'gradient-main',
             'gradient-header',
             'gradient-line',
@@ -41,9 +43,13 @@ export const cn = createCn({
           ],
         },
       ],
-      shadow: [{ shadow: ['knob', 'modal', 'popover', 'sticky', 'card'] }],
+      shadow: [
+        { shadow: ['knob', 'modal', 'popover', 'sticky', 'card', 'float'] },
+      ],
+      'drop-shadow': [{ 'drop-shadow': ['bubble'] }],
       'max-w': [{ 'max-w': ['app'] }],
       gap: [{ gap: ['body2'] }],
+      app: [{ app: ['column-inset'] }],
     },
   },
 })

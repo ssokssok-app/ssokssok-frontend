@@ -2,16 +2,17 @@
 
 ## 폴더
 
-| 경로              | 역할                                                                                                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                                                                                                                  |
-| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 응답 모양 확인 함수는 같은 폴더에 둔다 (`documents.ts`)                                           |
-| `src/components/` | Figma 공용 컴포넌트 (Base UI 기반, 규칙: `.claude/rules/styling.md`). `src/components/ui/` 는 shadcn 원본                                                                 |
-| `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG · SVG, 투명 영역이 없으면 JPG), `videos/` 움직이는 일러스트 |
-| `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                                                                                     |
-| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`, `wait.ts`)                                                                                                        |
-| `src/types/`      | 여러 곳에서 쓰는 타입. 백엔드 응답 타입(`document-result.ts` · `conversion.ts` · `auth.ts`)은 Swagger 와 1:1 로 맞춘다 (`docs/api-contract.md`)                           |
-| `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                                                                                  |
+| 경로              | 역할                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/routes/`     | 화면. 파일 기반 라우트 (규칙: `.claude/rules/routes.md`)                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `src/api/`        | 백엔드 호출 함수와 TanStack Query `queryOptions`. 도메인별 파일 하나씩. 응답 모양 확인 함수는 같은 폴더에 둔다 (`documents.ts`)                                                                                                                                                                                                                                                                                                                                               |
+| `src/components/` | Figma 공용 컴포넌트 (Base UI 기반, 규칙: `.claude/rules/styling.md`). `src/components/ui/` 는 shadcn 원본                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG · SVG, 투명 영역이 없으면 JPG. 화면에 따라 커지는 것은 Figma 원본에서 만든 `-2x` 파일을 함께 두고 `srcSet` 으로 고른다), `videos/` 움직이는 일러스트(애플용 투명 HEVC `.mov` 는 sRGB 감마 색 태그가 있어야 사파리에서 밝게 뜨지 않는다. 기존 파일에 ffmpeg `-c copy` 로 태그만 붙이면 애플식 투명 정보가 빠져 재생되지 않으니, 새로 만들 때 태그를 함께 넣는다) |
+| `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/types/`      | 여러 곳에서 쓰는 타입. 백엔드 응답 타입(`document-result.ts` · `conversion.ts` · `auth.ts`)은 Swagger 와 1:1 로 맞춘다 (`docs/api-contract.md`)                                                                                                                                                                                                                                                                                                                               |
+| `public/`         | 빌드 때 주소 그대로 복사되는 파일. 파비콘(`favicon.ico` · `icon.svg` · `apple-touch-icon.png`)과 링크 공유 미리보기 이미지(`og-image.jpg`). `index.html` 에서 연결한다                                                                                                                                                                                                                                                                                                        |
+| `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 `src/` 바로 아래에 이 표에 없는 폴더를 만들면 표에 한 줄 추가한다. 추가하지 않으면 Stop 훅이 알려 준다.
 
@@ -25,7 +26,7 @@
 4. `QueryClientProvider` 와 `RouterProvider` 를 렌더한다.
 
 루트 라우트 `src/routes/__root.tsx` 는 `beforeLoad` 에서 로그인 되살리기가 끝날 때까지 기다린 뒤 화면을 그린다. 보통 0.1~0.3초라 바로 뜨고, 1초가 넘을 때만 "잠시만 기다려주세요" 대기 화면을 보여 준다 (보이면 0.5초는 유지). 루트 레이아웃은 모든 화면을 `ToastProvider` 로 감싼다. 화면 어디서든 `useToast()` (`src/hooks/useToast.ts`) 로 알림을 띄운다.
-그 안에서 모든 화면을 앱 폭(`max-w-app`, 600px) 흰 기둥에 넣어 가운데 세운다. 기둥 바깥 배경은 `body` 가 칠한다 (`docs/product.md` "UX 원칙").
+그 안에서 모든 화면을 앱 폭(`max-w-app`, 600px) 흰 기둥에 넣어 가운데 세운다. 기둥 바깥 배경은 `body` 가 칠한다. 데스크톱 폭(`desktop:`, 1360px 이상)에서는 기둥을 `--app-column-left` 만큼 왼쪽에 두고 오른쪽에 소개(`src/routes/-root/desktop-intro.tsx`)를 붙인다. 폭 기준과 계산은 `src/index.css` "데스크톱 화면", 제품 기준은 `docs/product.md` "UX 원칙".
 
 ## 데이터 흐름
 
@@ -56,10 +57,19 @@ function SettingsPage() {
 - 여러 라우트가 같이 쓰는 화면 부품(결과 화면 등)은 `src/routes/-result/` 처럼 routes 바로 아래 `-` 폴더에 둔다.
 - 화면 안의 겹친 화면(원문 보기 등)을 휴대폰 뒤로 가기로 닫아야 하면 검색 파라미터(`?paragraph=`)로 연다. 같은 라우트라 아래 화면과 스크롤 위치가 그대로 남는다. 이동할 때 `resetScroll: false` 를 준다.
 - 서버 응답은 받은 모양 그대로 쓰고, 화면용 가공(원문 발췌 등)은 화면 폴더의 순수 함수로 둔다 (`src/routes/-result/source-excerpt.ts`). 응답 타입과 화면이 어긋나면 타입을 고치지 않고 가공 함수를 고친다
+- 오늘 남은 이용 횟수는 홈이 `src/api/users.ts` 의 `usageQueryOptions` 로 받는다. 사용자별 데이터라 `usersQueryKey` 아래에 두고, 서버가 변환을 요청할 때 횟수를 세므로 `startConversionSession` 이 요청할 때 지워서 홈에 돌아오면 새로 받는다.
 - 변환하려고 고른 사진 · PDF 는 파일이라 주소에 담을 수 없어 `src/hooks/useDocumentDraft.ts` 가 메모리에 둔다 (홈 → 확인 → 결과). 사진은 넣을 때 `src/lib/compress-image.ts` 로 줄인다. 홈으로 돌아오면 비우고, 미리보기 주소는 비울 때 해제한다.
 - 문서 변환은 사용자가 누른 순간 `src/hooks/useConversionSession.ts` 가 파일을 올려 작업 ID 를 받는다 (화면이 그려질 때 요청하면 개발 모드에서 두 번 나간다). 결과 화면(`src/routes/result.tsx`)은 작업 ID 로 `src/api/conversion.ts` 의 상태 조회를 TanStack Query `refetchInterval` 로 반복하고, 라우트 `onLeave` 에서 변환을 취소한다. 나가기 확인은 `useBlocker` 로 홈 · 닫기 · 뒤로 가기를 한곳에서 막는다.
 - 서버와 무관한 UI 상태는 컴포넌트 state 에 둔다.
 - 브라우저에 저장하는 설정은 `useFontScale.ts` · `usePrivacyNotice.ts` 처럼 `useSyncExternalStore` 훅 하나로 감싸고, `localStorage` 접근을 그 파일 안에만 둔다. 예외로 "로그인한 적 있음" 표시는 토큰과 함께 `src/api/client.ts` 가 다룬다.
+
+## 테스트
+
+- 로직 테스트는 Vitest 다 (`vitest.config.ts`). 화면을 띄우지 않는 순수 함수와 백엔드 응답 확인만 테스트하고, 브라우저 흉내(jsdom)는 쓰지 않는다. `pnpm check` 에서 돌아 종료 훅 · CI 가 함께 돌린다
+- 테스트 파일은 테스트할 파일 옆에 같은 이름 뒤에 .test.ts 를 붙여 둔다 (`src/routes/-result/source-excerpt.test.ts`). 라우트 폴더 안에서도 `-` 폴더에 두어 라우트로 잡히지 않게 한다
+- 백엔드를 부르는 함수는 `vi.mock('./client')` 로 `apiRequest` 만 바꿔 응답 모양 확인을 테스트한다 (`src/api/conversion.test.ts`). 실제 서버는 부르지 않는다
+- 화면 컴포넌트 안에 계산이 커지면 순수 함수로 빼서 테스트한다 (`src/routes/-result/loading-progress.ts`)
+- 경계 조건(맨 처음 · 맨 끝, 빈 값, 모르는 code · 값)을 먼저 테스트한다. 버그를 고치면 그 경우를 테스트로 남긴다
 
 ## 백엔드 연동
 
@@ -85,4 +95,4 @@ function SettingsPage() {
   3. 돌아갈 화면으로 replace 이동한다(코드가 방문 기록에 남지 않게). 홈이면 `?resume=` 을 붙여 지원 문서 안내부터 이어 가고, 홈이 한 번 쓰고 주소에서 지운다
 - **로그아웃 · 탈퇴:** `src/api/auth.ts` 의 `logout` 은 백엔드가 쿠키를 지워야 끝나므로, 실패하면 로그인 상태를 두고 오류를 던진다. `deleteAccount` 는 탈퇴 응답이 쿠키를 지우지 않아 로그아웃을 한 번 더 부른다
 - **변환 요청 (2026-09-15 연결):** `src/api/conversion.ts` 가 파일을 multipart 로 올려 작업 ID 를 받고(POST), 상태를 조회하고(GET), 취소한다(DELETE). 응답 모양은 `src/api/documents.ts` 의 `parseDocumentResult` 와 상태 파서가 확인하고, 다르면 `INVALID_RESPONSE` 오류다. 개발 중에도 실제 OCR · AI 를 부른다
-- **샘플 (2026-09-15 연결):** `src/api/samples.ts` 가 목록(Figma 문구, 프론트 고정)과 결과 `queryOptions` 를 가진다. 결과는 `GET /api/documents/samples/{id}` 로 받아 `parseDocumentResult` 로 확인한다. 변환 과정을 체험하도록 로딩 화면을 최소 2초 보여 준다 (`src/lib/wait.ts`)
+- **샘플 (2026-09-15 연결):** `src/api/samples.ts` 가 목록(Figma 문구, 프론트 고정)과 결과 `queryOptions` 를 가진다. 결과는 `GET /api/documents/samples/{id}` 로 받아 `parseDocumentResult` 로 확인한다. 샘플 목록에서 고르면 촬영한 문서 확인 화면(`src/routes/samples/$sampleId_.review.tsx`, 예시 사진 한 장)을 거쳐 결과로 간다. 확인 화면 모양은 촬영 흐름과 같은 `src/routes/-review/review-view.tsx` 를 쓰고, 확인 화면에 있는 동안 결과를 미리 받아 둔다. 변환 과정을 체험하도록 결과 화면이 들어올 때마다 로딩 화면을 최소 2초 보여 준다 (받아 둔 결과가 있어도)

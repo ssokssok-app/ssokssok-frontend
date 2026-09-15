@@ -1,11 +1,14 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 
 import type { SampleId } from '@/api/samples'
+import { usageQueryOptions } from '@/api/users'
 import CameraFilledIcon from '@/assets/icons/32/camera-filled.svg?react'
 import DocumentFilledIcon from '@/assets/icons/32/document-filled.svg?react'
 import ImageFilledIcon from '@/assets/icons/32/image-filled.svg?react'
 import homeDocumentsImage from '@/assets/images/home-documents.jpg'
+import homeDocumentsImage2x from '@/assets/images/home-documents-2x.jpg'
 import privacyShieldImage from '@/assets/images/privacy-shield.png'
 import warningImage from '@/assets/images/warning.png'
 import { Divider } from '@/components/divider'
@@ -34,6 +37,8 @@ import {
 import { DocumentTypesSheet } from './-home/document-types-sheet'
 import { type InputMethod, parseHomeSearch } from './-home/home-search'
 import { SampleSheet } from './-home/sample-sheet'
+import { UsageBubble } from './-home/usage-bubble'
+import { USAGE_LIMIT_NOTICE } from './-result/conversion-error'
 
 export const Route = createFileRoute('/')({
   validateSearch: parseHomeSearch,
@@ -54,6 +59,10 @@ function HomePage() {
   const { resume } = Route.useSearch()
   const { isLoggedIn } = useAuth()
   const privacyNotice = usePrivacyNotice()
+  // 받지 못했으면(아직 받는 중 · 실패) 말풍선을 숨기고 막지도 않는다. 제한은 서버가 변환 요청에서 한 번 더 막는다
+  const usageQuery = useQuery({ ...usageQueryOptions(), enabled: isLoggedIn })
+  const remainingUses = isLoggedIn ? usageQuery.data?.remaining : undefined
+  const usageExhausted = remainingUses === 0
   // 로그인하러 다녀왔으면 고르던 입력 방법으로 지원 문서 안내부터 이어 간다
   const [inputMethod, setInputMethod] = useState<InputMethod>(
     resume ?? 'camera',
@@ -82,6 +91,11 @@ function HomePage() {
   // 로그인 되살리기는 루트 라우트가 첫 화면 전에 기다려서, 여기서는 로그인 여부를 바로 본다
   function startInput(method: InputMethod) {
     setInputMethod(method)
+    // 오늘 횟수를 다 썼으면 안내를 띄우지 않고 바로 알린다
+    if (usageExhausted) {
+      showNotice(USAGE_LIMIT_NOTICE)
+      return
+    }
     if (!privacyNotice.isDismissed) setGuideStep('privacy')
     else setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
   }
@@ -106,6 +120,11 @@ function HomePage() {
 
   function handleDocumentTypesConfirm() {
     setGuideStep(null)
+    // 로그인하러 다녀오면 횟수를 받기 전에 이 시트부터 떠서, 여기서 한 번 더 확인한다
+    if (usageExhausted) {
+      showNotice(USAGE_LIMIT_NOTICE)
+      return
+    }
     // 카메라 · 파일 선택 창은 사용자가 누른 순간에만 열 수 있어서, 이 클릭 처리 안에서 바로 연다
     if (inputMethod === 'camera') cameraInputRef.current?.click()
     else if (inputMethod === 'gallery') galleryInputRef.current?.click()
@@ -159,19 +178,26 @@ function HomePage() {
 
   function handleSampleSelect(sampleId: SampleId) {
     setSampleSheetOpen(false)
-    navigate({ to: '/samples/$sampleId', params: { sampleId } })
+    // 실제로 찍을 때처럼 촬영한 문서 확인 화면을 거쳐 로딩 · 결과로 간다
+    navigate({ to: '/samples/$sampleId/review', params: { sampleId } })
   }
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-clip bg-gradient-background pt-[env(safe-area-inset-top)] pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
       {/*
        * Figma 에서 제목 · 버튼 뒤에 깔린 일러스트. 흰 바탕을 곱하기로 지워 배경 그라디언트에 섞는다.
-       * 원본 가장자리가 순백이 아니라(253~254) 네모 경계가 비치므로, 가장자리 5% 를 투명하게 흐린다
+       * 원본 가장자리가 순백이 아니라(253~254) 네모 경계가 비치므로, 가장자리 5% 를 투명하게 흐린다.
+       *
+       * 크기는 Figma 330×275 가 가장 작은 크기이고, 화면이 높으면 제목과 버튼 사이 빈 곳을 채우도록 커진다 (최대 기둥 폭의 84%, 600px 기둥에서 504px).
+       * 첫 버튼은 항상 화면 아래에서 377px 위에 있어서, 이미지 아래가 버튼보다 42px 위(852px 휴대폰의 Figma 위치)에 오도록 화면 높이로 폭을 정한다.
+       * 커져도 흐리지 않게 Figma 원본(1374px)에서 만든 2배 이미지를 함께 두고 브라우저가 고른다
        */}
       <img
         src={homeDocumentsImage}
+        srcSet={`${homeDocumentsImage} 660w, ${homeDocumentsImage2x} 1320w`}
+        sizes="(min-width: 600px) 504px, 330px"
         alt=""
-        className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+158px)] -right-5 h-[275px] w-[330px] opacity-78 mix-blend-multiply mask-x-from-95% mask-y-from-95%"
+        className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+158px)] -right-5 aspect-[6/5] w-[max(330px,min(84%,calc((100dvh-577px)*1.2)))] opacity-78 mix-blend-multiply mask-x-from-95% mask-y-from-95%"
       />
 
       <HomeGnb
@@ -193,22 +219,34 @@ function HomePage() {
 
         {/* 화면이 길면 버튼을 아래에 붙이고, 짧아도 일러스트가 보일 틈(40px)은 남긴다 */}
         <div className="mt-auto flex flex-col gap-3 pt-10">
-          <div className="flex flex-col gap-2.5">
-            <HomeButton onClick={() => startInput('camera')}>
-              <CameraFilledIcon aria-hidden />
-              문서 촬영하기
-            </HomeButton>
-            <HomeButton
-              variant="secondary"
-              onClick={() => startInput('gallery')}
-            >
-              <ImageFilledIcon aria-hidden />
-              사진첩에서 선택하기
-            </HomeButton>
-            <HomeButton variant="secondary" onClick={() => startInput('file')}>
-              <DocumentFilledIcon aria-hidden />
-              파일 불러오기 (PDF)
-            </HomeButton>
+          <div className="flex flex-col">
+            {/* 일러스트 위에 겹쳐 보이는 자리지만, 큰글씨 모드에서 커져도 제목과 겹치지 않게 흐름 안에 둔다 */}
+            {remainingUses !== undefined && (
+              <UsageBubble
+                remaining={remainingUses}
+                className="mb-[9px] self-center"
+              />
+            )}
+            <div className="flex flex-col gap-2.5">
+              <HomeButton onClick={() => startInput('camera')}>
+                <CameraFilledIcon aria-hidden />
+                문서 촬영하기
+              </HomeButton>
+              <HomeButton
+                variant="secondary"
+                onClick={() => startInput('gallery')}
+              >
+                <ImageFilledIcon aria-hidden />
+                사진첩에서 선택하기
+              </HomeButton>
+              <HomeButton
+                variant="secondary"
+                onClick={() => startInput('file')}
+              >
+                <DocumentFilledIcon aria-hidden />
+                파일 불러오기 (PDF)
+              </HomeButton>
+            </div>
           </div>
 
           <div className="flex items-center">

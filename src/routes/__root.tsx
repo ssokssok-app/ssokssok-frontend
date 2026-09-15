@@ -3,6 +3,9 @@ import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 import { whenSessionRestored } from '@/api/client'
 import { ToastProvider } from '@/components/toast'
+import { cn } from '@/lib/utils'
+
+import { DesktopIntro } from './-root/desktop-intro'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -21,17 +24,30 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
 })
 
+/**
+ * 앱 기둥. 600px 보다 좁으면 화면을 꽉 채우고, 넓으면 가운데에 선다.
+ * 데스크톱 화면에서는 오른쪽에 소개(DesktopIntro)를 두려고 기둥을 조금 왼쪽에 둔다 (src/index.css "데스크톱 화면")
+ */
+const appColumnClassName =
+  'relative mx-auto min-h-dvh w-full max-w-app bg-white desktop:mr-0 desktop:ml-(--app-column-left)'
+
 /** 앱을 켤 때 로그인 되살리기가 1초 넘게 걸리면 보이는 화면. Figma 에 없어 문구만 둔다 (docs/product.md "확인 필요") */
 function AppPending() {
   return (
-    <main
-      role="status"
-      className="mx-auto flex min-h-dvh w-full max-w-app items-center justify-center bg-white px-5 text-center"
-    >
-      <p className="text-headline-m-semibold text-gray-900">
-        잠시만 기다려주세요
-      </p>
-    </main>
+    <>
+      <main
+        role="status"
+        className={cn(
+          appColumnClassName,
+          'flex items-center justify-center px-5 text-center',
+        )}
+      >
+        <p className="text-headline-m-semibold text-gray-900">
+          잠시만 기다려주세요
+        </p>
+      </main>
+      <DesktopIntro />
+    </>
   )
 }
 
@@ -39,10 +55,10 @@ function RootLayout() {
   return (
     // 어느 화면에서든 useToast() 로 알림을 띄울 수 있게 한다
     <ToastProvider>
-      {/* 데스크톱 디자인이 없어, 넓은 화면에서는 모바일 화면을 가운데 앱 폭(600px)으로 세우고 양옆은 body 배경으로 둔다 */}
-      <div className="relative mx-auto min-h-dvh w-full max-w-app bg-white">
+      <div className={appColumnClassName}>
         <Outlet />
       </div>
+      <DesktopIntro />
     </ToastProvider>
   )
 }

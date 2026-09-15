@@ -1,6 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { wait } from '@/lib/wait'
 import type { DocumentResult } from '@/types/document-result'
 
 import { apiRequest } from './client'
@@ -24,18 +23,14 @@ export function isSampleId(value: string): value is SampleId {
   return sampleDocuments.some((sample) => sample.id === value)
 }
 
-// 샘플은 변환 과정을 체험하는 게 목적이라, 응답이 빨라도 로딩 화면을 이만큼은 보여 준다 (docs/product.md "확인 필요")
-const MIN_LOADING_MS = 2000
-
+// 로딩 화면을 최소 시간 보여 주는 것은 결과 화면이 맡는다 (src/routes/samples/$sampleId.tsx). 받아 둔 결과로 다시 들어와도 로딩을 보여 주기 위해서다
 async function getSampleResult(
   sampleId: SampleId,
   signal: AbortSignal,
 ): Promise<DocumentResult> {
-  const [body] = await Promise.all([
-    apiRequest(`/api/documents/samples/${sampleId}`, { signal }),
-    wait(MIN_LOADING_MS, signal),
-  ])
-  return parseDocumentResult(body)
+  return parseDocumentResult(
+    await apiRequest(`/api/documents/samples/${sampleId}`, { signal }),
+  )
 }
 
 export const sampleResultQueryOptions = (sampleId: SampleId) =>

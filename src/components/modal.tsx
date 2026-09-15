@@ -15,11 +15,12 @@ import { cn } from '@/lib/utils'
  * 화면이 낮거나(가로 모드) 큰글씨 모드로 카드가 화면보다 길어지면 Viewport 가 세로로 스크롤된다.
  * 안쪽 틀이 최소 화면 높이(min-h-full)에서 가운데 정렬하므로, 짧으면 가운데 · 길면 위부터 끝까지 볼 수 있다
  * (Base UI 문서의 "Outside scroll dialog" 구조).
+ * 넓은 화면에서는 카드가 앱 기둥 가운데에 뜬다(app-column-inset). 어두운 배경은 화면 전체를 덮는다.
  */
 const backdropClassName =
   'fixed inset-0 z-50 bg-dimmed transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0'
 const viewportClassName =
-  'fixed inset-0 z-50 overflow-y-auto overscroll-contain'
+  'fixed inset-y-0 z-50 app-column-inset overflow-y-auto overscroll-contain'
 const viewportContentClassName =
   'flex min-h-full items-center justify-center px-7 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]'
 const popupClassName =

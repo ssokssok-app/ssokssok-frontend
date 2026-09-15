@@ -9,8 +9,8 @@ export function isInputMethod(value: unknown): value is InputMethod {
 
 export interface HomeSearch {
   /**
-   * 문서를 넣다가 로그인하러 다녀왔을 때, 이어서 진행할 입력 방법.
-   * 로그인 뒤 콜백이 붙여 보내고, 홈은 지원 문서 안내부터 이어 띄운 뒤 주소에서 지운다.
+   * 이어서 진행할 입력 방법. 문서를 넣다가 로그인하러 다녀왔을 때(로그인 콜백),
+   * 변환 오류 화면에서 "다시 찍으러 가기" 를 눌렀을 때 붙여 보낸다. 홈은 지원 문서 안내부터 이어 띄운 뒤 주소에서 지운다.
    */
   resume?: InputMethod
 }

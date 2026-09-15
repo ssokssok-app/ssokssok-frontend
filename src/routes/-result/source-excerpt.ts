@@ -7,8 +7,15 @@ export interface SourceExcerptSegment {
   highlighted: boolean
 }
 
-/** 원문 발췌. 묶음 하나가 화면의 원문 문단 하나다. 강조 구간이 멀리 떨어져 있으면 묶음이 여러 개다 */
-export type SourceExcerpt = SourceExcerptSegment[][]
+/** 원문 발췌 */
+export interface SourceExcerpt {
+  /** 묶음 하나가 화면의 원문 문단 하나다. 강조 구간이 멀리 떨어져 있으면 묶음이 여러 개다 */
+  groups: SourceExcerptSegment[][]
+  /** 첫 묶음 앞에 보여 주지 않은 원문 줄이 있다. 없으면 원문 맨 처음부터라 위를 흐리지 않는다 */
+  hasMoreBefore: boolean
+  /** 마지막 묶음 뒤에 보여 주지 않은 원문 줄이 있다. 없으면 원문 맨 끝까지라 아래를 흐리지 않는다 */
+  hasMoreAfter: boolean
+}
 
 /** 강조한 줄 앞뒤로 강조 없이 함께 보여 주는 줄 수 (docs/product.md "결과 화면") */
 const CONTEXT_LINES = 2
@@ -42,15 +49,17 @@ export function getSourceExcerpt(
     }
   }
 
-  return groups.map(({ first, last }) =>
-    toSegments(
-      sourceLines.slice(
-        Math.max(0, first - CONTEXT_LINES),
-        last + 1 + CONTEXT_LINES,
-      ),
-      ids,
+  const ranges = groups.map(({ first, last }) => ({
+    start: Math.max(0, first - CONTEXT_LINES),
+    end: Math.min(sourceLines.length, last + 1 + CONTEXT_LINES),
+  }))
+  return {
+    groups: ranges.map(({ start, end }) =>
+      toSegments(sourceLines.slice(start, end), ids),
     ),
-  )
+    hasMoreBefore: ranges[0].start > 0,
+    hasMoreAfter: ranges[ranges.length - 1].end < sourceLines.length,
+  }
 }
 
 function toSegments(lines: SourceLine[], ids: Set<string>) {

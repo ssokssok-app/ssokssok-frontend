@@ -16,6 +16,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as DevComponentsRouteImport } from './routes/dev/components'
 import { Route as SamplesSampleIdRouteImport } from './routes/samples/$sampleId'
 import { Route as AuthProviderCallbackRouteImport } from './routes/auth/$provider/callback'
+import { Route as SamplesSampleIdReviewRouteImport } from './routes/samples/$sampleId_.review'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const AuthProviderCallbackRoute = AuthProviderCallbackRouteImport.update({
   path: '/auth/$provider/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SamplesSampleIdReviewRoute = SamplesSampleIdReviewRouteImport.update({
+  id: '/samples/$sampleId_/review',
+  path: '/samples/$sampleId/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
   '/auth/$provider/callback': typeof AuthProviderCallbackRoute
+  '/samples/$sampleId/review': typeof SamplesSampleIdReviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
   '/auth/$provider/callback': typeof AuthProviderCallbackRoute
+  '/samples/$sampleId/review': typeof SamplesSampleIdReviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
   '/auth/$provider/callback': typeof AuthProviderCallbackRoute
+  '/samples/$sampleId_/review': typeof SamplesSampleIdReviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/dev/components'
     | '/samples/$sampleId'
     | '/auth/$provider/callback'
+    | '/samples/$sampleId/review'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/dev/components'
     | '/samples/$sampleId'
     | '/auth/$provider/callback'
+    | '/samples/$sampleId/review'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/dev/components'
     | '/samples/$sampleId'
     | '/auth/$provider/callback'
+    | '/samples/$sampleId_/review'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   DevComponentsRoute: typeof DevComponentsRoute
   SamplesSampleIdRoute: typeof SamplesSampleIdRoute
   AuthProviderCallbackRoute: typeof AuthProviderCallbackRoute
+  SamplesSampleIdReviewRoute: typeof SamplesSampleIdReviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthProviderCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/samples/$sampleId_/review': {
+      id: '/samples/$sampleId_/review'
+      path: '/samples/$sampleId/review'
+      fullPath: '/samples/$sampleId/review'
+      preLoaderRoute: typeof SamplesSampleIdReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevComponentsRoute: DevComponentsRoute,
   SamplesSampleIdRoute: SamplesSampleIdRoute,
   AuthProviderCallbackRoute: AuthProviderCallbackRoute,
+  SamplesSampleIdReviewRoute: SamplesSampleIdReviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

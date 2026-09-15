@@ -20,6 +20,7 @@ interface SourceViewProps {
  *
  * 결과 화면 위에 화면 전체를 덮는 대화상자로 띄운다. 결과 화면을 그대로 두어서 닫으면 보던 위치로 돌아간다.
  * 원문 발췌 위아래는 흰색으로 흐려서 원문의 일부라는 것을 보여 준다 (Figma 149:1854 · 149:1855).
+ * 원문이 실제로 더 이어지는 쪽만 흐리고, 강조한 줄은 흐림 위에 그려 앞뒤 줄이 짧아도 흐려지지 않게 한다.
  */
 export function SourceView({
   result,
@@ -40,7 +41,7 @@ export function SourceView({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Popup className="fixed inset-0 z-40 mx-auto flex max-w-app flex-col overflow-y-auto overscroll-contain bg-gray-80 outline-none">
+        <Dialog.Popup className="fixed inset-y-0 z-40 flex app-column-inset flex-col overflow-y-auto overscroll-contain bg-gray-80 outline-none">
           <ResultHeader
             title={<Dialog.Title render={<span />}>원문 보기</Dialog.Title>}
             left={
@@ -75,9 +76,10 @@ export function SourceView({
                   <h2 className="text-subtitle-semibold text-gray-900">
                     원문의 이 부분에서 가져왔어요
                   </h2>
-                  <div className="relative flex flex-col gap-body2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
+                  {/* isolate: 강조 줄을 흐림 위로 올리는 z-index 가 결과 화면 머리 등 카드 밖과 겹치지 않게 가둔다 */}
+                  <div className="relative isolate flex flex-col gap-body2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
                     {/* 묶음 하나가 원문 문단 하나다. 줄들은 띄어쓰기로 이어 붙이고, 조각 사이의 띄어쓰기는 강조 밖에 둔다 */}
-                    {excerpt.map((segments, groupIndex) => (
+                    {excerpt.groups.map((segments, groupIndex) => (
                       // 묶음 · 조각 순서는 바뀌지 않는다
                       <p
                         key={groupIndex}
@@ -87,7 +89,7 @@ export function SourceView({
                           <Fragment key={index}>
                             {index > 0 && ' '}
                             {segment.highlighted ? (
-                              <mark className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500">
+                              <mark className="relative z-10 bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500">
                                 {segment.text}
                               </mark>
                             ) : (
@@ -97,14 +99,18 @@ export function SourceView({
                         ))}
                       </p>
                     ))}
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-x-0 top-0 h-[75px] bg-linear-to-b from-white/60 from-27% to-white/0"
-                    />
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[68px] bg-linear-to-t from-white/60 from-27% to-white/0"
-                    />
+                    {excerpt.hasMoreBefore && (
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-x-0 top-0 h-[75px] bg-linear-to-b from-white/60 from-27% to-white/0"
+                      />
+                    )}
+                    {excerpt.hasMoreAfter && (
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-x-0 bottom-0 h-[68px] bg-linear-to-t from-white/60 from-27% to-white/0"
+                      />
+                    )}
                   </div>
                 </section>
               </div>

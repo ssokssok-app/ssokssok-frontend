@@ -31,9 +31,25 @@ const problems = []
 const unitTests = walk(join(root, 'src')).filter((file) =>
   /\.(test|spec)\.[jt]sx?$/.test(file),
 )
-if (unitTests.length > 0 && !/pnpm (run )?test(\s|$)/m.test(ci)) {
+// CI 가 `pnpm test` 를 직접 돌리거나, `pnpm verify` 가 check 를 거쳐 `pnpm test` 를 돌리면 된다
+const scripts = JSON.parse(
+  readFileSync(join(root, 'package.json'), 'utf8'),
+).scripts
+const runsTestScript = (name, seen = new Set()) => {
+  const command = scripts[name]
+  if (!command || seen.has(name)) return false
+  seen.add(name)
+  if (/pnpm (run )?test(\s|&|$)/.test(command)) return true
+  return [...command.matchAll(/pnpm (?:run )?([\w:-]+)/g)].some(([, next]) =>
+    runsTestScript(next, seen),
+  )
+}
+const ciRunsTests =
+  /pnpm (run )?test(\s|$)/m.test(ci) ||
+  (/pnpm (run )?verify(\s|$)/m.test(ci) && runsTestScript('verify'))
+if (unitTests.length > 0 && !ciRunsTests) {
   problems.push(
-    `테스트 파일이 있는데(${unitTests[0]} 등) ${ciPath} 가 \`pnpm test\` 를 돌리지 않음 → docs/ci.md "나중에 추가할 것"의 단위 테스트 항목대로 CI 에 추가하세요.`,
+    `테스트 파일이 있는데(${unitTests[0]} 등) ${ciPath} 가 \`pnpm test\` 를 돌리지 않음 (직접 또는 \`pnpm verify\` → check 를 거쳐) → CI 에 테스트가 돌도록 추가하세요.`,
   )
 }
 
