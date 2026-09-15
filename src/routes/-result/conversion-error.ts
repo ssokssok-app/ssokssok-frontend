@@ -48,6 +48,12 @@ const copyByCode: Record<string, ConversionErrorCopy> = {
     description: '홈에서 다시 로그인해주세요.',
     needsReselect: true,
   },
+  // 갱신한 토큰으로도 거절된 경우 (src/api/client.ts)
+  TOKEN_EXPIRED: {
+    title: '로그인이 필요해요',
+    description: '홈에서 다시 로그인해주세요.',
+    needsReselect: true,
+  },
   JOB_NOT_FOUND: {
     title: '결과를 찾을 수 없어요',
     description: '처음부터 다시 해주세요.',

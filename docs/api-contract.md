@@ -24,12 +24,16 @@
 - `stage`: `analyzing` → `simplifying` → `structuring` → `done`
 - 로딩 화면 4단계와 짝: `analyzing` = 문서 분석, `simplifying` = 어려운 내용 이해 · 쉬운 글 변환, `structuring` = 중요 정보 정리
 - 취소는 다음 조각 처리를 막는 방식이다. 이미 보낸 AI 호출은 중간에 끊지 못한다
+- 2026-09-15 프론트 연결 (`src/api/conversion.ts`): 세 요청 모두 로그인이 필요하다 (토큰 없으면 401 `UNAUTHORIZED`). 취소는 상태 응답을 그대로 돌려주고 끝난 작업이면 아무것도 하지 않는다. 결과는 완료 뒤 30분 동안 서버 메모리에 있고 지나면 410 `JOB_EXPIRED`, 서버가 재시작하면 404 `JOB_NOT_FOUND`. 작업은 3분을 넘기면 `TIMEOUT` 으로 실패한다
+- 프론트는 결과를 받은 뒤에는 상태를 다시 조회하지 않는다. 탭을 오갈 때 다시 받으면 30분이 지난 뒤 보고 있던 결과가 오류 화면으로 바뀌기 때문이다
+- 상태 · 결과 응답은 `src/api/documents.ts` 의 `parseDocumentResult` 와 `src/api/conversion.ts` 가 모양을 확인한다. 다르면 `INVALID_RESPONSE` 오류다. 모르는 `kind` 는 `other`, 모르는 `stage` 는 `analyzing` 으로 본다
 
 ### 2. 업로드
 
 - 형식: 이미지(JPG · PNG)와 PDF. **HWP 는 받지 않는다** (OCR 엔진이 읽지 못함). 업로드 전에 프론트가 막는다
 - 여러 장: `multipart/form-data` 한 요청에 모든 파일을 배열로 보낸다. 서버가 순서대로 이어 붙여 한 문서로 처리한다
-- 제한: 이미지 한 장 최대 10MB, 문서 하나 최대 10장
+- 제한: 이미지 한 장 최대 10MB, 문서 하나 최대 10장. 요청 전체 최대 20MB (2026-09-15 백엔드 확인, `FILE_TOO_LARGE`)
+- 형식은 파일 이름의 확장자(jpg · jpeg · png · pdf)로 검사한다. 프론트가 줄인 사진은 `.jpg` 이름으로 올린다 (`src/lib/compress-image.ts`)
 - 압축은 프론트가 한다: 긴 변 2000px, JPEG 품질 80% 권장
 - 문서 자르기 · 기울기 보정은 서버가 하지 않는다. OCR 엔진이 어느 정도 기울기는 스스로 처리하므로, 카메라 가이드 테두리는 두되 정밀하게 자를 필요는 없다
 
@@ -156,29 +160,32 @@
 ### 연결 작업 전에 필요한 것
 
 1. **스키마 먼저** (2026-09-15 반영): 설계안 API 의 요청 · 응답 모델(Pydantic)과 고정 값을 돌려주는 임시 구현이 Swagger 에 올라왔다. 프론트 타입을 맞췄고, 샘플 내용이 채워지면 연결한다
-2. **변환 결과 받기**: 상태 조회가 `status: "done"` 일 때 `result` 를 같이 준다. `status` 는 `queued | processing | done | failed | canceled`, `failed` 면 `error: { code, message }` 를 같이 준다. 프론트는 2초마다 조회하고 1분이 넘으면 4초로 늘린다. 작업 최대 처리 시간(예: 3분)을 넘기면 `failed`(`TIMEOUT`)
-3. **결과 임시 보관 · 경로**: 서버는 결과를 저장하지 않지만 결과 화면에서 듣기 · 저장을 쓰려면 잠시 들고 있어야 한다. 완료 뒤 30분 동안 메모리에만 두고(디스크 · DB 저장 없음), 듣기 · 저장은 `job_id` 로 부른다: `/documents/convert/{job_id}/paragraphs/{i}/audio`, `/documents/convert/{job_id}/export`. 30분이 지나면 `JOB_EXPIRED`. 샘플은 `/documents/samples/{id}/paragraphs/{i}/audio` · `/documents/samples/{id}/export` 를 토큰 없이
+2. **변환 결과 받기** (2026-09-15 반영): 상태 조회가 `status: "done"` 일 때 `result` 를 같이 준다. `status` 는 `queued | processing | done | failed | canceled`, `failed` 면 `error: { code, message }` 를 같이 준다. 프론트는 2초마다 조회하고 1분이 넘으면 4초로 늘린다. 작업 최대 처리 시간(예: 3분)을 넘기면 `failed`(`TIMEOUT`)
+3. **결과 임시 보관 · 경로** (2026-09-15 반영, 듣기 · 저장은 아직 빈 응답): 서버는 결과를 저장하지 않지만 결과 화면에서 듣기 · 저장을 쓰려면 잠시 들고 있어야 한다. 완료 뒤 30분 동안 메모리에만 두고(디스크 · DB 저장 없음), 듣기 · 저장은 `job_id` 로 부른다: `/documents/convert/{job_id}/paragraphs/{i}/audio`, `/documents/convert/{job_id}/export`. 30분이 지나면 `JOB_EXPIRED`. 샘플은 `/documents/samples/{id}/paragraphs/{i}/audio` · `/documents/samples/{id}/export` 를 토큰 없이
 4. **표기 · 경로** (2026-09-15 반영): 응답 JSON 은 camelCase 로 맞춘다. Pydantic `alias_generator=to_camel` 설정 한 줄이면 되고 TypeScript 관례와 같아 변환 코드가 필요 없다 (스파이크는 snake_case). 모든 API 는 `/api` 아래에 둔다 (스파이크는 접두사 없음). 배포 때 같은 도메인이면 `/api` 만 서버로 넘기면 되고 개발 프록시도 그대로 쓴다
 
 ### 화면 작업 때 필요한 것
 
 5. **오류 code 목록**: 아래 표를 기준으로 더하거나 고칠 것만 알려 준다. 화면 문구는 프론트가 code 별로 정하므로, 새 code 를 만들면 꼭 알려 준다 (모르는 code 는 "잠시 뒤에 다시 시도해주세요" 로 보인다)
 
-   | code                 | HTTP | 프론트 동작                           |
-   | -------------------- | ---- | ------------------------------------- |
-   | `INVALID_REQUEST`    | 400  | 요청 형식 오류 (로그인이면 실패 화면) |
-   | `UNSUPPORTED_FORMAT` | 400  | 다른 파일 고르기                      |
-   | `FILE_TOO_LARGE`     | 400  | 다른 파일 고르기                      |
-   | `TOO_MANY_FILES`     | 400  | 장수 줄이기                           |
-   | `IMAGE_UNREADABLE`   | 422  | 다시 찍기                             |
-   | `TOKEN_EXPIRED`      | 401  | 토큰 갱신 뒤 한 번 다시 요청          |
-   | `UNAUTHORIZED`       | 401  | 로그인 시트 띄우기                    |
-   | `JOB_NOT_FOUND`      | 404  | 홈으로                                |
-   | `JOB_EXPIRED`        | 410  | 결과가 사라졌다고 알리고 홈으로       |
-   | `TIMEOUT`            | 500  | 다시 시도                             |
-   | `INTERNAL_ERROR`     | 500  | 다시 시도                             |
+   | code                 | HTTP | 프론트 동작                                      |
+   | -------------------- | ---- | ------------------------------------------------ |
+   | `INVALID_REQUEST`    | 400  | 요청 형식 오류 (로그인이면 실패 화면)            |
+   | `UNSUPPORTED_FORMAT` | 400  | 다른 파일 고르기                                 |
+   | `FILE_TOO_LARGE`     | 400  | 다른 파일 고르기                                 |
+   | `TOO_MANY_FILES`     | 400  | 장수 줄이기                                      |
+   | `IMAGE_UNREADABLE`   | 422  | 다시 찍기                                        |
+   | `TOKEN_EXPIRED`      | 401  | 토큰 갱신 뒤 한 번 다시 요청                     |
+   | `UNAUTHORIZED`       | 401  | 로그인 시트 띄우기                               |
+   | `JOB_NOT_FOUND`      | 404  | 홈으로                                           |
+   | `JOB_EXPIRED`        | 410  | 결과가 사라졌다고 알리고 홈으로                  |
+   | `TIMEOUT`            | 500  | 다시 시도                                        |
+   | `INTERNAL_ERROR`     | 500  | 다시 시도                                        |
+   | `CONVERT_FAILED`     | 500  | 다시 시도 (백엔드가 씀, 기본 문구)               |
+   | `CONFIG_ERROR`       | 500  | 다시 시도 (서버 설정 누락, 기본 문구)            |
+   | `JOB_NOT_READY`      | 409  | 완료 전 듣기 · 저장. 프론트는 완료 뒤에만 부른다 |
 
-6. **업로드 크기**: 프론트가 줄인 사진은 장당 1MB 안팎이라 10장이어도 10MB 쯤이다. 요청 전체 최대 20MB, PDF 는 파일 20MB · 10페이지를 제안한다. 요청 중에는 프론트가 버튼을 잠가 같은 변환을 두 번 보내지 않는다
+6. **업로드 크기** (2026-09-15 일부 반영: 요청 전체 20MB. PDF 페이지 수 제한은 없다): 프론트가 줄인 사진은 장당 1MB 안팎이라 10장이어도 10MB 쯤이다. 요청 전체 최대 20MB, PDF 는 파일 20MB · 10페이지를 제안한다. 요청 중에는 프론트가 버튼을 잠가 같은 변환을 두 번 보내지 않는다
 7. **원문 모양 (A안)** (2026-09-15 반영, 위 "3. 결과 데이터"): 스파이크처럼 OCR 줄 목록을 결과에 한 번 주고 (`sourceLines: [{ id, text }]`), 문단마다 줄 번호만 준다 (`sourceLineIds: ["e3", "e4"]`). 프론트가 그 줄을 강조하고 앞뒤 줄을 함께 보여 준다. 문단마다 원문을 되풀이하지 않아 응답이 작고, 스파이크 방식 그대로라 만들기 쉽다. 샘플의 "원문 텍스트" 도 같은 필드로 준다
 8. **로그인 토큰** (2026-09-15 백엔드 반영, 위 "5. 로그인"): `POST /auth/refresh` 로 액세스 토큰을 새로 받는다. 액세스 30분 · 리프레시 14일, 로그인 요청 본문은 `{ code, redirectUri }`. 토큰 없는 변환 요청은 401(`UNAUTHORIZED`). 로그인한 사용자의 하루 이용 횟수 제한이 있다면 그 값과 code(`RATE_LIMITED`, 429)
    - 웹의 로그인 · 갱신 응답: 액세스 토큰은 본문, 리프레시 토큰은 쿠키 `HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=1209600`. `Max-Age` 가 없으면 브라우저를 닫을 때 지워진다

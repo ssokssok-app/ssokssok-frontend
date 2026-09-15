@@ -89,6 +89,9 @@ function ResultPage() {
     ...conversionStatusQueryOptions(jobId),
     enabled: jobId !== '',
     retry: 2,
+    // 조회는 아래 간격으로만 한다. 탭을 오갈 때 다시 받으면, 서버 보관 시간(30분)이 지난 뒤 보고 있던 결과가 오류 화면으로 바뀐다
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     refetchInterval: (query) => {
       if (isFinished(query.state.data)) return false
       const elapsed = Date.now() - (session?.startedAt ?? Date.now())
