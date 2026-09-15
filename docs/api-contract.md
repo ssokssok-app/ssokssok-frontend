@@ -25,6 +25,7 @@
 - 로딩 화면 4단계와 짝: `analyzing` = 문서 분석, `simplifying` = 어려운 내용 이해 · 쉬운 글 변환, `structuring` = 중요 정보 정리
 - 취소는 다음 조각 처리를 막는 방식이다. 이미 보낸 AI 호출은 중간에 끊지 못한다
 - 2026-09-15 프론트 연결 (`src/api/conversion.ts`): 세 요청 모두 로그인이 필요하다 (토큰 없으면 401 `UNAUTHORIZED`). 취소는 상태 응답을 그대로 돌려주고 끝난 작업이면 아무것도 하지 않는다. 결과는 완료 뒤 30분 동안 서버 메모리에 있고 지나면 410 `JOB_EXPIRED`, 서버가 재시작하면 404 `JOB_NOT_FOUND`. 작업은 3분을 넘기면 `TIMEOUT` 으로 실패한다
+- **백엔드에 알릴 것:** 상태 조회 · 취소 · 듣기 · 저장이 작업을 만든 사용자인지 확인하지 않는다. 작업 ID(UUID)를 아는 사람은 로그인만 하면 다른 사람의 결과를 볼 수 있다. 작업에 사용자 ID 를 적어 두고 다른 사용자면 404 `JOB_NOT_FOUND` 로 답해 달라
 - 프론트는 결과를 받은 뒤에는 상태를 다시 조회하지 않는다. 탭을 오갈 때 다시 받으면 30분이 지난 뒤 보고 있던 결과가 오류 화면으로 바뀌기 때문이다
 - 상태 · 결과 응답은 `src/api/documents.ts` 의 `parseDocumentResult` 와 `src/api/conversion.ts` 가 모양을 확인한다. 다르면 `INVALID_RESPONSE` 오류다. 모르는 `kind` 는 `other`, 모르는 `stage` 는 `analyzing` 으로 본다
 
