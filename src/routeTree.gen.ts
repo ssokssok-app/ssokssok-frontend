@@ -15,6 +15,7 @@ import { Route as ReviewRouteImport } from './routes/review'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as DevComponentsRouteImport } from './routes/dev/components'
 import { Route as SamplesSampleIdRouteImport } from './routes/samples/$sampleId'
+import { Route as AuthProviderCallbackRouteImport } from './routes/auth/$provider/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const SamplesSampleIdRoute = SamplesSampleIdRouteImport.update({
   path: '/samples/$sampleId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthProviderCallbackRoute = AuthProviderCallbackRouteImport.update({
+  id: '/auth/$provider/callback',
+  path: '/auth/$provider/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
+  '/auth/$provider/callback': typeof AuthProviderCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
+  '/auth/$provider/callback': typeof AuthProviderCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/dev/components': typeof DevComponentsRoute
   '/samples/$sampleId': typeof SamplesSampleIdRoute
+  '/auth/$provider/callback': typeof AuthProviderCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/dev/components'
     | '/samples/$sampleId'
+    | '/auth/$provider/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/dev/components'
     | '/samples/$sampleId'
+    | '/auth/$provider/callback'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/dev/components'
     | '/samples/$sampleId'
+    | '/auth/$provider/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   DevComponentsRoute: typeof DevComponentsRoute
   SamplesSampleIdRoute: typeof SamplesSampleIdRoute
+  AuthProviderCallbackRoute: typeof AuthProviderCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SamplesSampleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/$provider/callback': {
+      id: '/auth/$provider/callback'
+      path: '/auth/$provider/callback'
+      fullPath: '/auth/$provider/callback'
+      preLoaderRoute: typeof AuthProviderCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   DevComponentsRoute: DevComponentsRoute,
   SamplesSampleIdRoute: SamplesSampleIdRoute,
+  AuthProviderCallbackRoute: AuthProviderCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

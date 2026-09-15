@@ -47,3 +47,8 @@ export const cn = createCn({
     },
   },
 })
+
+/** 서버 응답 · 저장소에서 읽은 값처럼 모양을 모르는 값이 객체인지 확인한다 (`as` 단언 대신) */
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}

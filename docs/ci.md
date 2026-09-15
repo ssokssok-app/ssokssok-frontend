@@ -28,7 +28,9 @@
 JSON 이라 주석을 달 수 없어 여기에 이유를 적는다.
 
 - `framework` · `buildCommand` · `outputDirectory`: Vite 로 `pnpm build` 해서 `dist` 를 올린다. 설치 명령은 적지 않는다. Vercel 이 `pnpm-lock.yaml` 을 보고 pnpm 으로 설치한다 (설치 명령을 직접 적으면 오래된 pnpm 이 쓰일 수 있다)
-- `rewrites`: 파일이 없는 주소는 모두 `index.html` 을 돌려준다. 화면 이동은 브라우저에서 하므로, 없으면 `/samples/fine` 에서 새로고침하거나 주소를 바로 열 때 404 가 난다. 빌드 파일이 담긴 assets 주소는 빼서, 새로 배포한 뒤 사라진 옛 파일을 요청하면 HTML 대신 404 를 준다
+- `rewrites` `/api`: `https://ssokssok-backend.fly.dev/api` 로 넘긴다. 프론트와 같은 도메인이라 리프레시 토큰 쿠키가 우리 사이트 쿠키가 되고 CORS 가 필요 없다 (`docs/api-contract.md` "웹 토큰 저장"). 넘긴 요청은 백엔드가 120초 안에 응답을 시작해야 한다 (변환은 작업 ID 를 바로 받고 폴링하므로 해당 없음)
+- `/api` 캐시 끄기(`x-vercel-enable-rewrite-caching: 0`): 2026-04-06 이후 만든 Vercel 프로젝트는 넘긴 응답을 백엔드 캐시 헤더대로 CDN 에 캐시한다. 개인 문서 · 음성 · 계정 응답이 다른 사람에게 가지 않게 끈다
+- `rewrites` 나머지: 파일이 없는 주소는 모두 `index.html` 을 돌려준다. 화면 이동은 브라우저에서 하므로, 없으면 `/samples/fine` 에서 새로고침하거나 주소를 바로 열 때 404 가 난다. 빌드 파일이 담긴 assets 주소와 `/api` 는 빼서, 새로 배포한 뒤 사라진 옛 파일을 요청하면 HTML 대신 404 를 준다
 - assets 주소 1년 캐시: 파일 이름에 내용 해시가 붙어 내용이 바뀌면 이름도 바뀐다
 - 보안 헤더: `X-Content-Type-Options: nosniff`(파일 종류 추측 금지), `Referrer-Policy`(다른 사이트로 갈 때 주소 전체를 넘기지 않음), `X-Frame-Options: DENY`(다른 사이트가 iframe 으로 넣어 누르게 하는 공격 방지)
 - Node 버전: Vercel 은 `.nvmrc` 를 읽지 않고 `package.json` 의 `engines.node` 를 쓴다. 둘이 다르면 `pnpm check:ci` 가 실패한다
@@ -36,13 +38,15 @@ JSON 이라 주석을 달 수 없어 여기에 이유를 적는다.
 ### Vercel 에서 관리하는 설정 (파일 없음)
 
 - **Git 연결:** `ssokssok-app/ssokssok-frontend`, 실서비스 브랜치 `main`
-- **환경 변수:** `ENABLE_EXPERIMENTAL_COREPACK=1`. `package.json` 의 `packageManager` 에 적은 pnpm 버전으로 설치해 CI 와 맞춘다
-- **도메인:** `www.ssokssok.site` 가 대표 주소, `ssokssok.site` 는 대표 주소로 넘긴다 (Vercel 권장. www 는 CNAME 으로 연결돼 Vercel 이 트래픽을 더 유연하게 돌릴 수 있다). DNS 는 도메인을 산 곳에서 A · CNAME 레코드로 연결한다 (값은 Vercel Domains 화면에 나오는 값). 카카오 · 구글 로그인 콘솔과 백엔드 CORS 에는 대표 주소를 등록한다
+- **환경 변수:**
+  - `ENABLE_EXPERIMENTAL_COREPACK=1`. `package.json` 의 `packageManager` 에 적은 pnpm 버전으로 설치해 CI 와 맞춘다
+  - `VITE_KAKAO_REST_API_KEY` · `VITE_GOOGLE_CLIENT_ID` (Production). 번들에 들어가는 공개 값이라 Sensitive 가 아닌 일반 값으로 둔다 (`docs/architecture.md` "백엔드 연동"). 빌드할 때 들어가므로 값을 바꾸면 다시 배포해야 반영된다
+- **도메인:** `www.ssokssok.site` 가 대표 주소, `ssokssok.site` 는 대표 주소로 넘긴다 (Vercel 권장. www 는 CNAME 으로 연결돼 Vercel 이 트래픽을 더 유연하게 돌릴 수 있다). DNS 는 도메인을 산 곳에서 A · CNAME 레코드로 연결한다 (값은 Vercel Domains 화면에 나오는 값). 카카오 · 구글 로그인 콘솔에는 대표 주소를 등록한다
 - **Deployment Protection:** 미리보기 주소를 누가 볼 수 있는지 정한다. Hobby 기본값(Standard Protection)은 Vercel 에 로그인한 프로젝트 소유자만 미리보기를 볼 수 있다
 
 ### 아직 없는 것
 
-- `/api` 연결: 배포 환경에서는 `/api` 를 어디로도 넘기지 않는다. 백엔드 배포처가 정해지면 `vercel.json` 에 넘기는 규칙을 더할지, API 주소를 따로 둘지 정한다 (`docs/api-contract.md` "우리가 정할 것")
+- 사진 여러 장 업로드 확인: Vercel 이 넘기는 요청의 본문 크기 제한은 문서에 없다 (함수의 4.5MB 제한과 다름). 배포에서 10장(약 10MB) 변환을 올려 확인한다. 막히면 업로드만 백엔드 주소로 바로 보내고 CORS 를 연다
 - CSP(불러올 수 있는 스크립트 · 주소 제한): 로그인 · 클로바 · 백엔드가 붙어 불러올 주소가 정해지면 추가한다
 - 없는 주소 화면(404): 지금은 라우터 기본 문구가 보인다
 

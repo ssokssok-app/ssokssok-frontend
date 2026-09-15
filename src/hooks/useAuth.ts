@@ -1,50 +1,16 @@
 import { useSyncExternalStore } from 'react'
 
+import { hasSession, subscribeSession } from '@/api/client'
+
 /**
- * 로그인 상태 (임시).
+ * 로그인 여부. 토큰과 갱신은 src/api/client.ts 가 맡고, 이 훅은 화면이 로그인 여부를 따라 다시 그려지게만 한다.
  *
- * - 인증 방식(토큰 저장 위치 · 갱신)이 아직 정해지지 않았다 (docs/architecture.md "백엔드 연동").
- *   그전까지는 로그인 버튼을 누르면 이 탭의 메모리에서만 로그인한 것으로 친다. 새로고침하면 풀린다.
- * - 백엔드 소셜 로그인이 준비되면 이 파일 안만 바꾸고, 화면은 useAuth() 를 그대로 쓴다.
+ * - 로그인은 카카오 · 구글 화면을 다녀와 콜백 라우트(src/routes/auth/$provider/callback.tsx)가 마친다.
+ *   시작은 src/routes/-auth/social-login.ts.
+ * - 앱을 켤 때 로그인을 되살리는 동안에는 false 다. 로그인 여부로 동작이 갈리는 곳은 whenSessionRestored() 를 기다린다.
  */
-
-export type LoginProvider = 'kakao' | 'google'
-
-export interface Account {
-  provider: LoginProvider
-  /** 로그인한 계정 이메일. 백엔드 연결 전에는 알 수 없어 null 이다 */
-  email: string | null
-}
-
-let currentAccount: Account | null = null
-const listeners = new Set<() => void>()
-
-function setAccount(next: Account | null) {
-  currentAccount = next
-  listeners.forEach((listener) => listener())
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
-}
-
-function getSnapshot() {
-  return currentAccount
-}
-
-function login(provider: LoginProvider) {
-  setAccount({ provider, email: null })
-}
-
-function logout() {
-  setAccount(null)
-}
-
 export function useAuth() {
-  const account = useSyncExternalStore(subscribe, getSnapshot)
+  const isLoggedIn = useSyncExternalStore(subscribeSession, hasSession)
 
-  return { account, isLoggedIn: account !== null, login, logout }
+  return { isLoggedIn }
 }

@@ -3,6 +3,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { restoreSession } from '@/api/client'
 import { initFontScale } from '@/hooks/useFontScale'
 import { queryClient } from '@/lib/query-client'
 import { routeTree } from './routeTree.gen'
@@ -24,6 +25,8 @@ declare module '@tanstack/react-router' {
 }
 
 initFontScale()
+// 로그인한 적이 있으면 첫 화면을 그리는 동안 쿠키로 로그인을 되살린다 (기다리지 않는다)
+restoreSession()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
