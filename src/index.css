@@ -62,6 +62,7 @@
   --shadow-popover: 0 1px 9.7px 0 rgb(0 0 0 / 20%); /* Listening 목소리 속도 패널 */
   --shadow-sticky: 0 1px 3px 0 rgb(0 0 0 / 8%); /* 결과 화면 바로가기 메뉴가 위에 붙었을 때 (Figma 156:5663) */
   --shadow-card: 0 0 3px 0 rgb(0 0 0 / 3%); /* 원문 보기 카드 (Figma 149:1800) */
+  --shadow-float: 0 0 7.7px 0 rgb(0 0 0 / 10%); /* 촬영한 문서 확인 사진 삭제 버튼 (Figma 225:2942) */
 
   /* 말풍선처럼 네모가 아닌 모양은 꼬리까지 그림자가 지도록 filter drop-shadow 로 준다 (Figma 흐림 값의 절반) */
   --drop-shadow-bubble: 0 2px 5.05px rgb(91 137 255 / 18%); /* 홈 남은 이용 횟수 말풍선 (Figma 230:4997) */

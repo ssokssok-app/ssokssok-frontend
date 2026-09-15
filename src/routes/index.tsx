@@ -177,7 +177,8 @@ function HomePage() {
 
   function handleSampleSelect(sampleId: SampleId) {
     setSampleSheetOpen(false)
-    navigate({ to: '/samples/$sampleId', params: { sampleId } })
+    // 실제로 찍을 때처럼 촬영한 문서 확인 화면을 거쳐 로딩 · 결과로 간다
+    navigate({ to: '/samples/$sampleId/review', params: { sampleId } })
   }
 
   return (
