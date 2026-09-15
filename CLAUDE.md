@@ -34,7 +34,7 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 | 폴더 역할, 데이터 흐름, API 연동          | `docs/architecture.md`     |
 | API 계약 초안, 백엔드에 확인할 것         | `docs/api-contract.md`     |
 | 커밋 · 브랜치 · PR                        | `docs/git.md`              |
-| CI · 레포 설정 · 나중에 추가할 CI         | `docs/ci.md`               |
+| CI · 배포(Vercel) · 레포 설정             | `docs/ci.md`               |
 | 훅 · 검사 스크립트 · 문서 체계            | `docs/harness.md`          |
 | 스타일 · 컴포넌트 (tsx 작업 시 자동 로드) | `.claude/rules/styling.md` |
 | 라우트 (routes 작업 시 자동 로드)         | `.claude/rules/routes.md`  |
@@ -63,7 +63,7 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 - 폴더 구조, 데이터 흐름, 라이브러리 추가 · 교체 → `docs/architecture.md`
 - 스타일 · 컴포넌트 · 라우트 규칙 → `.claude/rules/`
 - 훅 · 검사 스크립트 → `docs/harness.md`
-- CI 워크플로 · 레포 설정, 테스트 · 배포 도입 → `docs/ci.md`
+- CI 워크플로 · 레포 설정 · 배포 설정(`vercel.json`), 테스트 도입 → `docs/ci.md`
 - 제품 결정 (`docs/product.md` 의 "확인 필요" 항목이 정해짐) → `docs/product.md`
 
 문서가 언급하는 경로 · 명령어가 사라지면 `pnpm check` 가 실패한다. 문서에서 다루는 파일을 고쳤는데 문서를 그대로 두면 종료 훅이 알려 준다.

@@ -63,6 +63,7 @@ function SettingsPage() {
 
 - 백엔드는 FastAPI 이고 별도 레포에서 준비 중이다.
 - 개발 중에는 Vite 가 `/api` 요청을 `http://localhost:8000` 으로 넘긴다 (`vite.config.ts`). 코드에서는 항상 상대 경로 `/api/...` 로 부른다.
+- 배포(Vercel, `https://www.ssokssok.site`)에서는 `/api` 를 아직 넘기지 않는다. 백엔드 배포처가 정해지면 정한다 (`docs/ci.md` "배포").
 - `VITE_*` 환경 변수는 번들에 그대로 들어간다. 비밀값은 넣지 않는다.
 - API 계약은 `docs/api-contract.md` 에 있다. 로컬 백엔드는 `http://localhost:8000`, Swagger 는 `http://localhost:8000/docs`
 - 정해진 것 (2026-09-14 백엔드 답변): 오류 응답은 `{ error: { code, message } }`, 인증은 JWT(액세스 + 리프레시 토큰), 변환은 작업 ID + 폴링
