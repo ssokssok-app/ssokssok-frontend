@@ -6,8 +6,7 @@ import {
 } from '@tanstack/react-router'
 
 import { isLoginProvider, loginWithCode } from '@/api/auth'
-import { hasSession, whenSessionRestored } from '@/api/client'
-import { usersQueryKey } from '@/api/users'
+import { hasSession } from '@/api/client'
 import {
   getRedirectUri,
   type LoginReturnTo,
@@ -49,12 +48,11 @@ function redirectToReturn(returnTo: LoginReturnTo, resume: boolean) {
 export const Route = createFileRoute('/auth/$provider/callback')({
   validateSearch: parseCallbackSearch,
   loaderDeps: ({ search }) => search,
-  loader: async ({ params, deps, abortController, context }) => {
+  loader: async ({ params, deps, abortController }) => {
     const { provider } = params
     if (!isLoginProvider(provider)) throw notFound()
 
-    // 앱을 켤 때 시작한 로그인 되살리기(쿠키 갱신)가 끝난 뒤 진행한다. 늦게 끝난 갱신이 새 로그인을 덮어쓰지 않게 한다
-    await whenSessionRestored()
+    // 앱을 켤 때의 로그인 되살리기는 루트 라우트가 먼저 기다려서, 늦게 끝난 갱신이 새 로그인을 덮어쓰지 않는다
 
     const pending = takePendingLogin()
     if (!pending) {
@@ -82,8 +80,6 @@ export const Route = createFileRoute('/auth/$provider/callback')({
       // 코드 만료 · 등록되지 않은 콜백 주소(INVALID_REQUEST) · 네트워크 오류 모두 같은 실패 화면을 보여 준다
       return { returnTo }
     }
-    // 전에 로그인했던 사람의 정보가 남지 않게 지운다
-    context.queryClient.removeQueries({ queryKey: usersQueryKey })
     throw redirectToReturn(returnTo, true)
   },
   pendingComponent: LoginPending,

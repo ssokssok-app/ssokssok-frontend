@@ -1,5 +1,5 @@
 import { Button } from '@base-ui/react/button'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
   useCanGoBack,
@@ -8,8 +8,7 @@ import {
 import { type ReactNode, useState } from 'react'
 
 import { deleteAccount, logout } from '@/api/auth'
-import { hasSession, whenSessionRestored } from '@/api/client'
-import { meQueryOptions, usersQueryKey } from '@/api/users'
+import { meQueryOptions } from '@/api/users'
 import ArrowBackIosIcon from '@/assets/icons/24/arrow-back-ios.svg?react'
 import profilePlaceholderImage from '@/assets/images/profile-placeholder.svg'
 import warningImage from '@/assets/images/warning.png'
@@ -28,12 +27,6 @@ import {
 } from './-auth/social-login'
 
 export const Route = createFileRoute('/settings')({
-  // 주소로 바로 열었을 때 로그인을 되살리는 동안 비로그인 화면이 잠깐 보이지 않게 기다리고, 내 정보를 미리 받는다
-  loader: async ({ context }) => {
-    await whenSessionRestored()
-    // prefetchQuery 는 실패해도 던지지 않는다. 실패는 화면의 useQuery 가 보여 준다
-    if (hasSession()) await context.queryClient.prefetchQuery(meQueryOptions())
-  },
   component: SettingsPage,
 })
 
@@ -46,7 +39,6 @@ function SettingsPage() {
   const navigate = Route.useNavigate()
   const canGoBack = useCanGoBack()
   const showToast = useToast()
-  const queryClient = useQueryClient()
   const { isLoggedIn } = useAuth()
   const [loginSheetOpen, setLoginSheetOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -73,7 +65,8 @@ function SettingsPage() {
     showToast('아직 준비 중이에요')
   }
 
-  // 로그아웃은 확인 없이 바로 한다 (Figma 에 확인 창이 없다). 실패하면 쿠키가 남아 다시 로그인되므로 알린다
+  // 로그아웃은 확인 없이 바로 한다 (Figma 에 확인 창이 없다). 실패하면 쿠키가 남아 다시 로그인되므로 알린다.
+  // 사용자 정보 캐시는 로그인이 바뀌면 src/main.tsx 가 지운다
   async function handleLogout() {
     try {
       await logout()
@@ -82,9 +75,7 @@ function SettingsPage() {
         title: '로그아웃하지 못했어요',
         description: '인터넷 연결을 확인하고\n다시 시도해주세요.',
       })
-      return
     }
-    queryClient.removeQueries({ queryKey: usersQueryKey })
   }
 
   async function handleDeleteAccount() {
@@ -99,7 +90,6 @@ function SettingsPage() {
       })
       return
     }
-    queryClient.removeQueries({ queryKey: usersQueryKey })
     navigate({ to: '/', replace: true })
     showToast('탈퇴했어요')
   }
@@ -206,14 +196,11 @@ function AccountSection({ onLogout }: { onLogout: () => void }) {
         <div className="flex min-w-0 flex-col">
           <p className="text-body-semibold text-gray-900">현재 로그인된 계정</p>
           {/* 이메일 대신 닉네임을 보여 준다. 카카오는 이메일이 없고, 주 사용자에게 이름이 알아보기 쉽다 (2026-09-15 사용자와 정함) */}
-          {me && (
-            <p className="text-body-regular text-gray-600">{me.nickname}</p>
-          )}
-          {isError && (
-            <p className="text-body-regular text-gray-600">
-              계정 정보를 불러오지 못했어요
-            </p>
-          )}
+          {/* 불러오는 동안에도 줄을 비워 두어, 닉네임이 들어올 때 화면이 밀리지 않게 한다 */}
+          <p className="text-body-regular text-gray-600">
+            {me?.nickname ??
+              (isError ? '계정 정보를 불러오지 못했어요' : '\u00a0')}
+          </p>
         </div>
       </div>
       {/* 보이는 높이는 Figma(테두리 포함 32px) 그대로 두고, 누르는 영역만 위아래로 4px 씩 넓힌다 */}

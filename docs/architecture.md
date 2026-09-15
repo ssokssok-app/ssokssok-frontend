@@ -21,10 +21,10 @@
 
 1. 라우터를 만든다. `context` 에 `queryClient` 를 넣고, 링크에 마우스를 올리면 미리 불러오게 한다.
 2. `initFontScale()` 로 저장된 큰글씨 설정을 첫 렌더 전에 적용한다.
-3. `restoreSession()` (`src/api/client.ts`) 이 로그인한 적이 있으면 쿠키로 액세스 토큰을 다시 받기 시작한다. 기다리지 않고 바로 렌더한다.
+3. `initSession()` (`src/api/client.ts`) 이 로그인한 적이 있으면 쿠키로 액세스 토큰을 다시 받기 시작하고, 다른 탭의 로그인 · 로그아웃을 따라가게 한다. 로그인이 바뀔 때마다 사용자 정보 캐시(`usersQueryKey`)를 지우도록 구독한다.
 4. `QueryClientProvider` 와 `RouterProvider` 를 렌더한다.
 
-루트 레이아웃 `src/routes/__root.tsx` 는 모든 화면을 `ToastProvider` 로 감싼다. 화면 어디서든 `useToast()` (`src/hooks/useToast.ts`) 로 알림을 띄운다.
+루트 라우트 `src/routes/__root.tsx` 는 `beforeLoad` 에서 로그인 되살리기가 끝날 때까지 기다린 뒤 화면을 그린다. 보통 0.1~0.3초라 바로 뜨고, 1초가 넘을 때만 "잠시만 기다려주세요" 대기 화면을 보여 준다 (보이면 0.5초는 유지). 루트 레이아웃은 모든 화면을 `ToastProvider` 로 감싼다. 화면 어디서든 `useToast()` (`src/hooks/useToast.ts`) 로 알림을 띄운다.
 그 안에서 모든 화면을 앱 폭(`max-w-app`, 600px) 흰 기둥에 넣어 가운데 세운다. 기둥 바깥 배경은 `body` 가 칠한다 (`docs/product.md` "UX 원칙").
 
 ## 데이터 흐름
@@ -73,9 +73,10 @@ function SettingsPage() {
 - **요청 함수:** 백엔드 요청은 `src/api/client.ts` 의 `apiRequest` 로 보낸다. 실패하면 `ApiError`(`src/api/errors.ts`)를 던진다. 로그인이 필요한 요청은 `auth: true` 로 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다
 - **웹 토큰 (2026-09-15 결정):** 액세스 토큰은 `src/api/client.ts` 메모리에만 두고, 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키라 프론트 코드가 다루지 않는다 (응답 본문의 `refreshToken` 은 앱용이라 읽지 않는다). 토큰은 localStorage · sessionStorage · URL 에 두지 않는다. 이유와 백엔드 쪽 조건은 `docs/api-contract.md` "웹 토큰 저장"
   - 앱을 켤 때 갱신 요청으로 로그인을 되살린다. 쿠키는 읽을 수 없어 "로그인한 적 있음" 표시(참/거짓)만 localStorage 에 두고, 표시가 없으면 갱신 요청을 보내지 않는다 (비로그인 사용자의 헛된 요청을 줄인다)
-  - 되살리는 동안 앱 전체를 멈추지 않는다. 로그인 여부로 갈리는 곳만 `whenSessionRestored()` 를 기다린다: 설정 화면 loader, 홈의 문서 넣기, 로그인 콜백 loader, `auth: true` 요청
+  - 되살리기는 루트 라우트가 첫 화면 전에 한 번 기다린다. 화면마다 따로 기다리면 빠뜨리는 곳이 생겨(예: 개인정보 안내 확인 직후) 이미 로그인한 사람에게 로그인 시트가 뜰 수 있어서다. 화면은 `useAuth()` 의 로그인 여부를 바로 쓴다
+  - 다른 탭에서 로그인 표시가 바뀌면(`storage` 이벤트) 이 탭도 로그아웃하거나 쿠키로 따라 되살린다
   - 여러 요청이 동시에 만료로 실패해도 갱신은 한 번만 보내고 나머지는 그 결과를 기다린다. 갱신이 401 이면 로그인이 끝난 것으로 보고, 네트워크 · 서버 오류는 로그인을 지우지 않는다
-  - 로그인 여부가 바뀌면(로그인 · 로그아웃 · 탈퇴) `usersQueryKey` 쿼리를 지워 다른 사람 정보가 남지 않게 한다
+  - 로그인이 바뀌면(로그인 · 로그아웃 · 탈퇴 · 만료 · 다른 탭) `src/main.tsx` 가 한 곳에서 `usersQueryKey` 쿼리를 지운다. 사용자별 데이터는 이 키 아래에 둔다
 - **미정 (정해지면 여기에 적는다):** API 타입 생성 방식(Swagger 에서 만들지)
 - **소셜 로그인 흐름:**
   1. 로그인 시트의 버튼이 `src/routes/-auth/social-login.ts` 의 `startSocialLogin` 을 부른다. `state`(무작위 값)와 돌아갈 화면(홈 · 설정 중 하나)을 sessionStorage 에 두고 카카오 · 구글 로그인 화면으로 이동한다. 로그인 화면에 다녀오면 페이지가 새로 열려 메모리가 비기 때문이다. 토큰이 아니라 한 번 쓰고 지우는 확인 값이라 괜찮다

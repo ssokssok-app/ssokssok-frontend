@@ -3,7 +3,8 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-import { restoreSession } from '@/api/client'
+import { initSession, subscribeSession } from '@/api/client'
+import { usersQueryKey } from '@/api/users'
 import { initFontScale } from '@/hooks/useFontScale'
 import { queryClient } from '@/lib/query-client'
 import { routeTree } from './routeTree.gen'
@@ -25,8 +26,10 @@ declare module '@tanstack/react-router' {
 }
 
 initFontScale()
-// 로그인한 적이 있으면 첫 화면을 그리는 동안 쿠키로 로그인을 되살린다 (기다리지 않는다)
-restoreSession()
+// 로그인한 적이 있으면 쿠키로 로그인을 되살리기 시작한다. 루트 라우트가 끝날 때까지 기다린 뒤 첫 화면을 그린다
+initSession()
+// 로그인 · 로그아웃 · 탈퇴 · 만료 · 다른 탭 로그아웃 등 로그인이 바뀌면 한 곳에서 사용자 정보 캐시를 지운다
+subscribeSession(() => queryClient.removeQueries({ queryKey: usersQueryKey }))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 
-import { hasSession, whenSessionRestored } from '@/api/client'
 import type { SampleId } from '@/api/samples'
 import CameraFilledIcon from '@/assets/icons/32/camera-filled.svg?react'
 import DocumentFilledIcon from '@/assets/icons/32/document-filled.svg?react'
@@ -80,15 +79,11 @@ function HomePage() {
     if (resume) navigate({ to: '/', search: {}, replace: true })
   }, [resume, navigate])
 
-  async function startInput(method: InputMethod) {
+  // 로그인 되살리기는 루트 라우트가 첫 화면 전에 기다려서, 여기서는 로그인 여부를 바로 본다
+  function startInput(method: InputMethod) {
     setInputMethod(method)
-    if (!privacyNotice.isDismissed) {
-      setGuideStep('privacy')
-      return
-    }
-    // 앱을 켤 때 로그인을 되살리는 중이면 끝난 뒤에 로그인 여부를 본다 (보통 이미 끝나 있다)
-    await whenSessionRestored()
-    setGuideStep(hasSession() ? 'documentTypes' : 'login')
+    if (!privacyNotice.isDismissed) setGuideStep('privacy')
+    else setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
   }
 
   // 안내 창을 바깥 누르기 · 쓸어내리기로 닫으면 문서 넣기를 그만둔다.

@@ -10,6 +10,7 @@ import { toApiError } from './errors'
  * - 로그인이 필요한 요청이 401 이면 갱신한 뒤 한 번 다시 보낸다. 여러 요청이 동시에 실패해도 갱신은 한 번만 나간다.
  * - 쿠키는 읽을 수 없어 로그인했는지 알 수 없다. 그래서 "로그인한 적 있음" 표시(참/거짓)만 localStorage 에 두고,
  *   표시가 없으면 앱을 켤 때 갱신 요청을 보내지 않는다. 토큰이 아니라 가져가도 쓸 수 없다. localStorage 접근은 이 파일에서만 한다.
+ * - 이 표시가 다른 탭에서 바뀌면(로그인 · 로그아웃) 이 탭도 따라간다. 쿠키는 탭끼리 같이 쓰기 때문이다.
  */
 
 const SESSION_HINT_KEY = 'has-session'
@@ -37,11 +38,14 @@ function writeSessionHint(loggedIn: boolean) {
   }
 }
 
-function setAccessToken(next: string | null) {
-  const changed = (accessToken === null) !== (next === null)
+function setAccessToken(
+  next: string | null,
+  { newSession = false }: { newSession?: boolean } = {},
+) {
+  const changed = newSession || (accessToken === null) !== (next === null)
   accessToken = next
   writeSessionHint(next !== null)
-  // 갱신으로 토큰만 바뀐 때는 로그인 여부가 같아 알리지 않는다
+  // 갱신으로 같은 로그인의 토큰만 바뀐 때는 알리지 않는다
   if (changed) listeners.forEach((listener) => listener())
 }
 
@@ -56,9 +60,9 @@ export function hasSession() {
   return accessToken !== null
 }
 
-/** 로그인 응답의 액세스 토큰으로 로그인을 시작한다 */
+/** 로그인 응답의 액세스 토큰으로 로그인을 시작한다. 이미 로그인 중이어도 다른 계정일 수 있어 알린다 */
 export function beginSession(token: string) {
-  setAccessToken(token)
+  setAccessToken(token, { newSession: true })
 }
 
 /** 로그아웃 · 탈퇴 뒤 메모리의 토큰과 로그인 표시를 지운다 */
@@ -66,14 +70,25 @@ export function endSession() {
   setAccessToken(null)
 }
 
-/** 앱을 켤 때 한 번 부른다 (src/main.tsx). 로그인한 적이 있으면 쿠키로 액세스 토큰을 다시 받는다 */
-export function restoreSession() {
+/** 앱을 켤 때 한 번 부른다 (src/main.tsx). 로그인한 적이 있으면 쿠키로 액세스 토큰을 다시 받고, 다른 탭의 로그인 여부를 따라간다 */
+export function initSession() {
   if (readSessionHint()) restoring = refreshAccessToken()
+  window.addEventListener('storage', handleStorage)
+}
+
+// 다른 탭에서 로그아웃하면 이 탭도 로그아웃하고, 로그인하면 쿠키로 따라 되살린다 (key === null 은 localStorage.clear())
+function handleStorage(event: StorageEvent) {
+  if (event.key !== null && event.key !== SESSION_HINT_KEY) return
+  const loggedInElsewhere = readSessionHint()
+  if (!loggedInElsewhere && accessToken !== null) setAccessToken(null)
+  else if (loggedInElsewhere && accessToken === null) {
+    restoring = refreshAccessToken()
+  }
 }
 
 /**
- * 앱을 켤 때의 로그인 되살리기가 끝날 때까지 기다린다.
- * 로그인 여부로 화면이나 동작이 갈리는 곳(설정 화면, 문서 넣기, 로그인 콜백)은 이것을 기다린 뒤 hasSession() 을 본다.
+ * 로그인 되살리기가 끝날 때까지 기다린다.
+ * 루트 라우트가 첫 화면을 그리기 전에 기다려서, 화면들은 따로 기다리지 않고 로그인 여부를 바로 본다.
  */
 export function whenSessionRestored() {
   return restoring
