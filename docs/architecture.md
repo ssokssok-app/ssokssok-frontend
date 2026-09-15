@@ -63,6 +63,14 @@ function SettingsPage() {
 - 서버와 무관한 UI 상태는 컴포넌트 state 에 둔다.
 - 브라우저에 저장하는 설정은 `useFontScale.ts` · `usePrivacyNotice.ts` 처럼 `useSyncExternalStore` 훅 하나로 감싸고, `localStorage` 접근을 그 파일 안에만 둔다. 예외로 "로그인한 적 있음" 표시는 토큰과 함께 `src/api/client.ts` 가 다룬다.
 
+## 테스트
+
+- 로직 테스트는 Vitest 다 (`vitest.config.ts`). 화면을 띄우지 않는 순수 함수와 백엔드 응답 확인만 테스트하고, 브라우저 흉내(jsdom)는 쓰지 않는다. `pnpm check` 에서 돌아 종료 훅 · CI 가 함께 돌린다
+- 테스트 파일은 테스트할 파일 옆에 같은 이름 뒤에 .test.ts 를 붙여 둔다 (`src/routes/-result/source-excerpt.test.ts`). 라우트 폴더 안에서도 `-` 폴더에 두어 라우트로 잡히지 않게 한다
+- 백엔드를 부르는 함수는 `vi.mock('./client')` 로 `apiRequest` 만 바꿔 응답 모양 확인을 테스트한다 (`src/api/conversion.test.ts`). 실제 서버는 부르지 않는다
+- 화면 컴포넌트 안에 계산이 커지면 순수 함수로 빼서 테스트한다 (`src/routes/-result/loading-progress.ts`)
+- 경계 조건(맨 처음 · 맨 끝, 빈 값, 모르는 code · 값)을 먼저 테스트한다. 버그를 고치면 그 경우를 테스트로 남긴다
+
 ## 백엔드 연동
 
 - 백엔드는 FastAPI 이고 별도 레포(`ssokssok-app/ssokssok-backend`)다. 배포 주소는 `https://ssokssok-backend.fly.dev` (Fly.io 도쿄, 최소 1대 상시), 모든 API 는 `/api` 아래에 있다.
