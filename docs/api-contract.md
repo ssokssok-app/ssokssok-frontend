@@ -2,7 +2,7 @@
 
 프론트가 Figma 화면 기준으로 질문과 결과 데이터 초안을 보냈고, 백엔드가 2026-09-14 에 답했다 (ssokssok-backend `feature/ocr` 기준). 아래 "정해진 것" 이 그 답이다.
 
-- 필드 모양의 최종 기준은 백엔드 Swagger(`https://ssokssok-backend.fly.dev/docs`)다. 스키마가 확정되면 `src/types/document-result.ts` 를 맞추고, 가능하면 Swagger 에서 타입을 만든다 (`docs/architecture.md` "백엔드 연동")
+- 필드 모양의 최종 기준은 백엔드 Swagger(`https://ssokssok-backend.fly.dev/docs`)다. `src/types/document-result.ts` 는 Swagger 의 `DocumentResult` 와 1:1 로 맞춰 두었다 (2026-09-15). 지금은 손으로 맞추고, Swagger 에서 타입을 만드는 방식은 미정이다 (`docs/architecture.md` "백엔드 연동")
 - 백엔드에 연결하기 전에는 `src/api/` 의 호출 함수가 목데이터를 돌려준다. 연결할 때 함수 안만 바꾼다
 
 ## 정해진 것
@@ -35,13 +35,16 @@
 
 ### 3. 결과 데이터
 
-아래 "결과 데이터 초안" 모양을 기준으로 백엔드가 새로 만든다 (문서 종류 분류, 문단 묶기 · 소제목, mustCheck · todos · faqs 추출).
+프론트 초안을 기준으로 백엔드가 만들었다 (문서 종류 분류, 문단 묶기 · 소제목, mustCheck · todos · faqs 추출). 2026-09-15 백엔드 스키마(`DocumentResult`)를 확인해 아래 "결과 데이터" 에 옮겼다.
 
 - 소제목이 없는 문서는 `paragraphs[].title` 이 `null`
 - 지원하지 않는 문서 종류는 `mustCheck` · `todos` · `faqs` 가 `null`
 - 문서가 아니거나 너무 흐린 사진은 결과 대신 `IMAGE_UNREADABLE` 오류(422)
 - 서버는 원문 · 사진 · 결과를 저장하지 않는다 (2026-09-14 확인)
-- 원문 강조는 **줄 단위(A안)** 로 시작한다 (2026-09-14 프론트 결정): 관련 내용이 있는 원문 줄을 통째로 강조한다. 줄 안 일부만 강조하는 B안(Figma 원문 보기 모습)은 AI 가 원문을 그대로 옮겨 적어야 해서 깨질 수 있다. 써 보고 부족하면 B안으로 바꾼다. 프론트 타입(조각 배열)은 두 안 모두 담을 수 있어 화면은 그대로다
+- 원문 강조는 **줄 단위(A안)** 다 (2026-09-14 프론트 결정, 2026-09-15 백엔드 반영): 결과에 OCR 줄 목록 `sourceLines: [{ id, text }]` 를 한 번 주고, 문단마다 가리키는 줄 id 만 `sourceLineIds` 로 준다. 줄 안 일부만 강조하는 B안(Figma 원문 보기 모습)은 AI 가 원문을 그대로 옮겨 적어야 해서 깨질 수 있다. 써 보고 부족하면 B안으로 바꾼다. 발췌(강조 줄 + 앞뒤 줄)는 프론트가 만든다 (`src/routes/-result/source-excerpt.ts`)
+- `kind` 코드는 `labor_contract` · `lease_contract` · `fine` · `notice` · `other` 다. 백엔드 AI 가 `category`(근로계약서 · 임대차계약서 · 과태료 · 안내문 · 그 외)로 분류하고 코드로 바꾼다
+- `paragraphs[].id` 는 순서대로 `p1`, `p2` …, `sourceLines[].id` 는 OCR 순서대로 `e1`, `e2` … 다
+- **백엔드에 알릴 것:** `category` 문구가 Figma 이름표(계약서 · 과태료 통지서 · 안내문)와 다르다. 어느 쪽을 쓸지는 `docs/product.md` "확인 필요"
 
 ### 4. 오류 형식
 
@@ -152,10 +155,10 @@
 
 ### 연결 작업 전에 필요한 것
 
-1. **스키마 먼저**: 설계안 API 의 요청 · 응답 모델(Pydantic)과 고정 값을 돌려주는 임시 구현을 먼저 올려 주면, 프론트가 Swagger 에서 타입을 만들고 연결을 시작한다. 언제 가능한가
+1. **스키마 먼저** (2026-09-15 반영): 설계안 API 의 요청 · 응답 모델(Pydantic)과 고정 값을 돌려주는 임시 구현이 Swagger 에 올라왔다. 프론트 타입을 맞췄고, 샘플 내용이 채워지면 연결한다
 2. **변환 결과 받기**: 상태 조회가 `status: "done"` 일 때 `result` 를 같이 준다. `status` 는 `queued | processing | done | failed | canceled`, `failed` 면 `error: { code, message }` 를 같이 준다. 프론트는 2초마다 조회하고 1분이 넘으면 4초로 늘린다. 작업 최대 처리 시간(예: 3분)을 넘기면 `failed`(`TIMEOUT`)
 3. **결과 임시 보관 · 경로**: 서버는 결과를 저장하지 않지만 결과 화면에서 듣기 · 저장을 쓰려면 잠시 들고 있어야 한다. 완료 뒤 30분 동안 메모리에만 두고(디스크 · DB 저장 없음), 듣기 · 저장은 `job_id` 로 부른다: `/documents/convert/{job_id}/paragraphs/{i}/audio`, `/documents/convert/{job_id}/export`. 30분이 지나면 `JOB_EXPIRED`. 샘플은 `/documents/samples/{id}/paragraphs/{i}/audio` · `/documents/samples/{id}/export` 를 토큰 없이
-4. **표기 · 경로**: 응답 JSON 은 camelCase 로 맞춘다. Pydantic `alias_generator=to_camel` 설정 한 줄이면 되고 TypeScript 관례와 같아 변환 코드가 필요 없다 (스파이크는 snake_case). 모든 API 는 `/api` 아래에 둔다 (스파이크는 접두사 없음). 배포 때 같은 도메인이면 `/api` 만 서버로 넘기면 되고 개발 프록시도 그대로 쓴다
+4. **표기 · 경로** (2026-09-15 반영): 응답 JSON 은 camelCase 로 맞춘다. Pydantic `alias_generator=to_camel` 설정 한 줄이면 되고 TypeScript 관례와 같아 변환 코드가 필요 없다 (스파이크는 snake_case). 모든 API 는 `/api` 아래에 둔다 (스파이크는 접두사 없음). 배포 때 같은 도메인이면 `/api` 만 서버로 넘기면 되고 개발 프록시도 그대로 쓴다
 
 ### 화면 작업 때 필요한 것
 
@@ -176,7 +179,7 @@
    | `INTERNAL_ERROR`     | 500  | 다시 시도                             |
 
 6. **업로드 크기**: 프론트가 줄인 사진은 장당 1MB 안팎이라 10장이어도 10MB 쯤이다. 요청 전체 최대 20MB, PDF 는 파일 20MB · 10페이지를 제안한다. 요청 중에는 프론트가 버튼을 잠가 같은 변환을 두 번 보내지 않는다
-7. **원문 모양 (A안)**: 스파이크처럼 OCR 줄 목록을 결과에 한 번 주고 (`sourceLines: [{ id, text }]`), 문단마다 줄 번호만 준다 (`sourceLineIds: ["e3", "e4"]`). 프론트가 그 줄을 강조하고 앞뒤 줄을 함께 보여 준다. 문단마다 원문을 되풀이하지 않아 응답이 작고, 스파이크 방식 그대로라 만들기 쉽다. 샘플의 "원문 텍스트" 도 같은 필드로 준다. 합의되면 프론트가 `src/types/document-result.ts` 의 `source` 를 이 모양으로 바꾼다
+7. **원문 모양 (A안)** (2026-09-15 반영, 위 "3. 결과 데이터"): 스파이크처럼 OCR 줄 목록을 결과에 한 번 주고 (`sourceLines: [{ id, text }]`), 문단마다 줄 번호만 준다 (`sourceLineIds: ["e3", "e4"]`). 프론트가 그 줄을 강조하고 앞뒤 줄을 함께 보여 준다. 문단마다 원문을 되풀이하지 않아 응답이 작고, 스파이크 방식 그대로라 만들기 쉽다. 샘플의 "원문 텍스트" 도 같은 필드로 준다
 8. **로그인 토큰** (2026-09-15 백엔드 반영, 위 "5. 로그인"): `POST /auth/refresh` 로 액세스 토큰을 새로 받는다. 액세스 30분 · 리프레시 14일, 로그인 요청 본문은 `{ code, redirectUri }`. 토큰 없는 변환 요청은 401(`UNAUTHORIZED`). 로그인한 사용자의 하루 이용 횟수 제한이 있다면 그 값과 code(`RATE_LIMITED`, 429)
    - 웹의 로그인 · 갱신 응답: 액세스 토큰은 본문, 리프레시 토큰은 쿠키 `HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=1209600`. `Max-Age` 가 없으면 브라우저를 닫을 때 지워진다
    - `/auth/refresh` 는 본문이 아니라 쿠키에서 리프레시 토큰을 읽는다. `/auth/logout` 은 쿠키를 지운다 (`Max-Age=0`)
@@ -186,9 +189,9 @@
 10. **듣기 · 저장 세부**: `speed` 는 `slow | normal | fast` 로 보내고 서버가 클로바 값으로 바꾼다. `voice` 는 기본 목소리 하나로 시작해 생략할 수 있게 한다. 음성은 `audio/mpeg`, PDF 는 `application/pdf` 에 `Content-Disposition: attachment` (파일 이름 포함)
 11. **샘플 id**: 프론트 목데이터와 같은 `work-contract` · `house-contract` · `pension-notice` · `fine` 을 쓰면 연결할 때 바꿀 곳이 없다
 
-## 결과 데이터 초안
+## 결과 데이터
 
-변환 결과 한 건. 샘플 결과도 같은 모양이다. 필드 설명은 `src/types/document-result.ts` 주석을 따른다. 필드 이름 표기(위 3번)는 백엔드와 맞추는 중이다.
+변환 결과 한 건 (Swagger `DocumentResult`, 2026-09-15). 샘플 결과도 같은 모양이다. 필드 설명은 `src/types/document-result.ts` 주석을 따른다.
 
 ```json
 {
@@ -198,16 +201,16 @@
   "summary": "최근 소득 활동이 확인되어,\n2024년 11월 14일까지 가입 신고가 필요해요.",
   "paragraphs": [
     {
+      "id": "p1",
       "title": null,
       "body": "국민연금공단에서 확인한 자료에 따르면, 최근에 소득이 있었던 것으로 확인됐어요.",
-      "source": [
-        [{ "text": "국민연금은 국민의 생활안정과 …", "highlighted": false }],
-        [
-          { "text": "최근 공적자료상 고객님은 …", "highlighted": true },
-          { "text": " 아래 가입신고서를 작성하여 …", "highlighted": false }
-        ]
-      ]
+      "sourceLineIds": ["e2", "e3"]
     }
+  ],
+  "sourceLines": [
+    { "id": "e1", "text": "국민연금은 국민의 생활안정과 …" },
+    { "id": "e2", "text": "최근 공적자료상 고객님은 …" },
+    { "id": "e3", "text": "아래 가입신고서를 작성하여 …" }
   ],
   "mustCheck": [{ "label": "기한", "value": "2024년 11월 14일까지" }],
   "todos": ["가입신고서 작성하기", "국민연금공단에 신고하기"],
@@ -221,5 +224,6 @@
 ```
 
 - `paragraphs[].title`: 소제목이 없는 문서는 `null` (Figma 국민연금은 소제목 없음, 계약서 · 과태료는 있음)
-- `paragraphs[].source`: 원문 문단 배열이고, 문단마다 조각 배열이다. 강조 조각 앞뒤의 강조되지 않은 조각은 읽는 흐름을 위해 같이 준다. 원문을 찾지 못하면 `null`. 지금은 줄 단위(A안)라 조각 하나가 원문 한 줄이다 (예시는 B안 모양)
-- `mustCheck` · `todos` · `faqs`: 지원하지 않는 문서라 만들 수 없으면 `null`. 화면은 "이 문서 형태에서는 제공할 수 없어요." 를 보여 준다
+- `paragraphs[].sourceLineIds`: 이 문단을 만든 원문 줄의 id. 원문을 찾지 못하면 `null` 이고 원문 보기를 띄우지 않는다. 프론트는 실제로 있는 줄만 강조하고 앞뒤 2줄을 강조 없이 함께 보여 준다 (`docs/product.md` "결과 화면")
+- `sourceLines`: OCR 이 읽은 사진의 한 줄씩. 문단이 가리키지 않는 줄도 모두 들어 있다
+- `mustCheck` · `todos` · `faqs`: 지원하지 않는 문서(`other`)라 만들 수 없으면 `null`. 화면은 "이 문서 형태에서는 제공할 수 없어요." 를 보여 준다

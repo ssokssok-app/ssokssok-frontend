@@ -1,29 +1,40 @@
 import { Dialog } from '@base-ui/react/dialog'
+import { Fragment } from 'react'
 
 import ArrowBackIosIcon from '@/assets/icons/24/arrow-back-ios.svg?react'
 import { GnbIconButton } from '@/components/gnb'
-import type { ResultParagraph } from '@/types/document-result'
+import type { DocumentResult } from '@/types/document-result'
 
 import { ResultHeader } from './result-header'
+import { getSourceExcerpt } from './source-excerpt'
 
 interface SourceViewProps {
-  /** 원문을 볼 쉬운 문단. null 이거나 원문이 없으면 닫힌다 */
-  paragraph: ResultParagraph | null
+  result: DocumentResult
+  /** 원문을 볼 쉬운 문단 번호 (주소의 ?paragraph=). 없거나 그 문단에 원문이 없으면 닫힌다 */
+  paragraphIndex: number | undefined
   onClose: () => void
 }
 
 /**
- * 원문 보기 (Figma 149:1798). 쉬운 문단과, 그 문단을 만든 원문 부분을 강조해 보여 준다.
+ * 원문 보기 (Figma 149:1798). 쉬운 문단과, 그 문단을 만든 원문 줄을 강조해 보여 준다 (src/routes/-result/source-excerpt.ts).
  *
  * 결과 화면 위에 화면 전체를 덮는 대화상자로 띄운다. 결과 화면을 그대로 두어서 닫으면 보던 위치로 돌아간다.
  * 원문 발췌 위아래는 흰색으로 흐려서 원문의 일부라는 것을 보여 준다 (Figma 149:1854 · 149:1855).
  */
-export function SourceView({ paragraph, onClose }: SourceViewProps) {
-  const source = paragraph?.source
+export function SourceView({
+  result,
+  paragraphIndex,
+  onClose,
+}: SourceViewProps) {
+  const paragraph =
+    paragraphIndex === undefined
+      ? null
+      : (result.paragraphs[paragraphIndex] ?? null)
+  const excerpt = paragraph && getSourceExcerpt(result.sourceLines, paragraph)
 
   return (
     <Dialog.Root
-      open={Boolean(source)}
+      open={Boolean(excerpt)}
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
@@ -41,7 +52,7 @@ export function SourceView({ paragraph, onClose }: SourceViewProps) {
             }
           />
 
-          {paragraph && source && (
+          {paragraph && excerpt && (
             <div className="flex flex-col gap-4 pt-[30px] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
               <div className="flex flex-col gap-8 px-5">
                 <section className="flex flex-col gap-3">
@@ -64,27 +75,23 @@ export function SourceView({ paragraph, onClose }: SourceViewProps) {
                   <h2 className="text-subtitle-semibold text-gray-900">
                     원문의 이 부분에서 가져왔어요
                   </h2>
-                  <div className="relative flex flex-col gap-body2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
-                    {source.map((segments, paragraphIndex) => (
-                      <p
-                        // 원문 문단 순서는 바뀌지 않는다
-                        key={paragraphIndex}
-                        className="text-body2-regular text-gray-900"
-                      >
-                        {segments.map((segment, segmentIndex) =>
-                          segment.highlighted ? (
-                            <mark
-                              key={segmentIndex}
-                              className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500"
-                            >
+                  <div className="relative overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
+                    {/* 원문 줄들을 띄어쓰기로 이어 한 문단처럼 보여 준다. 조각 사이의 띄어쓰기는 강조 밖에 둔다 */}
+                    <p className="text-body2-regular text-gray-900">
+                      {excerpt.map((segment, index) => (
+                        // 조각 순서는 바뀌지 않는다
+                        <Fragment key={index}>
+                          {index > 0 && ' '}
+                          {segment.highlighted ? (
+                            <mark className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500">
                               {segment.text}
                             </mark>
                           ) : (
-                            <span key={segmentIndex}>{segment.text}</span>
-                          ),
-                        )}
-                      </p>
-                    ))}
+                            segment.text
+                          )}
+                        </Fragment>
+                      ))}
+                    </p>
                     <div
                       aria-hidden
                       className="pointer-events-none absolute inset-x-0 top-0 h-[75px] bg-linear-to-b from-white/60 from-27% to-white/0"

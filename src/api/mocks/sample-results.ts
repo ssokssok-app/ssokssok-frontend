@@ -1,75 +1,78 @@
-import type { DocumentResult, SourceParagraph } from '@/types/document-result'
+import type { DocumentResult, SourceLine } from '@/types/document-result'
 
 import type { SampleId } from '../samples'
 
 /*
  * 샘플 결과 목데이터. 문구는 Figma 결과 화면(국민연금 73:2264, 임대차 94:1072, 과태료 94:3082, 근로계약서 111:1338)을 그대로 옮겼다.
- * 백엔드가 샘플 결과를 주면 이 파일은 지운다 (docs/api-contract.md "샘플 문서").
+ * 백엔드가 샘플 결과를 채우면 이 파일은 지운다 (docs/api-contract.md "샘플 문서").
  *
- * 원문(source)은 Figma "원문 보기" 화면(149:1798)에 있는 국민연금 안내문 원문만 있어서, 그 원문으로 설명할 수 있는 문단에만 붙였다.
+ * 원문(sourceLines)은 Figma "원문 보기" 화면(149:1798)에 있는 국민연금 안내문 원문만 있어서, 그 원문으로 설명할 수 있는 문단에만 붙였다.
  * 나머지 문단은 원문 텍스트를 받기 전까지 null 이다.
  */
 
-const pensionSource = {
-  purpose:
-    '국민연금은 국민의 생활안정과 복지증진을 위하여 국가가 시행하는 소득보장제도입니다.',
-  eligibility:
-    '만 18세 이상 60세 미만인 국민은 국민연금에 당연히 가입되며(공무원 등 일부 제외),',
-  obligation:
-    ' 소득활동에 종사하는 경우에는 반드시 공단에 소득신고를 하여 소득에 따른 연금보험료를 납부하여야 합니다.',
-  notice:
-    '최근 공적자료상 고객님은 소득활동에 종사하는(하였던) 것으로 확인되어 안내하오니,',
-  howToReport:
-    ' 아래 가입신고서를 작성하여 2024년 11월 14일까지 공단에 Fax, 우편 제출 또는 전화로 신고하여 주시기 바랍니다.',
-}
-
-function pensionSourceParagraphs(
-  highlighted: (keyof typeof pensionSource)[],
-): SourceParagraph[] {
-  const segment = (key: keyof typeof pensionSource) => ({
-    text: pensionSource[key],
-    highlighted: highlighted.includes(key),
-  })
-  return [
-    [segment('purpose')],
-    [segment('eligibility'), segment('obligation')],
-    [segment('notice'), segment('howToReport')],
-  ]
-}
+// Figma 원문 보기 화면의 원문을 OCR 줄 모양(사진의 한 줄, e1 · e2 …)으로 나눴다
+const pensionSourceLines: SourceLine[] = [
+  {
+    id: 'e1',
+    text: '국민연금은 국민의 생활안정과 복지증진을 위하여 국가가 시행하는 소득보장제도입니다.',
+  },
+  {
+    id: 'e2',
+    text: '만 18세 이상 60세 미만인 국민은 국민연금에 당연히 가입되며(공무원 등 일부 제외),',
+  },
+  {
+    id: 'e3',
+    text: '소득활동에 종사하는 경우에는 반드시 공단에 소득신고를 하여 소득에 따른 연금보험료를 납부하여야 합니다.',
+  },
+  {
+    id: 'e4',
+    text: '최근 공적자료상 고객님은 소득활동에 종사하는(하였던) 것으로 확인되어 안내하오니,',
+  },
+  {
+    id: 'e5',
+    text: '아래 가입신고서를 작성하여 2024년 11월 14일까지 공단에 Fax, 우편 제출 또는 전화로 신고하여 주시기 바랍니다.',
+  },
+]
 
 export const sampleResults: Record<SampleId, DocumentResult> = {
   'work-contract': {
-    kind: 'work-contract',
+    kind: 'labor_contract',
     category: '계약서',
     title: '근로계약서예요',
     summary: '근무 조건과 급여 내용을 꼭 확인해주세요',
     paragraphs: [
       {
+        id: 'p1',
         title: '계약 안내',
         body: '주식회사 새봄테크와 김하늘은 2026년 9월 1일부터 기간을 정하지 않고 근로계약을 맺었습니다. 이 문서는 예시용이며 실제 효력은 없습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p2',
         title: '근무 장소와 업무',
         body: '근무 장소는 가상시 새봄로 12, 새봄빌딩 5층입니다. 담당 업무는 서비스 운영과 고객 지원입니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p3',
         title: '근무시간과 휴일',
         body: '근무시간은 월요일부터 금요일까지 오전 9시부터 오후 6시까지입니다. 낮 12시부터 오후 1시까지는 휴게시간이며, 매주 일요일은 유급 주휴일입니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p4',
         title: '임금과 지급 방법',
         body: '월 임금은 2,800,000원입니다. 기본급 2,700,000원과 식대 100,000원으로 구성되며 상여금은 없습니다. 급여는 매월 25일 근로자 명의 계좌로 지급합니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p5',
         title: '휴가·보험·계약서 보관',
         body: '연차유급휴가는 근로기준법에 따라 부여합니다. 고용보험·산재보험·국민연금·건강보험을 적용합니다. 회사는 계약서를 작성한 뒤 근로자에게 사본을 교부해야 합니다.',
-        source: null,
+        sourceLineIds: null,
       },
     ],
+    sourceLines: [],
     mustCheck: [
       { label: '근로 시작일', value: '2026년 9월 1일부터' },
       { label: '근무시간', value: '월~금 09:00~18:00\n휴게시간 12:00~13:00' },
@@ -108,67 +111,79 @@ export const sampleResults: Record<SampleId, DocumentResult> = {
   },
 
   'house-contract': {
-    kind: 'house-contract',
+    kind: 'lease_contract',
     category: '계약서',
     title: '원룸 임대차 계약서예요',
     summary: '보증금과 월세, 계약 기간을 꼭 확인해주세요',
     paragraphs: [
       {
+        id: 'p1',
         title: '임대할 집',
         body: '빌리는 집은 경기도 성남시 분당구 정자일로 123-4, 해와담 303호입니다.\n지번 주소는 정자동 456-7번지입니다.\n건물은 철근콘크리트 구조의 단독주택입니다.\n빌리는 곳은 303호 전체, 약 22.6㎡입니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p2',
         title: '보증금과 차임',
         body: '보증금은 500,000원입니다.\n계약금 500,000원은 계약할 때 지급했습니다.\n차임은 5,000,000원입니다.\n매년 12월 29일에 1년 치를 미리 지급합니다.\n잔금의 금액과 지급 날짜는 적혀 있지 않습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p3',
         title: '계약 기간',
         body: '임대인은 2024년 12월 29일까지 집을 사용할 수 있는 상태로 넘겨줍니다.\n계약 기간은 집을 넘겨받은 날부터 2025년 12월 20일까지입니다. 계약서에는 12개월이라고 적혀 있습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p4',
         title: '집 사용 제한',
         body: '임대인의 동의 없이 집의 용도나 구조를 바꿀 수 없습니다. 다른 사람에게 집을 다시 빌려주거나 임차권을 넘길 수도 없습니다.\n임차권을 담보로 제공하거나 다른 목적으로 집을 사용할 수 없습니다. 이를 어기면 임대인은 바로 계약을 해지할 수 있습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p5',
         title: '계약 해제와 종료',
         body: '중도금을 내기 전까지 계약을 해제할 수 있습니다. 중도금이 없다면 잔금을 내기 전까지 가능합니다.\n임대인이 계약을 해제하면 계약금의 2배를 돌려줍니다. 임차인이 해제하면 계약금을 포기합니다.\n계약이 끝나면 집을 원래 상태로 돌려놓고 임대인에게 반환합니다. 밀린 임대료나 손해배상금이 있다면 보증금에서 빼고 나머지를 돌려받습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p6',
         title: '계약 불이행과 손해배상',
         body: '한쪽이 계약을 지키지 않으면 상대방은 서면으로 계약을 지키라고 요구할 수 있습니다. 이후 계약을 해제하고 손해배상을 요구할 수 있습니다.\n별도의 약속이 없다면 계약금을 손해배상의 기준으로 봅니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p7',
         title: '중개보수와 서류',
         body: '임대인이나 임차인이 계약을 지키지 않은 책임은 개업공인중개사가 지지 않습니다.\n계약이 취소되거나 해제되어도 중개보수를 지급합니다.\n중개사는 중개대상물확인설명서와 업무보증관계증서 사본을 임대인과 임차인에게 줍니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p8',
         title: '특약사항',
         body: '현재 집과 시설 상태 그대로 계약합니다. 사용 중 소모품을 파손하면 임차인이 비용을 내고 수리합니다.\n임차인의 책임이 아닌 오래된 시설의 고장이나 파손은 임대인이 수리합니다.\n애완동물을 키울 수 없습니다.\n음주나 소란으로 피해가 생기면 퇴실 조치될 수 있습니다. 흡연하거나 애완동물을 사용하면 도배 비용이 청구될 수 있습니다.\n계약이 끝나기 전에 임차인의 책임으로 나가면 다음 세입자가 들어올 때까지 월차임, 관리비, 중개보수를 부담합니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p9',
         title: '관리비와 추가 비용',
         body: '관리비에는 공용전기료, 청소비, 인터넷, 수도세가 포함됩니다.\n전기료, 도시가스, TV수신료는 임차인이 따로 부담합니다. 퇴실할 때는 청소비 70,000원을 지급합니다.\n집에는 세탁기, 에어컨, 냉장고, 침대, TV, 의자, 전자레인지가 있습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p10',
         title: '입주와 계약 갱신',
         body: '도시가스는 입주 3일 전에 신청합니다.\nJB도시가스 전화번호는 1544-0041입니다.\n계약을 갱신할지는 2달 전에 미리 알려야 합니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p11',
         title: '계약 정보',
         body: '임대인은 이수민, 임차인은 박지현입니다.\n계약일은 2024년 12월 29일입니다.\n중개사무소는 하늘공인중개사사무소이며 전화번호는 031-265-7890입니다.\n대표자와 소속공인중개사는 김지민입니다.',
-        source: null,
+        sourceLineIds: null,
       },
     ],
+    sourceLines: [],
     mustCheck: [
       { label: '계약 기간', value: '2024년 12월 29일 ~ 2025년 12월 20일' },
       {
@@ -218,39 +233,50 @@ export const sampleResults: Record<SampleId, DocumentResult> = {
       '최근 소득 활동이 확인되어,\n2024년 11월 14일까지 가입 신고가 필요해요.',
     paragraphs: [
       {
+        id: 'p1',
+        title: null,
         body: '국민연금은 나이가 들었을 때 생활에 도움을 주는 제도예요. 만 18세 이상 60세 미만인 사람은 국민연금에 가입해야 해요. 일부 공무원 등은 가입 대상에서 제외돼요.',
-        source: pensionSourceParagraphs(['purpose', 'eligibility']),
+        sourceLineIds: ['e1', 'e2'],
       },
       {
+        id: 'p2',
+        title: null,
         body: '국민연금공단에서 확인한 자료에 따르면, 최근에 소득이 있었던 것으로 확인됐어요. 소득은 일을 하거나 사업을 해서 번 돈이에요. 소득이 있다면 국민연금공단에 소득을 신고해야 해요. 소득에 따라 국민연금 보험료를 내야 해요.',
         // Figma 원문 보기 화면에 그려진 강조 그대로
-        source: pensionSourceParagraphs([
-          'eligibility',
-          'obligation',
-          'notice',
-        ]),
+        sourceLineIds: ['e2', 'e3', 'e4'],
       },
       {
+        id: 'p3',
+        title: null,
         body: '2024년 11월 14일까지 신고해야 해요. 가입신고서를 작성한 뒤 팩스나 우편으로 보내거나 전화로 신고할 수 있어요.',
-        source: pensionSourceParagraphs(['howToReport']),
+        sourceLineIds: ['e5'],
       },
       {
+        id: 'p4',
+        title: null,
         body: '신고할 때는 현재 한 달에 평균적으로 버는 돈을 적어요. 이 금액을 신고소득금액이라고 해요. 신고소득금액은 내가 낼 보험료를 정할 때 사용해요. 나중에 받을 국민연금 금액을 정할 때도 사용해요.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p5',
+        title: null,
         body: '매달 내는 국민연금 보험료는 신고소득금액의 9%예요. 예를 들어 신고소득금액이 200만 원이라면, 한 달에 18만 원을 내요.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p6',
+        title: null,
         body: '현재 일을 그만두었거나 소득이 없다면 국민연금공단에 알려주세요. 보험료를 내기 어려운 경우에는 납부예외를 신청할 수 있어요. 납부예외는 일정한 기간 동안 국민연금 보험료를 내지 않는 제도예요.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p7',
+        title: null,
         body: '신고하지 않으면 국민연금공단이 가지고 있는 자료를 바탕으로 가입 처리될 수 있어요. 이 경우 국민연금 보험료가 부과될 수 있어요.',
-        source: null,
+        sourceLineIds: null,
       },
     ],
+    sourceLines: pensionSourceLines,
     mustCheck: [
       { label: '기한', value: '2024년 11월 14일까지' },
       { label: '신고 방법', value: '팩스, 우편, 전화' },
@@ -288,31 +314,37 @@ export const sampleResults: Record<SampleId, DocumentResult> = {
     summary: '위반 내용과 납부 기한을 꼭 확인해주세요',
     paragraphs: [
       {
+        id: 'p1',
         title: '문서 안내',
         body: '이 문서는 교통법규 위반 사실과 과태료 부과 예정 사실을 미리 알려주는 문서입니다.\n대상자는 김하늘이며, 주소는 가상시 새봄로 12, 101동 1004호입니다. 차량번호는 12가 3456입니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p2',
         title: '위반 내용',
         body: '2026년 7월 18일 오후 2시 53분, 가상시 새봄로 12 부근에서 안전운전 의무를 위반한 사실이 확인되었습니다.\n적용 법률은 도로교통법 제48조 제1항입니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p3',
         title: '운전자 확인과 납부 금액',
         body: '차량을 운전한 사람이 확인되면 운전자에게 범칙금 40,000원과 벌점 10점이 부과됩니다.\n운전자가 확인되지 않으면 차량 소유자에게 과태료 50,000원이 부과됩니다. 이 경우 벌점은 없습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p4',
         title: '의견 제출과 납부 기한',
         body: '의견 제출 및 사전 납부 기간은 2026년 8월 12일부터 9월 14일까지입니다.\n운전자는 경찰서 교통민원실에 방문하거나 경찰청 교통민원24 웹사이트에서 범칙금 고지서를 발급받을 수 있습니다.\n위반 내용에 의견이 있다면 기간 안에 관할 경찰서에 의견을 제출할 수 있습니다.',
-        source: null,
+        sourceLineIds: null,
       },
       {
+        id: 'p5',
         title: '과태료 감경',
         body: '의견 제출 기간 안에 과태료를 미리 납부하면 과태료의 20%가 감경됩니다.\n과태료 50,000원에서 20%를 감경받으면 40,000원을 납부하게 됩니다. 감경된 과태료는 납부한 뒤 이의를 제기할 수 없습니다.',
-        source: null,
+        sourceLineIds: null,
       },
     ],
+    sourceLines: [],
     mustCheck: [
       { label: '납부 기한', value: '2026년 9월 14일까지' },
       {

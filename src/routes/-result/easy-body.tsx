@@ -9,13 +9,16 @@ import {
 } from '@/components/listening-popover'
 import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/utils'
-import type { ResultParagraph } from '@/types/document-result'
+import type { ResultParagraph, SourceLine } from '@/types/document-result'
 
+import { getSourceExcerpt } from './source-excerpt'
 import { useParagraphSpeech } from './use-paragraph-speech'
 
 interface EasyBodyProps {
   id: string
   paragraphs: ResultParagraph[]
+  /** 원문 줄 목록. 문단이 가리키는 줄이 있어야 "원문 보러가기" 를 띄운다 */
+  sourceLines: SourceLine[]
   onOpenSource: (paragraphIndex: number) => void
 }
 
@@ -25,7 +28,12 @@ interface EasyBodyProps {
  * - 원문이 있는 문단을 누르면 강조하고 "원문 보러가기" 버튼을 띄운다. 다시 누르면 닫는다
  * - 듣기: 속도를 고르고 시작하면 지금 읽는 문단 글자가 파래진다. 읽는 중에 정지를 누르면 멈추고 알림을 띄운다
  */
-export function EasyBody({ id, paragraphs, onOpenSource }: EasyBodyProps) {
+export function EasyBody({
+  id,
+  paragraphs,
+  sourceLines,
+  onOpenSource,
+}: EasyBodyProps) {
   const titleId = useId()
   const showToast = useToast()
   const speech = useParagraphSpeech(paragraphs)
@@ -81,9 +89,9 @@ export function EasyBody({ id, paragraphs, onOpenSource }: EasyBodyProps) {
       <div className={cn('flex flex-col', hasTitles ? 'gap-3.5' : 'gap-body2')}>
         {paragraphs.map((paragraph, index) => (
           <ParagraphItem
-            // 문단은 순서가 바뀌지 않고 같은 문장이 두 번 나올 수 있어 순서를 키로 쓴다
-            key={index}
+            key={paragraph.id}
             paragraph={paragraph}
+            hasSource={getSourceExcerpt(sourceLines, paragraph) !== null}
             label={paragraph.title ?? `${index + 1}번째 문단`}
             selected={selectedIndex === index}
             reading={speech.readingIndex === index}
@@ -100,6 +108,8 @@ export function EasyBody({ id, paragraphs, onOpenSource }: EasyBodyProps) {
 
 interface ParagraphItemProps {
   paragraph: ResultParagraph
+  /** 원문이 있는 문단만 누를 수 있다 */
+  hasSource: boolean
   /** 스크린리더가 읽는 문단 이름 (소제목, 없으면 몇 번째 문단) */
   label: string
   selected: boolean
@@ -110,6 +120,7 @@ interface ParagraphItemProps {
 
 function ParagraphItem({
   paragraph,
+  hasSource,
   label,
   selected,
   reading,
@@ -142,7 +153,7 @@ function ParagraphItem({
     </p>
   )
 
-  if (!paragraph.source) return content
+  if (!hasSource) return content
 
   return (
     <div className="relative">

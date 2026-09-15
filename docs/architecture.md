@@ -10,7 +10,7 @@
 | `src/assets/`     | Figma 에서 받은 파일. `icons/{크기}/` 아이콘 · `logos/` 로고(SVG, `?react` 로 불러옴), `images/` 일러스트(PNG · SVG, 투명 영역이 없으면 JPG), `videos/` 움직이는 일러스트 |
 | `src/hooks/`      | 여러 화면에서 쓰는 훅                                                                                                                                                     |
 | `src/lib/`        | 앱 전역 인스턴스 · 유틸 (`query-client.ts`, `utils.ts`)                                                                                                                   |
-| `src/types/`      | 여러 곳에서 쓰는 타입. API 계약 초안 타입(`document-result.ts`, `auth.ts`, `docs/api-contract.md`)                                                                        |
+| `src/types/`      | 여러 곳에서 쓰는 타입. 백엔드 응답 타입(`document-result.ts` · `conversion.ts` · `auth.ts`)은 Swagger 와 1:1 로 맞춘다 (`docs/api-contract.md`)                           |
 | `scripts/`        | 하네스 검사 스크립트 (`docs/harness.md`)                                                                                                                                  |
 
 `src/` 바로 아래에 이 표에 없는 폴더를 만들면 표에 한 줄 추가한다. 추가하지 않으면 Stop 훅이 알려 준다.
@@ -55,6 +55,7 @@ function SettingsPage() {
 - 예외: 기다리는 동안 전용 로딩 화면(문서 읽기 로딩)을 보여 줘야 하는 결과 화면은 loader 로 미리 받지 않고, 화면에서 `useQuery` 로 받으며 대기 · 오류 상태를 직접 그린다 (`src/routes/samples/$sampleId.tsx`).
 - 여러 라우트가 같이 쓰는 화면 부품(결과 화면 등)은 `src/routes/-result/` 처럼 routes 바로 아래 `-` 폴더에 둔다.
 - 화면 안의 겹친 화면(원문 보기 등)을 휴대폰 뒤로 가기로 닫아야 하면 검색 파라미터(`?paragraph=`)로 연다. 같은 라우트라 아래 화면과 스크롤 위치가 그대로 남는다. 이동할 때 `resetScroll: false` 를 준다.
+- 서버 응답은 받은 모양 그대로 쓰고, 화면용 가공(원문 발췌 등)은 화면 폴더의 순수 함수로 둔다 (`src/routes/-result/source-excerpt.ts`). 응답 타입과 화면이 어긋나면 타입을 고치지 않고 가공 함수를 고친다
 - 변환하려고 고른 사진 · PDF 는 파일이라 주소에 담을 수 없어 `src/hooks/useDocumentDraft.ts` 가 메모리에 둔다 (홈 → 확인 → 결과). 사진은 넣을 때 `src/lib/compress-image.ts` 로 줄인다. 홈으로 돌아오면 비우고, 미리보기 주소는 비울 때 해제한다.
 - 문서 변환은 사용자가 누른 순간 `src/hooks/useConversionSession.ts` 가 파일을 올려 작업 ID 를 받는다 (화면이 그려질 때 요청하면 개발 모드에서 두 번 나간다). 결과 화면(`src/routes/result.tsx`)은 작업 ID 로 `src/api/conversion.ts` 의 상태 조회를 TanStack Query `refetchInterval` 로 반복하고, 라우트 `onLeave` 에서 변환을 취소한다. 나가기 확인은 `useBlocker` 로 홈 · 닫기 · 뒤로 가기를 한곳에서 막는다.
 - 서버와 무관한 UI 상태는 컴포넌트 state 에 둔다.

@@ -75,9 +75,8 @@ function SampleResultPage() {
         onSave={() => showToast('저장하기는 아직 준비 중이에요')}
       />
       <SourceView
-        paragraph={
-          paragraph === undefined ? null : (data.paragraphs[paragraph] ?? null)
-        }
+        result={data}
+        paragraphIndex={paragraph}
         onClose={closeSource}
       />
     </>

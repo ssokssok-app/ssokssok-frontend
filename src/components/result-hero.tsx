@@ -4,20 +4,25 @@ import resultHouseContractImage from '@/assets/images/result-house-contract.png'
 import resultNoticeImage from '@/assets/images/result-notice.png'
 import resultWorkContractImage from '@/assets/images/result-work-contract.png'
 import { cn } from '@/lib/utils'
+import type { DocumentKind } from '@/types/document-result'
 
 /*
  * Figma Result_Main. 결과 화면 맨 위 파란 영역: 문서 종류 일러스트 · 종류 이름표 · 제목 · 설명.
- * 일러스트와 기본 이름표는 문서 종류(type)로 정해지고, 제목 · 설명은 분석 결과를 넣는다.
+ * 일러스트와 기본 이름표는 문서 종류(type, 백엔드 kind 코드)로 정해지고, 제목 · 설명은 분석 결과를 넣는다.
+ * Figma 변형 이름과 짝: house-contract = lease_contract, work-contract = labor_contract, basic = other.
  * Figma 에서는 위쪽 138px 에 상태 표시줄 · GNB 가 겹쳐 있다. 여기서는 GNB 아래 여백(18px)만 두고,
  * GNB 는 페이지가 이 영역 위에 따로 둔다.
  */
-const documentTypes = {
-  'house-contract': {
+const documentTypes: Record<
+  DocumentKind,
+  { image: string; category: string; imageClassName: string }
+> = {
+  lease_contract: {
     image: resultHouseContractImage,
     category: '계약서',
     imageClassName: 'h-[180px] w-[217px]',
   },
-  'work-contract': {
+  labor_contract: {
     image: resultWorkContractImage,
     category: '계약서',
     imageClassName: 'h-[180px] w-[217px]',
@@ -32,17 +37,15 @@ const documentTypes = {
     category: '과태료 통지서',
     imageClassName: 'h-[180px] w-[217px]',
   },
-  basic: {
+  other: {
     image: resultBasicImage,
     category: '안내문',
     imageClassName: 'h-[169px] w-[204px]',
   },
 }
 
-export type ResultDocumentType = keyof typeof documentTypes
-
 interface ResultHeroProps {
-  type: ResultDocumentType
+  type: DocumentKind
   title: string
   /** 줄바꿈(\n)은 그대로 보여 준다 */
   description: string

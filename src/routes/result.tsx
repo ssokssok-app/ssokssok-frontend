@@ -185,11 +185,8 @@ function ResultPage() {
         onSave={() => showToast('저장하기는 아직 준비 중이에요')}
       />
       <SourceView
-        paragraph={
-          paragraph === undefined
-            ? null
-            : (result.paragraphs[paragraph] ?? null)
-        }
+        result={result}
+        paragraphIndex={paragraph}
         onClose={closeSource}
       />
       {/* 홈 · 닫기 · 휴대폰 뒤로 가기 모두 이 확인을 거친다 (Figma 156:5881) */}

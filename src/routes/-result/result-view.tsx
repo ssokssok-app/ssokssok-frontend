@@ -98,6 +98,7 @@ export function ResultView({
         <EasyBody
           id={sectionElementId('easy')}
           paragraphs={result.paragraphs}
+          sourceLines={result.sourceLines}
           onOpenSource={onOpenSource}
         />
 
