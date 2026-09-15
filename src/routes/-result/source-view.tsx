@@ -75,23 +75,28 @@ export function SourceView({
                   <h2 className="text-subtitle-semibold text-gray-900">
                     원문의 이 부분에서 가져왔어요
                   </h2>
-                  <div className="relative overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
-                    {/* 원문 줄들을 띄어쓰기로 이어 한 문단처럼 보여 준다. 조각 사이의 띄어쓰기는 강조 밖에 둔다 */}
-                    <p className="text-body2-regular text-gray-900">
-                      {excerpt.map((segment, index) => (
-                        // 조각 순서는 바뀌지 않는다
-                        <Fragment key={index}>
-                          {index > 0 && ' '}
-                          {segment.highlighted ? (
-                            <mark className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500">
-                              {segment.text}
-                            </mark>
-                          ) : (
-                            segment.text
-                          )}
-                        </Fragment>
-                      ))}
-                    </p>
+                  <div className="relative flex flex-col gap-body2 overflow-hidden rounded-[12px] bg-white p-5 shadow-card">
+                    {/* 묶음 하나가 원문 문단 하나다. 줄들은 띄어쓰기로 이어 붙이고, 조각 사이의 띄어쓰기는 강조 밖에 둔다 */}
+                    {excerpt.map((segments, groupIndex) => (
+                      // 묶음 · 조각 순서는 바뀌지 않는다
+                      <p
+                        key={groupIndex}
+                        className="text-body2-regular text-gray-900"
+                      >
+                        {segments.map((segment, index) => (
+                          <Fragment key={index}>
+                            {index > 0 && ' '}
+                            {segment.highlighted ? (
+                              <mark className="bg-blue-500/10 box-decoration-clone text-body2-medium text-blue-500">
+                                {segment.text}
+                              </mark>
+                            ) : (
+                              segment.text
+                            )}
+                          </Fragment>
+                        ))}
+                      </p>
+                    ))}
                     <div
                       aria-hidden
                       className="pointer-events-none absolute inset-x-0 top-0 h-[75px] bg-linear-to-b from-white/60 from-27% to-white/0"
