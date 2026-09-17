@@ -55,7 +55,9 @@ function parseUsage(body: unknown): Usage {
 }
 
 async function getUsage(signal: AbortSignal): Promise<Usage> {
-  return parseUsage(await apiRequest('/api/usage', { signal }))
+  // 로그인을 켜 두면 토큰을 붙여야 변환 요청과 같은 기준(계정)으로 센다.
+  // 토큰이 없으면 헤더가 붙지 않아 백엔드가 기기 번호로 센다
+  return parseUsage(await apiRequest('/api/usage', { auth: true, signal }))
 }
 
 /**

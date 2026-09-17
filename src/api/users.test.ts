@@ -20,10 +20,10 @@ describe('usageQueryOptions (오늘 남은 이용 횟수)', () => {
     await expect(
       new QueryClient().fetchQuery(usageQueryOptions()),
     ).resolves.toEqual({ remaining: 2, limit: 3 })
-    // 토큰을 붙이지 않는다. 백엔드가 토큰이 없으면 기기 번호로 센다
+    // 변환 요청과 같은 기준으로 세도록 토큰을 붙인다. 토큰이 없으면 백엔드가 기기 번호로 센다
     expect(mockedApiRequest).toHaveBeenCalledWith(
       '/api/usage',
-      expect.not.objectContaining({ auth: true }),
+      expect.objectContaining({ auth: true }),
     )
   })
 
