@@ -1,3 +1,4 @@
+import { getDeviceId } from '@/lib/device-id'
 import { isRecord } from '@/lib/utils'
 
 import { toApiError } from './errors'
@@ -5,6 +6,8 @@ import { toApiError } from './errors'
 /**
  * 백엔드 요청과 웹 토큰 (docs/api-contract.md "웹 토큰 저장", docs/architecture.md "백엔드 연동").
  *
+ * - 모든 요청에 기기 번호(X-Device-Id)를 붙인다. 백엔드는 토큰이 없으면 이 번호로 이용 횟수를 세고
+ *   작업의 주인을 확인한다. 번호를 만들고 저장하는 것은 src/lib/device-id.ts 가 맡는다.
  * - 액세스 토큰은 이 파일의 메모리에만 둔다. 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키라 코드가 다루지 않고,
  *   같은 도메인의 /api/auth 요청에 브라우저가 붙인다. 응답 본문에도 refreshToken 이 오지만 앱용이라 읽지 않는다.
  * - 로그인이 필요한 요청이 401 이면 갱신한 뒤 한 번 다시 보낸다. 여러 요청이 동시에 실패해도 갱신은 한 번만 나간다.
@@ -159,6 +162,7 @@ export async function apiRequest(
 
   const send = () => {
     const headers = new Headers()
+    headers.set('X-Device-Id', getDeviceId())
     if (json !== undefined) headers.set('Content-Type', 'application/json')
     if (auth && accessToken)
       headers.set('Authorization', `Bearer ${accessToken}`)

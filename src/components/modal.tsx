@@ -37,8 +37,8 @@ function Illustration({ src }: { src: string }) {
 interface ModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** 위쪽 일러스트 이미지 주소 (src/assets/images) */
-  illustration: string
+  /** 위쪽 일러스트 이미지 주소 (src/assets/images). Figma 에 없는 안내(문의 주소 등)는 생략한다 */
+  illustration?: string
   title: string
   description: string
   /** 아래 버튼들. ModalClose · ModalTextButton 을 넣는다 */
@@ -61,7 +61,7 @@ export function Modal({
           <div className={viewportContentClassName}>
             <Dialog.Popup className={popupClassName}>
               <div className="flex w-full flex-col items-center gap-2.5 text-center">
-                <Illustration src={illustration} />
+                {illustration && <Illustration src={illustration} />}
                 <div className="flex flex-col gap-5">
                   <Dialog.Title className={titleClassName}>
                     {title}

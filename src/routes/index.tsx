@@ -27,6 +27,7 @@ import {
   toDraftNotice,
 } from '@/hooks/useDocumentDraft'
 import { usePrivacyNotice } from '@/hooks/usePrivacyNotice'
+import { LOGIN_ENABLED } from '@/lib/features'
 import type { LoginProvider } from '@/types/auth'
 
 import { LoginSheet } from './-auth/login-sheet'
@@ -58,17 +59,20 @@ function HomePage() {
   const navigate = useNavigate()
   const { resume } = Route.useSearch()
   const { isLoggedIn } = useAuth()
+  // 로그인을 꺼 두면 비로그인도 로그인 유도 없이 바로 문서를 넣는다 (src/lib/features.ts)
+  const needsLogin = LOGIN_ENABLED && !isLoggedIn
   const privacyNotice = usePrivacyNotice()
+  // 로그인 여부와 상관없이 받는다 (비로그인은 기기 번호 기준).
   // 받지 못했으면(아직 받는 중 · 실패) 말풍선을 숨기고 막지도 않는다. 제한은 서버가 변환 요청에서 한 번 더 막는다
-  const usageQuery = useQuery({ ...usageQueryOptions(), enabled: isLoggedIn })
-  const remainingUses = isLoggedIn ? usageQuery.data?.remaining : undefined
+  const usageQuery = useQuery(usageQueryOptions())
+  const remainingUses = usageQuery.data?.remaining
   const usageExhausted = remainingUses === 0
   // 로그인하러 다녀왔으면 고르던 입력 방법으로 지원 문서 안내부터 이어 간다
   const [inputMethod, setInputMethod] = useState<InputMethod>(
     resume ?? 'camera',
   )
   const [guideStep, setGuideStep] = useState<GuideStep | null>(
-    resume && isLoggedIn ? 'documentTypes' : null,
+    resume && !needsLogin ? 'documentTypes' : null,
   )
   const [sampleSheetOpen, setSampleSheetOpen] = useState(false)
   // 닫히는 동안에도 문구가 보이도록 알림 내용과 열림을 따로 둔다
@@ -97,7 +101,7 @@ function HomePage() {
       return
     }
     if (!privacyNotice.isDismissed) setGuideStep('privacy')
-    else setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
+    else setGuideStep(needsLogin ? 'login' : 'documentTypes')
   }
 
   // 안내 창을 바깥 누르기 · 쓸어내리기로 닫으면 문서 넣기를 그만둔다.
@@ -107,7 +111,7 @@ function HomePage() {
   }
 
   function handlePrivacyConfirm() {
-    setGuideStep(isLoggedIn ? 'documentTypes' : 'login')
+    setGuideStep(needsLogin ? 'login' : 'documentTypes')
   }
 
   // 로그인 화면으로 이동한다. 돌아오면 콜백이 ?resume= 을 붙여 지원 문서 안내부터 이어 간다

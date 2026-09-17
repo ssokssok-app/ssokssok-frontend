@@ -60,7 +60,9 @@
 
 ### 로그인 · 인증 (P0)
 
-로그인은 카카오 · 구글이다. 웹에서는 액세스 토큰을 `src/api/client.ts` 메모리에만 두고, 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키다 (`docs/api-contract.md` "웹 토큰 저장"). localStorage 의 `has-session` 은 토큰이 아닌 "로그인한 적 있음" 표시라 허용한다.
+로그인은 2026-09-17부터 꺼져 있다 (`src/lib/features.ts` 의 `LOGIN_ENABLED`). 코드는 지우지 않았으니 아래 기준을 그대로 본다.
+
+로그인은 카카오 · 구글이다. 웹에서는 액세스 토큰을 `src/api/client.ts` 메모리에만 두고, 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키다 (`docs/api-contract.md` "웹 토큰 저장"). localStorage 의 `has-session` 은 토큰이 아닌 "로그인한 적 있음" 표시라 허용하고, `device-id` 도 토큰이 아닌 기기 번호라 허용한다 (`src/lib/device-id.ts`).
 
 - 로그인 뒤 돌아갈 주소(`redirect` 같은 값)를 검사하지 않고 그대로 이동하는 코드. 앱 안의 경로(`/` 로 시작, `//` 아님)만 허용한다
 - 인증 토큰을 localStorage · sessionStorage · URL · 일반 쿠키(`document.cookie`)에 두는 코드. 액세스 토큰은 메모리에만 둔다
@@ -69,6 +71,8 @@
 - 사용자별 데이터를 `usersQueryKey` 밖의 쿼리 키에 둬서, 로그인이 바뀔 때(`src/main.tsx` 가 이 키만 지운다) 다른 사람 정보가 캐시에 남는 경우
 - 화면이나 loader 에서 로그인 되살리기를 따로 기다리는 코드. 루트 라우트가 첫 화면 전에 기다리므로 `useAuth()` 를 바로 쓴다
 - 소셜 로그인 콜백에서 `state` 확인 없이 로그인을 완료하는 코드
+- 로그인을 끄고 켜는 갈래를 `LOGIN_ENABLED` 가 아닌 다른 값으로 판단하는 코드. 스위치는 하나다
+- 기기 번호를 `src/lib/device-id.ts` 밖에서 만들거나 저장하는 코드. 요청에 붙이는 것은 `apiRequest` 가 한다
 
 ### 큰글씨 · 접근성 (P1)
 
