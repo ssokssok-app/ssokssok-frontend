@@ -18,6 +18,7 @@ import { Gnb, GnbIconButton } from '@/components/gnb'
 import { ConfirmModal, Modal, ModalClose } from '@/components/modal'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
+import { LOGIN_ENABLED } from '@/lib/features'
 import { cn } from '@/lib/utils'
 
 import { LoginSheet } from './-auth/login-sheet'
@@ -115,22 +116,27 @@ function SettingsPage() {
           isLoggedIn ? 'gap-[26px]' : 'gap-7',
         )}
       >
-        {isLoggedIn ? (
-          <AccountSection onLogout={handleLogout} />
-        ) : (
-          <section className="flex flex-col gap-5 px-5">
-            <p className="text-subtitle-semibold text-gray-900">
-              로그인 후 쏙쏙을 이용해보세요!
-            </p>
-            {/* Figma 는 48px · 둥글기 8px 버튼이지만, 같은 역할의 CTA md(50px · 10px)를 쓴다 */}
-            <CtaButton size="md" onClick={() => setLoginSheetOpen(true)}>
-              로그인
-            </CtaButton>
-          </section>
-        )}
+        {/* 로그인을 꺼 두면 계정 구역과 그 아래 띠가 통째로 빠지고 메뉴만 남는다 (src/lib/features.ts) */}
+        {LOGIN_ENABLED && (
+          <>
+            {isLoggedIn ? (
+              <AccountSection onLogout={handleLogout} />
+            ) : (
+              <section className="flex flex-col gap-5 px-5">
+                <p className="text-subtitle-semibold text-gray-900">
+                  로그인 후 쏙쏙을 이용해보세요!
+                </p>
+                {/* Figma 는 48px · 둥글기 8px 버튼이지만, 같은 역할의 CTA md(50px · 10px)를 쓴다 */}
+                <CtaButton size="md" onClick={() => setLoginSheetOpen(true)}>
+                  로그인
+                </CtaButton>
+              </section>
+            )}
 
-        {/* Figma 설정 화면의 구역 띠는 기본 Divider(Gray/90)보다 옅은 Gray/80 이다 */}
-        <Divider variant="section" className="bg-gray-80" />
+            {/* Figma 설정 화면의 구역 띠는 기본 Divider(Gray/90)보다 옅은 Gray/80 이다 */}
+            <Divider variant="section" className="bg-gray-80" />
+          </>
+        )}
 
         <nav aria-label="설정 메뉴" className="flex flex-col gap-4 px-5">
           <MenuButton onClick={showNotReady}>1:1 문의</MenuButton>

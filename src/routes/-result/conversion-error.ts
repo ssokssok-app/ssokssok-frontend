@@ -76,6 +76,13 @@ const copyByCode: Record<string, ConversionErrorCopy> = {
   TOKEN_EXPIRED: loginRequiredCopy,
   // 다른 기기 · 탭에서 먼저 다 써서 홈의 남은 횟수가 옛 값이었던 경우
   RATE_LIMITED: { ...USAGE_LIMIT_NOTICE, next: 'home' },
+  // 서비스 전체 · 같은 IP 의 오늘 처리량을 넘긴 경우 (2026-09-17 백엔드 추가).
+  // 내 횟수는 남아 있으니 "다 썼다" 고 하지 않고, 잠시 뒤 다시 시도하게 한다
+  SERVICE_BUSY: {
+    title: '지금은 이용자가 많아요',
+    description: '잠시 뒤에 다시 시도해주세요.',
+    next: 'retry',
+  },
   JOB_NOT_FOUND: {
     title: '결과를 찾을 수 없어요',
     description: '처음부터 다시 해주세요.',

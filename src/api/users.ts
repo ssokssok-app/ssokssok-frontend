@@ -55,15 +55,13 @@ function parseUsage(body: unknown): Usage {
 }
 
 async function getUsage(signal: AbortSignal): Promise<Usage> {
-  return parseUsage(
-    await apiRequest('/api/users/me/usage', { auth: true, signal }),
-  )
+  return parseUsage(await apiRequest('/api/usage', { signal }))
 }
 
 /**
- * 오늘 남은 변환 횟수. 로그인했을 때만 부른다.
- * 알려 주기만 하는 값이고 실제 제한은 서버가 변환 요청에서 막으니(RATE_LIMITED), 실패하면 다시 묻지 않고 말풍선을 숨긴다.
- * 백엔드가 아직 만들지 않아(docs/api-contract.md "백엔드에 보낼 제안" 13번) 지금은 404 로 실패한다
+ * 오늘 남은 변환 횟수. 로그인 여부와 상관없이 부른다.
+ * 백엔드가 토큰이 있으면 계정 기준, 없으면 기기 번호 기준으로 센다 (docs/api-contract.md "9. 기기 번호 · 이용 횟수").
+ * 알려 주기만 하는 값이고 실제 제한은 서버가 변환 요청에서 막으니(RATE_LIMITED), 실패하면 다시 묻지 않고 말풍선을 숨긴다
  */
 export const usageQueryOptions = () =>
   queryOptions({

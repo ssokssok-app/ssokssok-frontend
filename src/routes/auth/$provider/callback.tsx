@@ -7,6 +7,7 @@ import {
 
 import { isLoginProvider, loginWithCode } from '@/api/auth'
 import { hasSession } from '@/api/client'
+import { LOGIN_ENABLED } from '@/lib/features'
 import {
   getRedirectUri,
   type LoginReturnTo,
@@ -49,6 +50,9 @@ export const Route = createFileRoute('/auth/$provider/callback')({
   validateSearch: parseCallbackSearch,
   loaderDeps: ({ search }) => search,
   loader: async ({ params, deps, abortController }) => {
+    // 로그인을 꺼 두면 이 화면으로 올 일이 없다. 주소를 직접 친 경우 홈으로 보낸다 (src/lib/features.ts)
+    if (!LOGIN_ENABLED) throw redirect({ to: '/', replace: true })
+
     const { provider } = params
     if (!isLoginProvider(provider)) throw notFound()
 

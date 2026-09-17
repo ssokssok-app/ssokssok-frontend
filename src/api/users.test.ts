@@ -14,15 +14,16 @@ beforeEach(() => {
 })
 
 describe('usageQueryOptions (오늘 남은 이용 횟수)', () => {
-  it('로그인해서 남은 횟수를 받는다', async () => {
+  it('로그인 여부와 상관없이 남은 횟수를 받는다', async () => {
     mockedApiRequest.mockResolvedValue({ remaining: 2, limit: 3 })
 
     await expect(
       new QueryClient().fetchQuery(usageQueryOptions()),
     ).resolves.toEqual({ remaining: 2, limit: 3 })
+    // 토큰을 붙이지 않는다. 백엔드가 토큰이 없으면 기기 번호로 센다
     expect(mockedApiRequest).toHaveBeenCalledWith(
-      '/api/users/me/usage',
-      expect.objectContaining({ auth: true }),
+      '/api/usage',
+      expect.not.objectContaining({ auth: true }),
     )
   })
 
@@ -37,7 +38,7 @@ describe('usageQueryOptions (오늘 남은 이용 횟수)', () => {
     expect((error as ApiError).code).toBe('INVALID_RESPONSE')
   })
 
-  it('실패해도 다시 묻지 않는다 (API 가 없는 동안 404 가 반복되지 않게)', () => {
+  it('실패해도 다시 묻지 않는다 (말풍선만 숨기고 문서 넣기는 막지 않는다)', () => {
     expect(usageQueryOptions().retry).toBe(false)
   })
 
