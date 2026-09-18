@@ -164,10 +164,20 @@ export function ResultView({
         </section>
 
         <footer className="bg-gray-80 px-5 pt-5 pb-[max(3rem,calc(env(safe-area-inset-bottom)+0.875rem))]">
-          <CtaButton variant="dark" onClick={pdfSave.save}>
+          {/* 받는 동안은 버튼을 잠그되 초점은 남겨 둔다. 키보드 · 스크린리더 사용자의 위치가 사라지지 않게 한다 */}
+          <CtaButton
+            variant="dark"
+            onClick={pdfSave.save}
+            disabled={pdfSave.saving}
+            focusableWhenDisabled
+          >
             <DownloadIcon aria-hidden />
-            저장하기
+            {pdfSave.saving ? '저장하는 중이에요' : '저장하기'}
           </CtaButton>
+          {/* 저장을 시작했다는 것을 스크린리더에도 알린다. 끝나면 완료 · 실패 창이 뜬다 */}
+          <p aria-live="polite" className="sr-only">
+            {pdfSave.saving ? '저장하는 중이에요' : ''}
+          </p>
         </footer>
       </main>
 
