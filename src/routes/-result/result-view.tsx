@@ -10,7 +10,7 @@ import { GnbIconButton } from '@/components/gnb'
 import { InfoItem, InfoList } from '@/components/info-list'
 import { MustCard, MustCardEmpty, TodoList } from '@/components/must-card'
 import { QuickMenu } from '@/components/quick-menu'
-import { ResultHero } from '@/components/result-hero'
+import { ResultHero, type ResultIllustration } from '@/components/result-hero'
 import { cn } from '@/lib/utils'
 import type { DocumentResult } from '@/types/document-result'
 
@@ -35,6 +35,8 @@ function isResultSection(value: string): value is ResultSection {
 
 interface ResultViewProps {
   result: DocumentResult
+  /** 맨 위 일러스트. 주지 않으면 문서 종류(kind)의 기본 그림 */
+  illustration?: ResultIllustration
   /** 홈 · 닫기 아이콘. 결과가 저장되지 않는 화면이면 페이지가 나가기 확인을 띄운다 */
   onExit: () => void
   onOpenSource: (paragraphIndex: number) => void
@@ -47,6 +49,7 @@ interface ResultViewProps {
  */
 export function ResultView({
   result,
+  illustration,
   onExit,
   onOpenSource,
   onSave,
@@ -71,6 +74,7 @@ export function ResultView({
       {/* 결과 머리는 헤더 밑까지 끌어올려 배경이 이어지게 하고, 내용은 헤더 아래 18px 부터 둔다 (Figma pt 138 = 120 + 18) */}
       <ResultHero
         type={result.kind}
+        illustration={illustration}
         category={result.category}
         title={result.title}
         description={result.summary}

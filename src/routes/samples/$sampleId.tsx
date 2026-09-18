@@ -74,6 +74,8 @@ function SampleResultPage() {
     <>
       <ResultView
         result={data}
+        // 안내문(notice)은 범용 그림이 기본이라, 국민연금 샘플만 국민연금 그림을 고른다 (src/components/result-hero.tsx)
+        illustration={sampleId === 'pension-notice' ? 'pension' : undefined}
         // 샘플은 다시 열 수 있어서, 결과가 사라진다는 나가기 확인 없이 홈으로 간다
         onExit={() => navigate({ to: '/' })}
         onOpenSource={openSource}
