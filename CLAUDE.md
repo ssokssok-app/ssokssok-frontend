@@ -66,6 +66,7 @@ Vite 8 · React 19 (React Compiler) · TypeScript 7 · TanStack Router (파일 �
 - 훅 · 검사 스크립트 → `docs/harness.md`
 - CI 워크플로 · 레포 설정 · 배포 설정(`vercel.json`), 테스트 도입 → `docs/ci.md`
 - 제품 결정 (`docs/product.md` 의 "확인 필요" 항목이 정해짐) → `docs/product.md`
+- 기능 · 화면 · 시작 방법 · 팀이 바뀜 → `README.md` (사람이 읽는 소개. 세부는 `docs/` 로 링크만 한다)
 
 문서가 언급하는 경로 · 명령어가 사라지면 `pnpm check` 가 실패한다. 문서에서 다루는 파일을 고쳤는데 문서를 그대로 두면 종료 훅이 알려 준다.
 문서 전체 점검은 `/sync-docs` 로 한다. 이 파일은 지도로만 쓰고 100줄을 넘기지 않는다. 세부 내용은 `docs/` 에 둔다.
