@@ -6,8 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-import { sampleResultQueryOptions } from '@/api/samples'
-import { useToast } from '@/hooks/useToast'
+import { downloadSamplePdf, sampleResultQueryOptions } from '@/api/samples'
 
 import { parseParagraphSearch } from '../-result/paragraph-search'
 import { ResultError } from '../-result/result-error'
@@ -35,7 +34,6 @@ function SampleResultPage() {
   const navigate = Route.useNavigate()
   const router = useRouter()
   const canGoBack = useCanGoBack()
-  const showToast = useToast()
   const { data, isPending, isError, refetch } = useQuery(
     sampleResultQueryOptions(sampleId),
   )
@@ -74,10 +72,12 @@ function SampleResultPage() {
     <>
       <ResultView
         result={data}
+        // 안내문(notice)은 범용 그림이 기본이라, 국민연금 샘플만 국민연금 그림을 고른다 (src/components/result-hero.tsx)
+        illustration={sampleId === 'pension-notice' ? 'pension' : undefined}
         // 샘플은 다시 열 수 있어서, 결과가 사라진다는 나가기 확인 없이 홈으로 간다
         onExit={() => navigate({ to: '/' })}
         onOpenSource={openSource}
-        onSave={() => showToast('저장하기는 아직 준비 중이에요')}
+        fetchPdf={() => downloadSamplePdf(sampleId)}
       />
       <SourceView
         result={data}

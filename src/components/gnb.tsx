@@ -5,13 +5,14 @@ import SettingsIcon24 from '@/assets/icons/24/settings.svg?react'
 import SettingsIcon32 from '@/assets/icons/32/settings.svg?react'
 import SsokssokLogo from '@/assets/logos/ssokssok.svg?react'
 import { BigFontSwitch } from '@/components/big-font-switch'
+import { DropdownMenu, type DropdownMenuItem } from '@/components/dropdown-menu'
 import { useFontScale } from '@/hooks/useFontScale'
 import { cn } from '@/lib/utils'
 
 /*
  * Figma GNB. 화면 맨 위 막대. 배경은 투명이라 화면 배경을 그대로 보여 준다.
  * - Gnb: 제목 + 양쪽 아이콘 버튼 (Default · Variant2)
- * - HomeGnb: 로고 + 큰글씨 스위치 + 설정 (Home · Home_BIg)
+ * - HomeGnb: 로고 + 큰글씨 스위치 + 설정 메뉴 (Home · Home_BIg, 설정 메뉴는 설정 2 251:3114)
  */
 
 interface GnbProps {
@@ -74,12 +75,15 @@ export function GnbIconButton({
   )
 }
 
-/** 홈 화면 GNB. 큰글씨 모드가 켜지면 설정 아이콘이 24px → 32px 로 커진다 (Figma Home_BIg). */
+/**
+ * 홈 화면 GNB. 큰글씨 모드가 켜지면 설정 아이콘이 24px → 32px 로 커진다 (Figma Home_BIg).
+ * 설정 아이콘을 누르면 설정 화면으로 가지 않고 아이콘 아래에 메뉴가 뜬다 (Figma 설정 2, 2026-09-18 회의).
+ */
 export function HomeGnb({
-  onSettingsClick,
+  settingsMenuItems,
   className,
 }: {
-  onSettingsClick?: () => void
+  settingsMenuItems: DropdownMenuItem[]
   className?: string
 }) {
   const { isLarge } = useFontScale()
@@ -100,13 +104,23 @@ export function HomeGnb({
       />
       <div className={cn('flex items-center', isLarge ? 'gap-3.5' : 'gap-2.5')}>
         <BigFontSwitch />
-        <Button
-          aria-label="설정"
-          onClick={onSettingsClick}
-          className="-m-2 p-2 text-gray-400 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-500"
-        >
-          <SettingsIcon aria-hidden className={isLarge ? 'size-8' : 'size-6'} />
-        </Button>
+        {/* Figma 는 아이콘 아래 12px, 아이콘 오른쪽 끝에 맞춰 뜬다. 버튼은 누르는 영역을 8px 넓혀 두어 그만큼 뺀다 */}
+        <DropdownMenu
+          items={settingsMenuItems}
+          sideOffset={4}
+          alignOffset={8}
+          trigger={
+            <Button
+              aria-label="설정"
+              className="-m-2 p-2 text-gray-400 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-500"
+            >
+              <SettingsIcon
+                aria-hidden
+                className={isLarge ? 'size-8' : 'size-6'}
+              />
+            </Button>
+          }
+        />
       </div>
     </header>
   )

@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 
 import type { DocumentResult } from '@/types/document-result'
 
-import { apiRequest } from './client'
+import { apiDownload, apiRequest } from './client'
 import { parseDocumentResult } from './documents'
 
 /**
@@ -40,3 +40,8 @@ export const sampleResultQueryOptions = (sampleId: SampleId) =>
     // 샘플은 바뀌지 않으니 한 번 받으면 다시 받지 않는다
     staleTime: Infinity,
   })
+
+/** 샘플 결과를 PDF 로 받는다 (저장하기). 로그인 없이, 사용량과 무관하게 쓴다 */
+export function downloadSamplePdf(sampleId: SampleId): Promise<Blob> {
+  return apiDownload(`/api/documents/samples/${sampleId}/export?format=pdf`)
+}

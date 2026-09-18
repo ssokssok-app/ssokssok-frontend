@@ -22,6 +22,7 @@ import {
   BottomSheetSection,
   GnbSection,
   ListeningSection,
+  MenuSection,
   ModalSection,
 } from './-catalog/overlay-sections'
 import {
@@ -66,6 +67,7 @@ function ComponentCatalogPage() {
         <BottomSheetSection />
         <ListeningSection />
         <GnbSection />
+        <MenuSection />
         <ResultHeroSection />
         <EasyParagraphSection />
         <MustCardSection />

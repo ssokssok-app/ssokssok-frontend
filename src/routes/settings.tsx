@@ -15,15 +15,9 @@ import warningImage from '@/assets/images/warning.png'
 import { CtaButton } from '@/components/cta-button'
 import { Divider } from '@/components/divider'
 import { Gnb, GnbIconButton } from '@/components/gnb'
-import {
-  ConfirmModal,
-  Modal,
-  ModalClose,
-  ModalTextButton,
-} from '@/components/modal'
+import { ConfirmModal, Modal, ModalClose } from '@/components/modal'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
-import { CONTACT_EMAIL } from '@/lib/contact'
 import { LOGIN_ENABLED } from '@/lib/features'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +26,7 @@ import {
   LOGIN_UNAVAILABLE_NOTICE,
   startSocialLogin,
 } from './-auth/social-login'
+import { ContactModal } from './-settings/contact-modal'
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
@@ -40,6 +35,9 @@ export const Route = createFileRoute('/settings')({
 /**
  * 설정 (Figma 비로그인 156:2468 · 로그인 151:2298).
  * 로그인 버튼은 홈과 같은 로그인 시트를 띄운다. 로그아웃하면 이 화면에서 비로그인 모습으로 바뀐다.
+ *
+ * 2026-09-18 부터 홈 설정 아이콘은 이 화면 대신 메뉴(1:1 문의 · 개인정보처리방침)를 띄워, 지금은 이 화면으로 오는 길이 없다.
+ * 로그인 · 로그아웃 · 탈퇴를 다시 쓸 때를 위해 남겨 둔다 (src/lib/features.ts "다시 켤 때")
  */
 function SettingsPage() {
   const router = useRouter()
@@ -174,29 +172,7 @@ function SettingsPage() {
       >
         <ModalClose>확인</ModalClose>
       </Modal>
-
-      {/*
-       * 문의 안내. Figma 에 없는 창이라 일러스트 없이 Modal 을 쓴다 (docs/product.md "확인 필요").
-       * mailto 만 걸면 메일 앱이 없거나 계정이 설정되지 않은 기기에서 눌러도 아무 일이 없어,
-       * 주 사용자가 고장으로 오해한다. 그래서 주소를 글자로도 보여 준다
-       */}
-      <Modal
-        open={contactOpen}
-        onOpenChange={setContactOpen}
-        title="문의는 메일로 보내주세요"
-        description={`${CONTACT_EMAIL}\n\n아래 버튼이 눌리지 않으면\n이 주소로 메일을 보내주세요.`}
-      >
-        <ModalClose
-          onClick={() => {
-            window.location.href = `mailto:${CONTACT_EMAIL}`
-          }}
-        >
-          메일 보내기
-        </ModalClose>
-        <ModalTextButton onClick={() => setContactOpen(false)}>
-          닫기
-        </ModalTextButton>
-      </Modal>
+      <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
 
       <LoginSheet
         open={loginSheetOpen}
