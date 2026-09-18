@@ -132,8 +132,7 @@ function PrivacyPage() {
           </p>
           <List>
             <li>
-              <Term>문자 인식(OCR) · 쉬운 글 변환 · 음성 안내</Term>{' '}
-              네이버클라우드
+              <Term>문자 인식(OCR) · 쉬운 글 변환</Term> 네이버클라우드
             </li>
             <li>
               <Term>데이터베이스 운영</Term> Supabase

@@ -1,58 +1,84 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { ListeningSpeed } from '@/components/listening-popover'
+import { useScreenWakeLock } from '@/hooks/useScreenWakeLock'
 import type { ResultParagraph } from '@/types/document-result'
 
-// 목소리 속도. 브라우저 기본 1 을 "보통" 으로 두고 위아래로 조금씩 벌렸다
+import { pickKoreanVoice, splitSentences } from './paragraph-speech'
+
+// 목소리 속도. 브라우저 기본 1 을 "보통" 으로 두고, 느림은 또박또박 들리게 더 늦추고 빠름은 덜 빠르게 했다 (2026-09-18 회의)
 const rates: Record<ListeningSpeed, number> = {
-  slow: 0.8,
+  slow: 0.6,
   normal: 1,
-  fast: 1.3,
+  fast: 1.2,
+}
+
+/** 읽고 있거나 읽을 차례가 남았을 때만 멈춘다. 사파리는 아무것도 없을 때 멈춘 직후의 새 읽기를 놓치기도 한다 */
+function cancelSpeech() {
+  const { speechSynthesis } = window
+  if (speechSynthesis.speaking || speechSynthesis.pending) {
+    speechSynthesis.cancel()
+  }
 }
 
 /**
- * 쉬운 본문 듣기. 브라우저 음성 합성(Web Speech API)으로 문단을 차례로 읽는다.
+ * 쉬운 본문 듣기. 기기에 들어 있는 음성(브라우저 음성 합성, Web Speech API)으로 문단을 차례로 읽는다.
  *
- * - 실제 음성은 네이버 클로바를 백엔드를 거쳐 쓰기로 정했다 (docs/api-contract.md "듣기 · 저장하기").
- *   API 가 나오기 전까지의 임시 구현이라, 바뀌면 이 파일 안만 고치고 화면은 그대로 둔다
- * - 문단마다 따로 읽어서, 지금 읽는 문단 번호를 화면에 알려 준다 (크롬은 긴 글 하나를 읽다가 멈추는 문제도 있다)
+ * - 요금 때문에 서버 음성(네이버 클로바) 대신 기기 음성을 쓴다 (2026-09-18 회의, docs/product.md "결과 화면")
+ * - 문단을 문장씩 나눠 읽고, 지금 읽는 문단 번호를 화면에 알려 준다 (크롬은 긴 글 하나를 읽다가 멈추는 문제가 있다)
+ * - 목소리는 기기에 있는 한국어 목소리 중에서 고른다 (src/routes/-result/paragraph-speech.ts)
+ * - 읽는 동안은 휴대폰 화면이 저절로 꺼지지 않게 한다. 꺼지면 아이폰은 읽기를 멈춘다
+ * - 다른 앱으로 가거나 화면을 끄면 멈춘다. 사파리는 이때 읽기를 말없이 멈춰서, 그대로 두면 정지 버튼만 남는다
  * - 화면이 사라지면 소리를 멈춘다
  */
 export function useParagraphSpeech(paragraphs: ResultParagraph[]) {
   const [readingIndex, setReadingIndex] = useState<number | null>(null)
-  // 시작 · 멈춤마다 늘린다. 멈춘 읽기의 끝 이벤트가 다음 문단을 이어서 읽지 않게 하는 표시다
+  // 시작 · 멈춤마다 늘린다. 멈춘 읽기의 끝 이벤트가 다음 문장을 이어서 읽지 않게 하는 표시다
   const sessionRef = useRef(0)
+  // 읽는 중인 문장을 붙잡아 둔다. 크롬 · 사파리는 붙잡는 곳이 없으면 읽는 도중에 치워 버려 끝 이벤트가 오지 않는다
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const supported = 'speechSynthesis' in window
+  const isReading = readingIndex !== null
+
+  useScreenWakeLock(isReading)
 
   function stop() {
     sessionRef.current += 1
-    window.speechSynthesis.cancel()
+    utteranceRef.current = null
+    cancelSpeech()
     setReadingIndex(null)
   }
 
   function start(speed: ListeningSpeed) {
     stop()
     const session = sessionRef.current
+    const voice = pickKoreanVoice(window.speechSynthesis.getVoices())
+    // 문단 번호를 붙인 문장 목록. 소제목도 한 문장으로 먼저 읽는다
+    const sentences = paragraphs.flatMap((paragraph, index) =>
+      [
+        ...(paragraph.title ? [paragraph.title] : []),
+        ...splitSentences(paragraph.body),
+      ].map((text) => ({ index, text })),
+    )
 
-    function speak(index: number) {
+    function speak(position: number) {
       if (session !== sessionRef.current) return
-      const paragraph = paragraphs[index]
-      if (!paragraph) {
+      const sentence = sentences[position]
+      if (!sentence) {
+        utteranceRef.current = null
         setReadingIndex(null)
         return
       }
-      const utterance = new SpeechSynthesisUtterance(
-        paragraph.title
-          ? `${paragraph.title}. ${paragraph.body}`
-          : paragraph.body,
-      )
+      const utterance = new SpeechSynthesisUtterance(sentence.text)
       utterance.lang = 'ko-KR'
+      if (voice) utterance.voice = voice
       utterance.rate = rates[speed]
-      utterance.onend = () => speak(index + 1)
+      utterance.onend = () => speak(position + 1)
       utterance.onerror = () => {
-        if (session === sessionRef.current) setReadingIndex(null)
+        if (session === sessionRef.current) stop()
       }
-      setReadingIndex(index)
+      utteranceRef.current = utterance
+      setReadingIndex(sentence.index)
       window.speechSynthesis.speak(utterance)
     }
 
@@ -60,16 +86,36 @@ export function useParagraphSpeech(paragraphs: ResultParagraph[]) {
   }
 
   useEffect(() => {
+    if (!isReading) return
+    // stop() 과 같은 일이다. stop 은 렌더마다 새로 만들어져 의존성에 넣지 않고 여기서 직접 한다
+    function stopWhenHidden() {
+      if (document.visibilityState !== 'hidden') return
+      sessionRef.current += 1
+      utteranceRef.current = null
+      cancelSpeech()
+      setReadingIndex(null)
+    }
+    document.addEventListener('visibilitychange', stopWhenHidden)
+    return () => {
+      document.removeEventListener('visibilitychange', stopWhenHidden)
+    }
+  }, [isReading])
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return
+    // 크롬은 목록을 처음 물어볼 때 목소리를 불러오기 시작한다. 듣기를 누르기 전에 미리 불러 둔다
+    window.speechSynthesis.getVoices()
     return () => {
       sessionRef.current += 1
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+      utteranceRef.current = null
+      cancelSpeech()
     }
   }, [])
 
   return {
     supported,
     readingIndex,
-    isReading: readingIndex !== null,
+    isReading,
     start,
     stop,
   }
