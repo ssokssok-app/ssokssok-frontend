@@ -17,6 +17,8 @@
  *    계정만 로그인된다 (`docs/api-contract.md` "콘솔 설정")
  * 3. Vercel 환경 변수에 VITE_KAKAO_REST_API_KEY · VITE_GOOGLE_CLIENT_ID 가 있는지 본다
  * 4. 백엔드에 계정 기준 하루 한도를 확인한다 (기기 기준과 별개 카운터)
+ * 5. 설정 화면(/settings: 로그인 · 로그아웃 · 탈퇴)으로 가는 길을 만든다. 2026-09-18 부터 홈 설정 아이콘은
+ *    메뉴(src/components/dropdown-menu.tsx)를 띄워, 메뉴에 항목을 더하거나 계정 메뉴를 따로 정해야 한다
  *
  * 타입을 boolean 으로 넓혀 둔다. 리터럴 타입(false)이면 TypeScript 가 로그인 쪽 갈래를 닿지 않는
  * 코드로 보고 타입 검사에서 빼, 꺼 둔 동안 그 코드가 조용히 낡는다.

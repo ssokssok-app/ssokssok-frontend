@@ -40,6 +40,7 @@ import { type InputMethod, parseHomeSearch } from './-home/home-search'
 import { SampleSheet } from './-home/sample-sheet'
 import { UsageBubble } from './-home/usage-bubble'
 import { USAGE_LIMIT_NOTICE } from './-result/conversion-error'
+import { ContactModal } from './-settings/contact-modal'
 
 export const Route = createFileRoute('/')({
   validateSearch: parseHomeSearch,
@@ -75,6 +76,7 @@ function HomePage() {
     resume && !needsLogin ? 'documentTypes' : null,
   )
   const [sampleSheetOpen, setSampleSheetOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
   // 닫히는 동안에도 문구가 보이도록 알림 내용과 열림을 따로 둔다
   const [notice, setNotice] = useState<HomeNotice | null>(null)
   const [noticeOpen, setNoticeOpen] = useState(false)
@@ -204,9 +206,16 @@ function HomePage() {
         className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+158px)] -right-5 aspect-[6/5] w-[max(330px,min(84%,calc((100dvh-577px)*1.2)))] opacity-78 mix-blend-multiply mask-x-from-95% mask-y-from-95%"
       />
 
+      {/* Figma 메뉴의 서비스이용약관은 두지 않는다 (2026-09-17 사용자와 정함, docs/product.md "설정 화면") */}
       <HomeGnb
         className="relative"
-        onSettingsClick={() => navigate({ to: '/settings' })}
+        settingsMenuItems={[
+          { label: '1:1 문의', onSelect: () => setContactOpen(true) },
+          {
+            label: '개인정보처리방침',
+            onSelect: () => navigate({ to: '/privacy' }),
+          },
+        ]}
       />
 
       <main className="relative flex flex-1 flex-col px-5">
@@ -329,6 +338,7 @@ function HomePage() {
         onOpenChange={setSampleSheetOpen}
         onSelect={handleSampleSelect}
       />
+      <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
       {/* Figma 에 없는 알림이라 개인정보 안내와 같은 Modal 에 경고 일러스트를 쓴다 (docs/product.md "확인 필요") */}
       <Modal
         open={noticeOpen}

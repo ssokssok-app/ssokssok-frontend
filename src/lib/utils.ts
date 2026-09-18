@@ -44,7 +44,17 @@ export const cn = createCn({
         },
       ],
       shadow: [
-        { shadow: ['knob', 'modal', 'popover', 'sticky', 'card', 'float'] },
+        {
+          shadow: [
+            'knob',
+            'modal',
+            'popover',
+            'sticky',
+            'card',
+            'float',
+            'menu',
+          ],
+        },
       ],
       'drop-shadow': [{ 'drop-shadow': ['bubble'] }],
       'max-w': [{ 'max-w': ['app'] }],

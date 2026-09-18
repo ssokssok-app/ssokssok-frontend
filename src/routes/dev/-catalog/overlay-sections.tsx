@@ -213,7 +213,34 @@ export function GnbSection() {
         />
       </CatalogItem>
       <CatalogItem label="Home · Home_BIg (큰글씨를 켜면 설정 아이콘이 커짐)">
-        <HomeGnb className="-mx-5 bg-gradient-background" />
+        <HomeGnb
+          className="-mx-5 bg-gradient-background"
+          settingsMenuItems={[]}
+        />
+      </CatalogItem>
+    </CatalogSection>
+  )
+}
+
+export function MenuSection() {
+  const showToast = useToast()
+
+  return (
+    <CatalogSection title="Menu" figmaNodeId="251:3217">
+      <CatalogItem label="홈 설정 아이콘을 누르면 뜨는 메뉴 (Figma 설정 2 251:3114)">
+        <HomeGnb
+          className="-mx-5 bg-gradient-background"
+          settingsMenuItems={[
+            {
+              label: '1:1 문의',
+              onSelect: () => showToast('1:1 문의를 눌렀어요'),
+            },
+            {
+              label: '개인정보처리방침',
+              onSelect: () => showToast('개인정보처리방침을 눌렀어요'),
+            },
+          ]}
+        />
       </CatalogItem>
     </CatalogSection>
   )

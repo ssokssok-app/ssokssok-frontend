@@ -28,9 +28,9 @@ function PrivacyPage() {
   const canGoBack = useCanGoBack()
 
   function goBack() {
-    // 주소로 바로 들어왔으면 돌아갈 곳이 없어 설정으로 간다
+    // 주소로 바로 들어왔으면 돌아갈 곳이 없어 홈으로 간다 (홈 설정 메뉴에서 들어온다)
     if (canGoBack) router.history.back()
-    else navigate({ to: '/settings' })
+    else navigate({ to: '/' })
   }
 
   return (
