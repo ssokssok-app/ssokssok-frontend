@@ -1,16 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { apiRequest } from './client'
-import { getConversionStatus, startConversion } from './conversion'
+import { apiDownload, apiRequest } from './client'
+import {
+  downloadConversionPdf,
+  getConversionStatus,
+  startConversion,
+} from './conversion'
 import { ApiError } from './errors'
 
-vi.mock('./client', () => ({ apiRequest: vi.fn() }))
+vi.mock('./client', () => ({ apiRequest: vi.fn(), apiDownload: vi.fn() }))
 
 const mockedApiRequest = vi.mocked(apiRequest)
+const mockedApiDownload = vi.mocked(apiDownload)
 const signal = new AbortController().signal
 
 beforeEach(() => {
   mockedApiRequest.mockReset()
+  mockedApiDownload.mockReset()
 })
 
 async function expectInvalidResponse(promise: Promise<unknown>) {
@@ -110,6 +116,19 @@ describe('getConversionStatus', () => {
     expect(mockedApiRequest).toHaveBeenCalledWith(
       '/api/documents/convert/a%2Fb',
       expect.objectContaining({ auth: true }),
+    )
+  })
+})
+
+describe('downloadConversionPdf', () => {
+  it('작업의 export 경로에서 PDF 를 로그인해서 받는다', async () => {
+    const pdf = new Blob(['%PDF'], { type: 'application/pdf' })
+    mockedApiDownload.mockResolvedValue(pdf)
+
+    await expect(downloadConversionPdf('a/b')).resolves.toBe(pdf)
+    expect(mockedApiDownload).toHaveBeenCalledWith(
+      '/api/documents/convert/a%2Fb/export?format=pdf',
+      { auth: true },
     )
   })
 })

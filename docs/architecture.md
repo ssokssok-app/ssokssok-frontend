@@ -83,7 +83,7 @@ function SettingsPage() {
 - 정해진 것 (2026-09-14 백엔드 답변): 오류 응답은 `{ error: { code, message } }`, 인증은 JWT(액세스 + 리프레시 토큰), 변환은 작업 ID + 폴링
 - **기능 스위치 (2026-09-17):** 켜고 끄는 기능은 `src/lib/features.ts` 의 상수 하나로 다룬다. 지금은 `LOGIN_ENABLED` 가 꺼져 있다. 끈 기능의 코드 · 화면은 지우지 않아, 값만 바꾸면 다시 켜진다. 다시 켤 때 확인할 것은 그 파일 주석에 적어 둔다
 - **기기 번호 (2026-09-17):** `src/lib/device-id.ts` 가 브라우저마다 UUID 를 하나 만들어 localStorage 에 두고, `apiRequest` 가 모든 요청에 `X-Device-Id` 로 붙인다. 백엔드는 토큰이 있으면 계정, 없으면 이 번호로 이용 횟수를 세고 작업의 주인을 확인한다 (`docs/api-contract.md` "9. 기기 번호 · 이용 횟수"). 빠지면 400 `DEVICE_ID_REQUIRED` 다. 토큰이 아니라 가져가도 쓸 수 없고, 저장소를 못 쓰면 메모리에만 두고 쓴다
-- **요청 함수:** 백엔드 요청은 `src/api/client.ts` 의 `apiRequest` 로 보낸다. JSON 본문은 `json`, 파일 올리기는 `form`(FormData) 으로 준다. 실패하면 `ApiError`(`src/api/errors.ts`)를 던진다. 로그인이 필요한 요청은 `auth: true` 로 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다
+- **요청 함수:** 백엔드 요청은 `src/api/client.ts` 의 `apiRequest` 로 보낸다. JSON 본문은 `json`, 파일 올리기는 `form`(FormData) 으로 준다. 파일(PDF)을 받을 때는 같은 옵션의 `apiDownload` 가 `Blob` 을 돌려준다. 실패하면 `ApiError`(`src/api/errors.ts`)를 던진다. 로그인이 필요한 요청은 `auth: true` 로 액세스 토큰을 붙이고, 401 이면 갱신한 뒤 한 번 다시 보낸다
 - **웹 토큰 (2026-09-15 결정, 로그인이 꺼져 있어 지금은 쓰지 않는다):** 액세스 토큰은 `src/api/client.ts` 메모리에만 두고, 리프레시 토큰은 백엔드가 심는 HttpOnly 쿠키라 프론트 코드가 다루지 않는다 (응답 본문의 `refreshToken` 은 앱용이라 읽지 않는다). 토큰은 localStorage · sessionStorage · URL 에 두지 않는다. 이유와 백엔드 쪽 조건은 `docs/api-contract.md` "웹 토큰 저장"
   - 앱을 켤 때 갱신 요청으로 로그인을 되살린다. 쿠키는 읽을 수 없어 "로그인한 적 있음" 표시(참/거짓)만 localStorage 에 두고, 표시가 없으면 갱신 요청을 보내지 않는다 (비로그인 사용자의 헛된 요청을 줄인다)
   - 되살리기는 루트 라우트가 첫 화면 전에 한 번 기다린다. 화면마다 따로 기다리면 빠뜨리는 곳이 생겨(예: 개인정보 안내 확인 직후) 이미 로그인한 사람에게 로그인 시트가 뜰 수 있어서다. 화면은 `useAuth()` 의 로그인 여부를 바로 쓴다

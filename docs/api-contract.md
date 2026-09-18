@@ -138,7 +138,7 @@
 | GET    | `/documents/{id}/export`               | 저장. 쿼리 `format=pdf`           |
 
 - 듣기 (2026-09-18 회의): 요금 때문에 서버 음성(네이버 클로바) 대신 프론트가 기기 음성(브라우저 음성 합성)으로 읽는다. 음성 API 는 만들지 않아도 된다고 백엔드에 알린다 (`docs/product.md` "결과 화면")
-- 저장하기: 서버가 PDF 를 만든다
+- 저장하기: 서버가 PDF 를 만든다 (ReportLab). 2026-09-18 확인: 샘플 국민연금은 2쪽 · 약 50KB, 0.2초 안에 온다. 프론트는 `src/api/conversion.ts` 의 `downloadConversionPdf` · `src/api/samples.ts` 의 `downloadSamplePdf` 로 받는다 (`?format=pdf`)
 
 ### 8. 배포 · 개발 환경 (2026-09-15)
 
@@ -193,7 +193,7 @@
 
 1. **스키마 먼저** (2026-09-15 반영): 설계안 API 의 요청 · 응답 모델(Pydantic)과 고정 값을 돌려주는 임시 구현이 Swagger 에 올라왔다. 프론트 타입을 맞췄고, 샘플 내용이 채워지면 연결한다
 2. **변환 결과 받기** (2026-09-15 반영): 상태 조회가 `status: "done"` 일 때 `result` 를 같이 준다. `status` 는 `queued | processing | done | failed | canceled`, `failed` 면 `error: { code, message }` 를 같이 준다. 프론트는 2초마다 조회하고 1분이 넘으면 4초로 늘린다. 작업 최대 처리 시간(예: 3분)을 넘기면 `failed`(`TIMEOUT`)
-3. **결과 임시 보관 · 경로** (2026-09-15 반영, 듣기 · 저장은 아직 빈 응답. 듣기 경로는 2026-09-18 부터 쓰지 않는다): 서버는 결과를 저장하지 않지만 결과 화면에서 듣기 · 저장을 쓰려면 잠시 들고 있어야 한다. 완료 뒤 30분 동안만 들고 있고, 듣기 · 저장은 `job_id` 로 부른다: `/documents/convert/{job_id}/paragraphs/{i}/audio`, `/documents/convert/{job_id}/export`. 30분이 지나면 `JOB_EXPIRED`. 샘플은 `/documents/samples/{id}/paragraphs/{i}/audio` · `/documents/samples/{id}/export` 를 토큰 없이
+3. **결과 임시 보관 · 경로** (2026-09-15 반영. 저장은 2026-09-18 확인 결과 PDF 를 준다. 듣기 경로는 2026-09-18 부터 쓰지 않는다): 서버는 결과를 저장하지 않지만 결과 화면에서 듣기 · 저장을 쓰려면 잠시 들고 있어야 한다. 완료 뒤 30분 동안만 들고 있고, 듣기 · 저장은 `job_id` 로 부른다: `/documents/convert/{job_id}/paragraphs/{i}/audio`, `/documents/convert/{job_id}/export`. 30분이 지나면 `JOB_EXPIRED`. 샘플은 `/documents/samples/{id}/paragraphs/{i}/audio` · `/documents/samples/{id}/export` 를 토큰 없이
 4. **표기 · 경로** (2026-09-15 반영): 응답 JSON 은 camelCase 로 맞춘다. Pydantic `alias_generator=to_camel` 설정 한 줄이면 되고 TypeScript 관례와 같아 변환 코드가 필요 없다 (스파이크는 snake_case). 모든 API 는 `/api` 아래에 둔다 (스파이크는 접두사 없음). 배포 때 같은 도메인이면 `/api` 만 서버로 넘기면 되고 개발 프록시도 그대로 쓴다
 
 ### 화면 작업 때 필요한 것

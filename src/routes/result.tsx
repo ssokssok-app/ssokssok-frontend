@@ -8,7 +8,10 @@ import {
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
-import { conversionStatusQueryOptions } from '@/api/conversion'
+import {
+  conversionStatusQueryOptions,
+  downloadConversionPdf,
+} from '@/api/conversion'
 import { ApiError } from '@/api/errors'
 import warningImage from '@/assets/images/warning.png'
 import { ConfirmModal } from '@/components/modal'
@@ -25,7 +28,6 @@ import {
   getDraftFiles,
   useDocumentDraft,
 } from '@/hooks/useDocumentDraft'
-import { useToast } from '@/hooks/useToast'
 import type { ConversionStatus } from '@/types/conversion'
 
 import type { InputMethod } from './-home/home-search'
@@ -100,7 +102,6 @@ function ResultPage() {
   const { paragraph } = Route.useSearch()
   const router = useRouter()
   const canGoBack = useCanGoBack()
-  const showToast = useToast()
   const draft = useDocumentDraft()
 
   const jobId = session?.status === 'started' ? session.jobId : ''
@@ -212,7 +213,7 @@ function ResultPage() {
             resetScroll: false,
           })
         }
-        onSave={() => showToast('저장하기는 아직 준비 중이에요')}
+        fetchPdf={() => downloadConversionPdf(jobId)}
       />
       <SourceView
         result={result}

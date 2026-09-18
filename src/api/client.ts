@@ -156,11 +156,31 @@ interface ApiRequestOptions {
  */
 export async function apiRequest(
   path: `/api/${string}`,
-  { method = 'GET', json, form, signal, auth = false }: ApiRequestOptions = {},
+  options: ApiRequestOptions = {},
 ): Promise<unknown> {
+  const response = await send(path, options)
+  const body = await readJson(response)
+  if (!response.ok) throw toApiError(body, response.status)
+  return body
+}
+
+/** 백엔드에서 파일(PDF 등)을 받는다. 실패 응답은 JSON 오류라 apiRequest 와 같이 ApiError 를 던진다 */
+export async function apiDownload(
+  path: `/api/${string}`,
+  options: ApiRequestOptions = {},
+): Promise<Blob> {
+  const response = await send(path, options)
+  if (!response.ok) throw toApiError(await readJson(response), response.status)
+  return response.blob()
+}
+
+async function send(
+  path: `/api/${string}`,
+  { method = 'GET', json, form, signal, auth = false }: ApiRequestOptions,
+): Promise<Response> {
   if (auth) await restoring
 
-  const send = () => {
+  const request = () => {
     const headers = new Headers()
     headers.set('X-Device-Id', getDeviceId())
     if (json !== undefined) headers.set('Content-Type', 'application/json')
@@ -174,15 +194,12 @@ export async function apiRequest(
     })
   }
 
-  let response = await send()
+  let response = await request()
   // 액세스 토큰이 만료(TOKEN_EXPIRED)됐거나 서버가 모르는 토큰(UNAUTHORIZED)이면 갱신해 본다
   if (auth && response.status === 401 && (await refreshAccessToken())) {
-    response = await send()
+    response = await request()
     // 새 토큰으로도 거절되면 로그인이 끝난 것이다
     if (response.status === 401) setAccessToken(null)
   }
-
-  const body = await readJson(response)
-  if (!response.ok) throw toApiError(body, response.status)
-  return body
+  return response
 }

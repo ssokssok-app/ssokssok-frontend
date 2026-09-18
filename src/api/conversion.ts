@@ -8,7 +8,7 @@ import type {
   ConversionStatus,
 } from '@/types/conversion'
 
-import { apiRequest } from './client'
+import { apiDownload, apiRequest } from './client'
 import { parseDocumentResult } from './documents'
 import { ApiError } from './errors'
 
@@ -116,3 +116,10 @@ export const conversionStatusQueryOptions = (jobId: string) =>
     // 결과는 개인정보라 화면이 사라지면 캐시에서도 바로 지운다
     gcTime: 0,
   })
+
+/** 결과를 PDF 로 받는다 (저장하기). 완료 뒤 30분이 지나면 JOB_EXPIRED 다 */
+export function downloadConversionPdf(jobId: string): Promise<Blob> {
+  return apiDownload(`${conversionPath(jobId)}/export?format=pdf`, {
+    auth: true,
+  })
+}
