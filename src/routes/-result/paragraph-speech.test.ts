@@ -71,18 +71,24 @@ describe('pickKoreanVoice', () => {
     expect(pickKoreanVoice([voice('Yuna'), enhanced])).toBe(enhanced)
   })
 
-  it('인터넷 목소리보다 기기 안 목소리를 먼저 쓴다', () => {
+  it('인터넷 목소리는 고품질 · 기본이어도 쓰지 않는다 (개인정보)', () => {
     const local = voice('유나')
     expect(
-      pickKoreanVoice([voice('Google 한국의', { localService: false }), local]),
+      pickKoreanVoice([
+        voice('Google 한국의', { localService: false, default: true }),
+        voice('Microsoft SunHi Online (Natural)', { localService: false }),
+        local,
+      ]),
     ).toBe(local)
   })
 
-  it('인터넷 목소리밖에 없으면 그것을 쓴다', () => {
-    const google = voice('Google 한국의', { localService: false })
-    expect(pickKoreanVoice([voice('Alex', { lang: 'en-US' }), google])).toBe(
-      google,
-    )
+  it('인터넷 목소리밖에 없으면 고르지 않는다', () => {
+    expect(
+      pickKoreanVoice([
+        voice('Alex', { lang: 'en-US' }),
+        voice('Google 한국의', { localService: false }),
+      ]),
+    ).toBeUndefined()
   })
 
   it('기계음 목소리밖에 없으면 그것이라도 쓴다', () => {

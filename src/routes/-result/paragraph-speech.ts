@@ -46,22 +46,27 @@ const highQualityPattern = /고품질|프리미엄|enhanced|premium/i
 function voiceRank(voice: Voice): number {
   if (roboticVoiceNames.some((name) => voice.name.startsWith(name))) return 0
   let rank = 1
-  // 인터넷 목소리(크롬의 Google 목소리 등)보다 기기 안 목소리를 먼저 쓴다. 인터넷 목소리는 읽다가 멈추는 문제가 있다
-  if (voice.localService) rank += 4
   if (highQualityPattern.test(voice.name)) rank += 2
   if (voice.default) rank += 1
   return rank
 }
 
 /**
- * 한국어 목소리 중 가장 알맞은 것. 한국어 목소리가 없으면 undefined 이고, 그때는 언어(ko-KR)만 정해 브라우저에 맡긴다.
- * 순위: 기기 안 목소리 > 고품질 > 기기 기본 목소리. 기계음 목소리는 다른 한국어 목소리가 없을 때만 쓴다.
+ * 기기 안 한국어 목소리 중 가장 알맞은 것. 없으면 undefined 이고, 그때는 읽지 않는다.
+ *
+ * 인터넷 목소리(localService: false, 예: PC 크롬의 "Google 한국의")는 읽을 글을 구글 · 마이크로소프트 서버로 보낸다.
+ * 결과 글에는 이름 · 주소 같은 개인정보가 있어 쓰지 않는다 (AGENTS.md "개인정보 · 보안", 2026-09-18 Codex 리뷰).
+ * 목소리를 비워 브라우저에 맡겨도 인터넷 목소리를 고를 수 있어, 고를 목소리가 없으면 읽지 않는 것이다.
+ * 안드로이드 크롬은 목소리를 모두 기기 안(localService: true)으로 알려 준다.
+ *
+ * 순위: 고품질 > 기기 기본 목소리. 기계음 목소리는 다른 한국어 목소리가 없을 때만 쓴다.
  */
 export function pickKoreanVoice<T extends Voice>(
   voices: readonly T[],
 ): T | undefined {
   let best: T | undefined
   for (const voice of voices) {
+    if (!voice.localService) continue
     // 안드로이드 옛 크롬은 ko_KR 처럼 밑줄로 준다
     if (!/^ko([-_]|$)/i.test(voice.lang)) continue
     if (!best || voiceRank(voice) > voiceRank(best)) best = voice

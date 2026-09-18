@@ -1,12 +1,14 @@
 import { Button } from '@base-ui/react/button'
 import { useId, useState } from 'react'
 
+import warningImage from '@/assets/images/warning.png'
 import { EasyParagraph } from '@/components/easy-paragraph'
 import { ListenButton } from '@/components/listen-button'
 import {
   type ListeningSpeed,
   ListeningPopover,
 } from '@/components/listening-popover'
+import { Modal, ModalClose } from '@/components/modal'
 import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/utils'
 import type { ResultParagraph, SourceLine } from '@/types/document-result'
@@ -36,7 +38,10 @@ export function EasyBody({
 }: EasyBodyProps) {
   const titleId = useId()
   const showToast = useToast()
-  const speech = useParagraphSpeech(paragraphs)
+  const [voiceUnavailableOpen, setVoiceUnavailableOpen] = useState(false)
+  const speech = useParagraphSpeech(paragraphs, {
+    onUnavailable: () => setVoiceUnavailableOpen(true),
+  })
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [listeningOpen, setListeningOpen] = useState(false)
   const [speed, setSpeed] = useState<ListeningSpeed>('normal')
@@ -102,6 +107,19 @@ export function EasyBody({
           />
         ))}
       </div>
+
+      {/* 기기 안 한국어 목소리가 없을 때 (크롬북 · 리눅스 등). Figma 에 없는 창이라 경고 Modal 을 쓴다 (docs/product.md "확인 필요") */}
+      <Modal
+        open={voiceUnavailableOpen}
+        onOpenChange={setVoiceUnavailableOpen}
+        illustration={warningImage}
+        title={'이 기기에서는\n듣기를 쓸 수 없어요'}
+        description={
+          '이 기기에는 한국어 목소리가 없어요.\n휴대폰으로 열면 들을 수 있어요.'
+        }
+      >
+        <ModalClose>확인</ModalClose>
+      </Modal>
     </section>
   )
 }
