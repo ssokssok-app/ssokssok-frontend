@@ -15,6 +15,7 @@ description: CLAUDE.md, docs/, .claude/rules 가 현재 코드와 맞는지 점�
    - `.claude/rules/` ↔ `components.json`, `src/index.css`, `vite.config.ts`
    - `docs/harness.md` ↔ `.claude/settings.json`, `.claude/hooks/`, `scripts/`
    - `docs/product.md` 의 "확인 필요" 항목 중 코드나 대화로 확정된 것
+   - `README.md` 의 기능 · 시작하기 · 명령어 ↔ 실제 화면, `package.json`, `.env.example`. 화면이 크게 바뀌었으면 `docs/images/` 사진도 다시 찍는다
 4. 고친다.
    - 코드를 읽으면 알 수 있는 내용은 문서에서 지운다. 코드가 원본이다.
    - 같은 내용이 두 곳에 있으면 한 곳에만 남기고 나머지는 그곳을 가리키게 한다.

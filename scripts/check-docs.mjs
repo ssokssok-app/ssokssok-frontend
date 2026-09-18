@@ -2,9 +2,9 @@
 /**
  * 문서 최신성 검사 (`pnpm check` 에 포함).
  *
- * 에이전트용 문서(CLAUDE.md, 모든 AGENTS.md, docs/, .claude/rules, .claude/skills)에 적힌
+ * 문서(README.md, CLAUDE.md, 모든 AGENTS.md, docs/, .claude/rules, .claude/skills)에 적힌
  * - `pnpm <script>` 명령어가 package.json 에 실제로 있는지
- * - 인라인 코드로 적은 파일·폴더 경로와 상대 링크가 실제로 있는지
+ * - 인라인 코드로 적은 파일·폴더 경로와 상대 링크, HTML 태그의 src · href 가 실제로 있는지
  * 확인한다. 코드가 바뀌었는데 문서가 그대로면 여기서 실패한다.
  *
  * 코드 블록(```) 안은 예시로 보고 검사하지 않는다. 존재하지 않는 경로를 예로 들 때는 코드 블록에 쓴다.
@@ -55,6 +55,8 @@ const scripts =
 
 const docFiles = allFiles.filter(
   (file) =>
+    // 레포 첫 화면. 사람이 읽는 문서라 에이전트가 고칠 일이 적어 낡기 쉽다
+    file === 'README.md' ||
     file === 'CLAUDE.md' ||
     // Codex 등이 읽는 리뷰 기준. 루트와 하위 폴더에 있다
     file.split('/').at(-1) === 'AGENTS.md' ||
@@ -126,7 +128,12 @@ for (const docFile of docFiles) {
     }
 
     const withoutCode = line.replace(/`[^`]*`/g, '')
-    for (const [, target] of withoutCode.matchAll(/\]\(([^)\s]+)\)/g)) {
+    // 마크다운 링크 `](...)` 와 README 의 <img src="..."> 같은 HTML 속성
+    const targets = [
+      ...withoutCode.matchAll(/\]\(([^)\s]+)\)/g),
+      ...withoutCode.matchAll(/\b(?:src|href)="([^"]+)"/g),
+    ]
+    for (const [, target] of targets) {
       if (/^(https?:|mailto:|#)/.test(target)) continue
       const resolved = join(
         dirname(join(root, docFile)),
